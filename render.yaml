@@ -4,6 +4,7 @@ services:
     name: apex-car-rental-backend
     env: docker
     dockerfilePath: ./Dockerfile
+    plan: free
     envVars:
       - key: JAVA_TOOL_OPTIONS
         value: -Xmx512m -Xms256m
