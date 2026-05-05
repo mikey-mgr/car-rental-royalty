@@ -59,11 +59,19 @@
 			<scope>runtime</scope>
 		</dependency> -->
 
-		<!-- [15](https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client) -->
+		<!-- PostgreSQL Driver for Production (Render) -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- MariaDB Driver for Local Development -->
 		<dependency>
 			<groupId>org.mariadb.jdbc</groupId>
 			<artifactId>mariadb-java-client</artifactId>
 			<version>3.3.2</version>
+			<scope>runtime</scope>
 		</dependency>
 
 		<!-- swagger ui -->
