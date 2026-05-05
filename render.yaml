@@ -14,8 +14,6 @@ services:
         fromDatabase:
           name: apex-car-rental-db
           property: connectionString
-      - key: SERVER_PORT
-        value: 8080
     healthCheckPath: /actuator/health
 
 databases:
