@@ -23,10 +23,10 @@ public class CartHistory {
     @Column(name = "created_date")
     private Date createdDate;
 
-    @JoinColumn(name = "user_name")
+    @Column(name = "user_name")
     private String user;
 
-    @JoinColumn(name = "car_name")
+    @Column(name = "car_name")
     private String product;
 
     @Column(name = "booked_days")

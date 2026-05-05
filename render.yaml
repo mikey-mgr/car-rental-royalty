@@ -10,11 +10,12 @@ services:
         value: -Xmx512m -Xms256m
       - key: SPRING_PROFILES_ACTIVE
         value: prod
-      - key: DATABASE_URL
-        fromDatabase:
-          name: apex-car-rental-db
-          property: connectionString
-    healthCheckPath: /actuator/health
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://dpg-d7st1rbbc2fs73d3ighg-a:5432/car_rental_qnd8
+      - key: SPRING_DATASOURCE_USERNAME
+        value: apex_user
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
 
 databases:
   - name: apex-car-rental-db
