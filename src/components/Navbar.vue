@@ -1,5 +1,5 @@
 <template>
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top nav-underline mb-2 p-0">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top nav-underline p-0">
       <div class="container-fluid">
         <!-- Navbar content -->
         <!--    Logo-->
@@ -57,13 +57,24 @@
                 </ul>
               </li>
               <li class="nav-item"><router-link :class="{'active': $route.path==='/contact'}" class="nav-link text-light" :to="{name: 'ContactUs'}">CONTACT</router-link></li>
+            
+              <!-- Theme Toggle -->
+              <li class="nav-item">
+                <button @click="toggleTheme" class="btn btn-link nav-link text-light" style="border: none; background: none;">
+                  <i :class="isDarkMode ? 'bi bi-sun-fill' : 'bi bi-moon-fill'" style="font-size: 20px; color: #c18e32;"></i>
+                </button>
+              </li>
+
             <!-- </ul > -->
-              <li v-if="role" class="nav-item cart position-relative">
-                  <span class="rounded rounded-pill" id="cart-nav-count">{{ cartCount }}</span>
-                  <router-link style="font-size: 36px; color: #c18e32;" 
-                      :to="{name:'CartView'}" class="py-2 bi bi-cart nav-link text-decoration-none"
+              <li v-if="role" class="nav-item cart-container position-relative">
+                  <router-link 
+                      :to="{name:'CartView'}" 
+                      class="cart-link nav-link text-decoration-none d-flex align-items-center"
                       :class="{'active': $route.path==='/cart'}">
-                    <!-- <img class="icon-link" style="width: 40px;" src="../../public/cart-shopping-solid.svg" alt=""> -->
+                    <div class="cart-icon-wrapper position-relative">
+                      <i class="bi bi-cart3" style="font-size: 28px; color: #c18e32;"></i>
+                      <span v-if="cartCount > 0" class="cart-badge">{{ cartCount }}</span>
+                    </div>
                   </router-link>
               </li>
           </ul>
@@ -83,9 +94,16 @@ import swal from 'sweetalert';
     data() {
       return {
         role: null,
+        isDarkMode: true,
       }
     },
     methods: {
+      toggleTheme() {
+        this.isDarkMode = !this.isDarkMode;
+        const theme = this.isDarkMode ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+      },
       async logout(){
         await axios.get(`${this.baseURL}/logout`)
         .then((res) =>{
@@ -112,6 +130,11 @@ import swal from 'sweetalert';
         this.token = localStorage.getItem("token");
         this.role = localStorage.getItem("role");
         this.$emit("usersInfo");
+        
+        // Load theme preference
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        this.isDarkMode = savedTheme === 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
     },
   }
 </script>
@@ -119,8 +142,9 @@ import swal from 'sweetalert';
 
 <style scoped>
 .navbar{
-  background-color: #090051;
-  color: #c18e32;
+  background-color: var(--navbar-bg);
+  color: var(--accent-color);
+  transition: background-color 0.3s ease;
 }
 #logo {
   width: 120px;
@@ -128,26 +152,84 @@ import swal from 'sweetalert';
   margin-right: 20px;
 }
 .dropdown-menu{
-  /* --bs-dropdown-padding-x: .3rem;
-  --bs-dropdown-padding-y: .25rem;
-  border-radius: 0.5rem; */
   right: 0;
   left: auto;
   top: 2.8rem;
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
 }
 .dropdown-item{
-  border-color: black;
-  /* border-radius: 0.5rem; */
+  border-color: var(--border-color);
+  color: var(--text-primary);
 }
 .dropdown-item:hover{
-  background-color: lightgrey;
+  background-color: var(--hover-bg);
+  color: var(--accent-color);
 }
 .nav-link{
   display: flex;
   height: 100%;
   justify-items: center;
+  transition: color 0.3s ease;
 }
-.cart{
+
+.nav-link:hover {
+  color: var(--accent-color) !important;
+}
+
+/* Cart Icon Styling */
+.cart-container {
+  margin-top: 0;
+}
+
+.cart-link {
+  padding: 0.5rem 1rem !important;
+  transition: transform 0.2s ease;
+}
+
+.cart-link:hover {
+  transform: scale(1.05);
+}
+
+.cart-icon-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid var(--navbar-bg);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.cart-badge:empty {
+  display: none;
+}
+
+.cart {
   margin-top: -0.5rem;
 }
 #navbarAccount.dropdown-toggle::after{
@@ -159,21 +241,5 @@ import swal from 'sweetalert';
   display: inline-block;
     margin-left: 0.4em;
     margin-top: 0.7rem;
-}
-#cart-nav-count{
-  text-decoration-style: none;
-  background-color: crimson; 
-  color: white;
-  border-radius: 50%;
-  height: 20px;
-  font-size: 15px;
-  align-items: center;
-  justify-content: center;
-  display: flex;
-  padding: 0.1rem;
-  position: absolute;
-  left: 10px;
-  top: 5px;
-
 }
 </style>

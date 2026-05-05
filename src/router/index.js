@@ -173,16 +173,39 @@ const router = createRouter({
   routes,
 
   scrollBehavior(to, from, savedPosition) {
-    if (savedPosition) {
-      // If a saved position is available, return to that position
-      return savedPosition;
-    } else {
-      // Scroll to the top of the page
-      return { top: 0 };
-    }
+    // Return a promise to handle async scroll restoration
+    return new Promise((resolve) => {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        if (savedPosition) {
+          // Browser back/forward button - use native saved position
+          resolve(savedPosition);
+        } else {
+          // Check if we have a saved scroll position for this route
+          const savedScrollKey = `scrollPosition_${to.path}`;
+          const savedScroll = sessionStorage.getItem(savedScrollKey);
+          
+          if (savedScroll) {
+            // Restore saved scroll position
+            resolve({ top: parseInt(savedScroll), behavior: 'auto' });
+          } else {
+            // No saved position - scroll to top
+            resolve({ top: 0, behavior: 'auto' });
+          }
+        }
+      }, 100);
+    });
   },
 });
 
-
+// Save scroll position before leaving a route
+router.beforeEach((to, from, next) => {
+  // Save current scroll position for the route we're leaving
+  if (from.path) {
+    const scrollKey = `scrollPosition_${from.path}`;
+    sessionStorage.setItem(scrollKey, window.scrollY.toString());
+  }
+  next();
+});
 
 export default router

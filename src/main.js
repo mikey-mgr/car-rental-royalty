@@ -9,6 +9,7 @@ import { configureCompat } from '@vue/compat';
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
+import './assets/scss/theme.scss' // Import luxury theme
 
 // Configure Vue 3 to use Vue 2-compatible behavior
 configureCompat({

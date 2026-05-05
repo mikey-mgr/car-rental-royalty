@@ -31,7 +31,7 @@ public class AdminController {
         //find the user
         // User user = authenticationService.getUser(token);
 
-        // //verify if user is an admin
+        //verify if user is an admin
         // adminService.verifyAdminUser(user);
 
         List<UserDto> userDto = adminService.getUsers();
@@ -44,7 +44,7 @@ public class AdminController {
         //find user
         // User user = authenticationService.getUser(token);
 
-        // //verify whether user is admin
+        //verify whether user is admin
         // adminService.verifyAdminUser(user);
 
         CartDto cartDto = adminService.listCartBookings();
@@ -58,7 +58,7 @@ public class AdminController {
         //find user
         // User user = authenticationService.getUser(token);
 
-        // //verify whether user is admin
+        //verify whether user is admin
         // adminService.verifyAdminUser(user);
 
         List<WishlistDto> wishlists = adminService.listWishlists();

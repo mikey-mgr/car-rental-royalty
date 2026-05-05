@@ -15,7 +15,7 @@
           <h2 class="pt-3 pb-3">No vehicles found for '{{ text }}'</h2>
         </div>
       </div>
-      <div class="row justify-content-end bg-body-tertiary p-3">
+      <div class="row justify-content-end      p-3">
 
         <!--      Search Bar-->
         <form class="form col-lg-4" @submit="searchVehicle">
@@ -125,6 +125,9 @@ export default {
 </script>
 
 <style scoped>
+.bg-body-tertiary{
+  background-color: rgb(16, 32, 64);
+}
 #search-button-navbar{
   background-color: #c18e32;
   border-radius: 0 0.5rem 0.5rem 0;

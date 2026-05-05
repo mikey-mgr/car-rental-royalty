@@ -217,18 +217,21 @@ export default {
 <style>
 html{
   overflow-y: scroll;
-  transition: all 1s ease-in-out 0s;
-  
+  transition: all 0.3s ease;
+  background-color: var(--bg-primary);
+}
+body {
+  overflow-x: clip;
 }
 div{
   font-family: Akrobat-Regular, sans-serif
 }
 #app{
   margin-top: 8.4rem;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
 }
-/* div{
-  
-} */
 router-view{
   min-height: 90vh;
 }

@@ -141,7 +141,7 @@
         </a>
     </div>
     <div class="container mt-4 px-5" style="height: 60vh">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3796.760555171495!2d31.04838703883267!3d-17.89664646057479!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1931a3f22ee38a99%3A0x757348b8f2bdbc19!2sRoyalty%20Car%20Rental!5e0!3m2!1sen!2sza!4v1709393298615!5m2!1sen!2sza" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3799.4174172123485!2d31.049516075055923!3d-17.77206898318216!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTfCsDQ2JzE5LjUiUyAzMcKwMDMnMDcuNSJF!5e0!3m2!1sen!2szw!4v1777922138615!5m2!1sen!2szw" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
 </template>
 
@@ -207,31 +207,25 @@ export default {
 .contact-us{
   margin-top: -180px;
   margin-bottom: 2rem;
-  background-color: rgba(201, 201, 201, 0.85); /* Creamy color with 92.5% opacity */
-  /* transition: all 1s ease-in-out 0s; */
+  background-color: var(--bg-card);
+  transition: all 0.3s ease;
 }
 .card-img-top{
     width: 5.8rem;
     height: 5.8rem;
 }
+.card {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
 .contact-btn{
     border-radius: 0;
-    background-color: tomato;
-    border-color: tomato;
-    color: black;
 }
 .contact-btn:hover{
-    background-color: white;
-    cursor: default;
+    transform: translateY(-2px);
 }
 .call-btn{
     border-radius: 0;
-    background-color: tomato;
-    border-color: tomato;
-    color: black;
-}
-.contact-btn:active{
-    background-color: tomato;
 }
 @media (min-width: 0px) and (max-width: 992px) {
     div.contact-us{
@@ -244,6 +238,10 @@ export default {
     }
   }
   div{
-    transition: all 1s ease-in-out 0s;
+    transition: all 0.3s ease;
   }
+  
+h3, h4, h5, p {
+  color: var(--text-primary);
+}
 </style>

@@ -52,9 +52,9 @@
                 <div class="col-md-2 col-9">
                     <ul  class="list-unstyled">
                         <li><router-link class="text-decoration-none footer-link" :to="{name: 'ContactUs'}">Contact Us</router-link></li>
-                        <li><address class="text-light">2870 Mainway Meadows<br>
-                                    Waterfalls, Harare<br>
-                                    <a href="#" class="footer-link">0712768037</a>
+                        <li><address class="text-light">36912 The Chase<br>
+                                    Mt. Pleasant, Harare<br>
+                                    <a href="#" class="footer-link">0788667111</a>
                             </address>
                         </li>
                     </ul>
@@ -74,19 +74,21 @@ export default {
 
 footer{
     margin-top: 40px;
-    background-color: #090051;
+    background-color: var(--footer-bg);
     font-size: 16px;
+    transition: background-color 0.3s ease;
 }
 .footer-link{
     text-decoration: none;
-    color: white;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
 }
 .media-icon{
-    color: gold;
+    color: var(--accent-color);
     font-size: larger;
 }
 .footer-link:hover{
-    color: darkgoldenrod;
+    color: var(--accent-color);
 }
 li{
     padding-bottom: 10px;

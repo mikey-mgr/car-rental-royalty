@@ -33,19 +33,18 @@ public class AdminService {
     //generate booking list for all users
     public CartDto listCartBookings() {
         List<Cart> cartList = cartRepo.findAll();
-
-        if(cartList.isEmpty()){
-            throw new CustomException("Cart Is Empty");
-        }
         
         List<CartItemDto> cartItems = new ArrayList<>();
-
         double totalCost = 0;
-        for(Cart cart: cartList){
-            CartItemDto cartItemDto = new CartItemDto(cart);
-            totalCost += cartItemDto.getQuantity() * cart.getProduct().getPrice();
-            cartItems.add(cartItemDto);
+
+        if(!cartList.isEmpty()){
+            for(Cart cart: cartList){
+                CartItemDto cartItemDto = new CartItemDto(cart);
+                totalCost += cartItemDto.getQuantity() * cart.getProduct().getPrice();
+                cartItems.add(cartItemDto);
+            }
         }
+        
         CartDto cartDto = new CartDto();
         cartDto.setCartItems(cartItems);
         cartDto.setTotalCost(totalCost);
@@ -66,11 +65,11 @@ public class AdminService {
         cartRepo.delete(cart); 
     }
 
-    // public void verifyAdminUser(User user) {
-    //     if(Objects.isNull(user.getRole())){
-    //         throw new AuthenticationFailException("You cannot access this information");
-    //     }
-    // }
+    public void verifyAdminUser(User user) {
+        if(user == null || !"ADMIN".equals(user.getRole())){
+            throw new CustomException("You do not have admin privileges to access this information");
+        }
+    }
 
     //get a list of all users
     public List<UserDto> getUsers(){
@@ -90,14 +89,13 @@ public class AdminService {
         List<Wishlist> wishlists = wishlistRepo.findAll();
         List<WishlistDto> allWishlists = new ArrayList<>();
         
-        if(wishlists.isEmpty()){
-            throw new CustomException("There are no wishlists");
+        if(!wishlists.isEmpty()){
+            for(Wishlist list: wishlists){
+                WishlistDto listDto = new WishlistDto(list);
+                allWishlists.add(listDto);
+            }
         }
         
-        for(Wishlist list: wishlists){
-            WishlistDto listDto = new WishlistDto(list);
-            allWishlists.add(listDto);
-        }
         return allWishlists;
     }
 }

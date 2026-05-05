@@ -5,7 +5,7 @@
      <div class="container p-5 text-center about-us col-sm-10">
         <div class="row">
           <h1 class="display-6">About Us</h1>
-          <h4 class="mb-5">Royalty Car Rental<br><br></h4>
+          <h4 class="mb-5">Apex Car Rental<br><br></h4>
           <p class="text-start mt-5" style="font-size: large;">Our vision is to become the most customer centric company in car rental industry. We will be persistent in building strong relationships with our customers and business partners.<br><br>
               We will be constantly focusing on innovation and delivery of simple high-quality service to our customers. <br><br>
               We are convinced that we need to innovate and control the high technology behind our services, and to participate only in markets where we can make significant contribution. <br><br>
@@ -20,7 +20,7 @@
         <h4 class="mb-4 display-5 animated">
             Our World</h4>
         <p class="obs mb-0 animated">
-            Royalty Car Rental</p>
+            Apex Car Rental</p>
       </div>
     <div class="px-3 px-lg-0 map-stats d-flex flex-column flex-sm-row justify-content-evenly align-items-center mt-4">
       <div class="d-flex flex-column justify-content-center align-items-center mb-4">
@@ -56,8 +56,9 @@
           <div class="nav-link page-sections sticky-top active"
               data-toggle="collapse" aria-label="Toggle-navigation"
                 aria-expanded="true" data-target="ourVision"
-                  aria-controls="ourVision">
-                  01 Our Branches
+                  aria-controls="ourVision"
+                  @click="scrollToSection">
+                  Our Branches
           </div>
           <div class="row g-0" id="ourVision">
             <div class="col-md-6 text-white section-text">
@@ -74,7 +75,7 @@
               <img src="../assets/AppImages/home_page/our-vision.jpg" class="img-fluid max-h-100-vh" alt="Our vision">
             </div>
           </div>
-          <div class="container my-5 px-4">
+          <div class="container p-5">
             <div class="row text-start d-flex justify-content-space-between">
               <div class="col-lg-6 col-md-6 col-sm-12 my-3">
                 <div class="container-fluid">
@@ -114,8 +115,9 @@
           <div class="nav-link page-sections sticky-top active"
               data-toggle="collapse" aria-label="Toggle-navigation"
                 aria-expanded="true" data-target="ourLocation"
-                  aria-controls="ourLocation">
-                  02 Worldwide Locations
+                  aria-controls="ourLocation"
+                  @click="scrollToSection">
+                  Worldwide Locations
           </div>
           <div class="row g-0" id="ourLocation">
             <div class="col-md-6 text-white section-text">
@@ -123,7 +125,7 @@
                 <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
                   <h2 class="">Worldwide Locations</h2>
                   <p>We are a premium car rental group in Africa, Australia and the Middle East. It doesn't matter where you are located,
-                      there will always be a convenient Royalty car rental branch nearby to help you continue your journery.
+                      there will always be a convenient Apex car rental branch nearby to help you continue your journery.
                   </p>
                 </div>
               </div>
@@ -132,8 +134,8 @@
               <img src="../assets/AppImages/home_page/locations.jpg" class="img-fluid max-h-100-vh" alt="our locations">
             </div>
           </div>
-          <div class="col-12 map-container w-100 bg-light-gray py-4 px-3 py-lg-9">
-            <img src="../assets/AppImages/map/map-main.png" class="img-fluid max-h-100-vh" title="Royalty Car Rental">
+          <div class="col-12 map-container text-center w-100 bg-light-gray py-4 px-3 py-lg-9">
+            <img src="../assets/AppImages/map/map-main.png" class="img-fluid max-h-100-vh" title="Apex Car Rental">
           </div>
         </div>
 
@@ -146,29 +148,161 @@
   </div>
   <div class="container my-5">
     <h3>Visit us at our location</h3>
-    <a class="text-decoration-none text-dark" href="https://maps.app.goo.gl/SU6bUuAfL1exDXXH8">
-      <div class="btn btn-warning">
-        Royalty Car Rental<span class="bi bi-location"></span>
-      </div>
-    </a>
+    <button @click="openDirections" class="btn btn-luxury">
+      Get Directions to Apex Car Rental <i class="bi bi-geo-alt-fill ms-2"></i>
+    </button>
+  </div>
+  <div class="container mt-4" style="height: 60vh">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3799.4174172123485!2d31.049516075055923!3d-17.77206898318216!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTfCsDQ2JzE5LjUiUyAzMcKwMDMnMDcuNSJF!5e0!3m2!1sen!2szw!4v1777922138615!5m2!1sen!2szw" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
   </div>
   </template>
 
 <script>
 export default {
   name: 'AboutUs',
+  methods: {
+    openDirections() {
+      // Apex Car Rental coordinates
+      const destination = '-17.770207,31.052499';
+      const destinationName = 'Apex Car Rental';
+      
+      // Open Google Maps immediately (without waiting for geolocation)
+      const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}&destination_place_id=${destinationName}`;
+      window.open(mapsUrl, '_blank');
+      
+      // Optionally try to get user's location in background (for future improvements)
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          () => {
+            // Location obtained - could be used for analytics or future features
+            console.log('User location obtained for better directions');
+          },
+          () => {
+            // Silently handle error - user already has directions open
+            console.log('Location not available, using default directions');
+          },
+          { timeout: 5000, maximumAge: 300000 } // 5 second timeout, cache for 5 minutes
+        );
+      }
+    },
+    scrollToSection(event) {
+      // Prevent default collapse behavior
+      event.preventDefault();
+      
+      const target = event.currentTarget;
+      const targetId = target.getAttribute('data-target');
+      const targetElement = document.getElementById(targetId);
+      const navbar = document.querySelector('.navbar');
+      const navbarHeight = navbar ? navbar.offsetHeight : 70;
+      
+      if (targetElement) {
+        const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+        const offsetPosition = elementPosition - navbarHeight;
+        
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+    },
+    handleScroll() {
+      // Update scroll progress for each section
+      const sections = document.querySelectorAll('.page-sections');
+      const navbar = document.querySelector('.navbar');
+      const stickyTop = navbar ? navbar.offsetHeight : 70; // Dynamic navbar height
+      
+      sections.forEach((section, index) => {
+        const targetId = section.getAttribute('data-target');
+        const targetElement = document.getElementById(targetId);
+        const nextSection = sections[index + 1];
+        
+        if (targetElement) {
+          const sectionRect = section.getBoundingClientRect();
+          
+          let progress = 0;
+          
+          // Only start progress when section header reaches sticky position
+          if (sectionRect.top <= stickyTop) {
+            if (nextSection) {
+              const nextSectionRect = nextSection.getBoundingClientRect();
+              const sectionHeight = section.offsetHeight;
+              
+              // Progress fills as next section approaches current section
+              if (nextSectionRect.top > stickyTop + sectionHeight) {
+                // Calculate progress based on how close the next section is
+                const distanceToNextSection = nextSectionRect.top - (stickyTop + sectionHeight);
+                const parentElement = section.closest('.nav-item');
+                const totalDistance = parentElement ? parentElement.offsetHeight - sectionHeight : 1000;
+                
+                progress = Math.min(100, Math.max(0, ((totalDistance - distanceToNextSection) / totalDistance) * 100));
+              } else {
+                // Next section has reached or overlapped, set to 100%
+                progress = 100;
+              }
+            } else {
+              // Last section - fill based on how much content has been scrolled past
+              const parentElement = section.closest('.nav-item');
+              if (parentElement) {
+                const parentRect = parentElement.getBoundingClientRect();
+                const sectionHeight = section.offsetHeight;
+                const contentHeight = parentRect.height - sectionHeight;
+                
+                // Calculate how much of the content area has been scrolled
+                const contentTop = parentRect.top + sectionHeight;
+                const scrolledContent = stickyTop + sectionHeight - contentTop;
+                
+                // Check if we've reached the bottom of the page
+                const scrolledToBottom = (window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 10;
+                
+                // Progress based on content scrolled vs total scrollable content
+                if (scrolledToBottom) {
+                  progress = 100;
+                } else if (contentHeight > 0) {
+                  progress = Math.min(100, Math.max(0, (scrolledContent / contentHeight) * 100));
+                } else {
+                  progress = 100;
+                }
+              }
+            }
+          }
+          
+          // Set the CSS variable directly
+          section.style.setProperty('--scroll-progress', `${progress}%`);
+          section.setAttribute('data-progress', progress.toFixed(0));
+        }
+      });
+    }
+  },
+  mounted() {
+    // Calculate and set navbar height
+    this.$nextTick(() => {
+      const navbar = document.querySelector('.navbar');
+      if (navbar) {
+        const navbarHeight = navbar.offsetHeight;
+        document.documentElement.style.setProperty('--navbar-height', `${navbarHeight}px`);
+      }
+    });
+    
+    // Add scroll listener for progress bars
+    window.addEventListener('scroll', this.handleScroll);
+    this.handleScroll(); // Initial call
+  },
+  beforeUnmount() {
+    // Clean up scroll listener
+    window.removeEventListener('scroll', this.handleScroll);
+  }
 }
 </script>
 
 <style scoped>
 #home{
-  background-color: rgb(241, 241, 241);
+  background-color: var(--bg-primary);
+  transition: background-color 0.3s ease;
 }
   .about-us{
   margin-top: -180px;
   margin-bottom: 2rem;
-  background-color: rgba(201, 201, 201, 0.85); /* Creamy color with 92.5% opacity */
-  /* transition: all 1s ease-in-out 0s; */
+  background-color: var(--bg-card);
 }
 #background-div {
   margin-top: -55px;
@@ -178,23 +312,108 @@ export default {
   min-height: 90vh;
 }
 .page-sections{
-    border-radius: 0;
     display: flex;
     justify-content: center;
-    padding: 16px;
+    padding: 20px 16px;
+    background: linear-gradient(135deg, var(--bg-secondary), var(--royal-midnight-blue)) !important;
+    color: var(--accent-color) !important;
+    font-weight: 700 !important;
+    font-size: 1.2rem !important;
+    letter-spacing: 2px !important;
+    border: none !important;
+    border-bottom: 4px solid rgba(212, 175, 55, 0.2) !important;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-family: 'MV Boli', 'Brush Script MT', cursive !important;
+    position: relative;
+    overflow: visible;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Animated progress bar */
+  .page-sections::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--gold-gradient-start), var(--gold-gradient-end));
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
+    z-index: 1;
+  }
+  
+  .page-sections[style*="--scroll-progress"]::after {
+    width: var(--scroll-progress, 0%);
+  }
+  
+  .page-sections:hover{
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--hover-bg), var(--deep-sapphire)) !important;
+    color: var(--ivory-white) !important;
+    letter-spacing: 2px !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+  }
+  
+  .page-sections.active {
+    background: linear-gradient(135deg, var(--deep-sapphire), var(--royal-midnight-blue)) !important;
+    border-bottom: 4px solid transparent !important;
+  }
+  
+  .page-sections.active::after {
+    animation: shimmer 2s infinite;
+  }
+  
+  @keyframes shimmer {
+    0%, 100% {
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    }
   }
   .sticky-top{
-    top: 120px;
+    position: sticky !important;
+    top: var(--navbar-height, 70px);
+    z-index: 100;
   }
+  
+  /* Fallback for different screen sizes */
+  @media (max-width: 991px) {
+    .sticky-top {
+      top: 60px;
+    }
+  }
+  .nav-pills {
+    --bs-nav-pills-border-radius: 0px;
+  }
+  /* Ensure section content doesn't overlap */
+  .nav-item {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .row.g-0 {
+    position: relative;
+    z-index: 0;
+  }
+  
   .section-text{
-  background-color: #090051;
+  color: var(--text-primary);
 }
 .img-fluid{
   object-fit: cover;
 }
   div{
-    transition: all 1s ease-in-out 0s;
+    transition: all 0.3s ease;
   }
+  
+h3 {
+  color: var(--text-primary);
+}
+
 @media (min-width: 0px) and (max-width: 992px) {
     div.about-us{
       margin-top: -1rem;

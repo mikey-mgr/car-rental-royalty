@@ -47,7 +47,7 @@
                     </div>
                 <!-- display total price -->
                 <div class="total-cost pt-2 text-end">
-                    <h5 v-if="usrTotalCost">Total : ${{ usrTotalCost }}</h5>
+                    <h5 class ="text-white" v-if="usrTotalCost">Total : ${{ usrTotalCost }}</h5>
                     <button @click="bookRental" v-if="usrTotalCost" class="btn btn-primary confirm">Confirm Booking</button>
                 </div>
                 <div class="col-12 mt-5">
