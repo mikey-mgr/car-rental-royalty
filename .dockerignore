@@ -1,0 +1,12 @@
+# Ignore unnecessary files for Docker build
+target/
+node_modules/
+.git/
+.gitignore
+.mvn/
+*.md
+.vscode/
+.settings/
+*.log
+*.tmp
+.DS_Store
