@@ -54,6 +54,7 @@ export default {
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded",
                     },
+                    withCredentials: true, // CRITICAL: Send cookies with request
                 }).then((res) =>{
                     let loginInfo = res.data;
                     if(loginInfo.status=="Login Success"){

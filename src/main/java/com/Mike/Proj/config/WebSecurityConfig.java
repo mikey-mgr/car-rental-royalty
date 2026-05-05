@@ -23,9 +23,18 @@ public class WebSecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigSrc(){
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("http://localhost:8583");
+        
+        // Get allowed origins from environment variable
+        String allowedOrigins = System.getenv()
+            .getOrDefault("ALLOWED_ORIGINS", "http://localhost:8583");
+        
+        for (String origin : allowedOrigins.split(",")) {
+            config.addAllowedOrigin(origin.trim());
+        }
+        
         config.setAllowedMethods(Arrays.asList("*"));
         config.setAllowedHeaders(Arrays.asList("*"));
+        config.setAllowCredentials(true); // CRITICAL: Allow cookies
         
         UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
         src.registerCorsConfiguration("/**", config);
