@@ -23,11 +23,10 @@
   import CategoryBox from "../../components/Category/CategoryBox.vue";
   export default {
     name: "AdminCategory",
-    props:["categories", "users"],
+    props:["categories", "users", "baseURL"],
     components: { CategoryBox },
     data() {
       return {
-        baseURL: "http://localhost:8081",
       };
     },
     methods: {

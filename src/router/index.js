@@ -177,7 +177,10 @@ const router = createRouter({
     return new Promise((resolve) => {
       // Small delay to ensure DOM is ready
       setTimeout(() => {
-        if (savedPosition) {
+        // If clicking the same route (same path), always scroll to top
+        if (to.path === from.path) {
+          resolve({ top: 0, behavior: 'smooth' });
+        } else if (savedPosition) {
           // Browser back/forward button - use native saved position
           resolve(savedPosition);
         } else {

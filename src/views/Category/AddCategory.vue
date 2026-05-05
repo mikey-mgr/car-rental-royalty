@@ -28,7 +28,7 @@
   const axios = require("axios");
   const sweetalert = require("sweetalert");
   export default {
-    props: ["users"],
+    props: ["users", "baseURL"],
     data() {
       return {
         categoryName: "",
@@ -46,11 +46,9 @@
           imageUrl: this.imageUrl,
         };
   
-        const baseURL = "http://localhost:8081";
-  
         axios({
           method: "post",
-          url: `${baseURL}/category/create`,
+          url: `${this.baseURL}/category/create`,
           data: JSON.stringify(newCategory),
           headers: {
             "Content-Type": "application/json",

@@ -1,5 +1,5 @@
 <template>
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top nav-underline p-0">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top p-0">
       <div class="container-fluid">
         <!-- Navbar content -->
         <!--    Logo-->
@@ -26,44 +26,45 @@
                   ADMIN
                 </a>
                 <ul class="dropdown-menu admin-dropdown" aria-labelledby="navbarAdmin">
-                  <router-link v-if="token" class="dropdown-item" :to="{name: 'AdminView'}">Dashboard</router-link>
-                  <router-link v-if="token" class="dropdown-item" :to="{name: 'AdminProduct'}">Vehicles</router-link>
-                  <router-link v-if="token" class="dropdown-item" :to="{name: 'AdminCategory'}">Categories</router-link>
-                  <router-link v-if="token" class="dropdown-item" :to="{name: 'UsersView'}">Users</router-link>
+                  <router-link v-if="token" class="dropdown-item" :to="{name: 'AdminView'}" @click="closeNavbar">Dashboard</router-link>
+                  <router-link v-if="token" class="dropdown-item" :to="{name: 'AdminProduct'}" @click="closeNavbar">Vehicles</router-link>
+                  <router-link v-if="token" class="dropdown-item" :to="{name: 'AdminCategory'}" @click="closeNavbar">Categories</router-link>
+                  <router-link v-if="token" class="dropdown-item" :to="{name: 'UsersView'}" @click="closeNavbar">Users</router-link>
                 </ul>
                 <!-- <router-link :class="{'active': $route.path==='/admin' || $route.path==='/admin/vehicle' || $route.path==='/admin/category'}" class="nav-link text-light" v-if="role == 'ADMIN'" :to="{name: 'AdminView'}">ADMIN</router-link> -->
               </li>
 
 
-              <li class="nav-item"><router-link :class="{'active': $route.path==='/home'}" class="nav-link text-light" :to="{name: 'HomeView'}">HOME</router-link></li>
-              <li class="nav-item"><router-link :class="{'active': $route.path==='/about'}" class="nav-link text-light" :to="{name: 'AboutUs'}">ABOUT US</router-link></li>
-              <li class="nav-item"><router-link :class="{'active': $route.path==='/vehicles/'}" class="nav-link text-light" :to="{name: 'VehiclesView'}">VEHICLES</router-link></li>
+              <li class="nav-item"><router-link :class="{'active': $route.path==='/home'}" class="nav-link text-light" :to="{name: 'HomeView'}" @click="closeNavbar">HOME</router-link></li>
+              <li class="nav-item"><router-link :class="{'active': $route.path==='/about'}" class="nav-link text-light" :to="{name: 'AboutUs'}" @click="closeNavbar">ABOUT US</router-link></li>
+              <li class="nav-item"><router-link :class="{'active': $route.path==='/vehicles/'}" class="nav-link text-light" :to="{name: 'VehiclesView'}" @click="closeNavbar">VEHICLES</router-link></li>
               
             <!-- Dropdown for account -->
             <!-- <ul class="navbar-nav nav-underline mr-auto"> -->
               <li class="nav-item dropdown">
                 <a href=""
                     class="nav-link text-light dropdown-toggle" 
+                    :class="{'active': $route.path==='/wishlist' || $route.path==='/user/signup' || $route.path==='/user/signin'}"
                       id="navbarAccount" 
                         data-toggle="dropdown"
                         >ACCOUNT
                 </a>
                 <ul class="dropdown-menu account-dropdown" aria-labelledby="navbarAccount">
-                  <router-link v-if="token" class="dropdown-item" :to="{name: 'WishList'}">Wishlist</router-link>
-                  <router-link v-if="!token" class="dropdown-item" :to="{name: 'SignupView'}">Signup</router-link>
+                  <router-link v-if="token" class="dropdown-item" :to="{name: 'WishList'}" @click="closeNavbar">Wishlist</router-link>
+                  <router-link v-if="!token" class="dropdown-item" :to="{name: 'SignupView'}" @click="closeNavbar">Signup</router-link>
                   <li><hr class="dropdown-divider"></li>
-                  <router-link v-if="!token" class="dropdown-item" :to="{name: 'SigninView'}">Login</router-link>
+                  <router-link v-if="!token" class="dropdown-item" :to="{name: 'SigninView'}" @click="closeNavbar">Login</router-link>
                   <a href="#" v-if="token" @click="logout" class="dropdown-item">Logout</a>
                 </ul>
               </li>
-              <li class="nav-item"><router-link :class="{'active': $route.path==='/contact'}" class="nav-link text-light" :to="{name: 'ContactUs'}">CONTACT</router-link></li>
+              <li class="nav-item"><router-link :class="{'active': $route.path==='/contact'}" class="nav-link text-light" :to="{name: 'ContactUs'}" @click="closeNavbar">CONTACT</router-link></li>
             
               <!-- Theme Toggle -->
-              <li class="nav-item">
+              <!-- <li class="nav-item">
                 <button @click="toggleTheme" class="btn btn-link nav-link text-light" style="border: none; background: none;">
                   <i :class="isDarkMode ? 'bi bi-sun-fill' : 'bi bi-moon-fill'" style="font-size: 20px; color: #c18e32;"></i>
                 </button>
-              </li>
+              </li> -->
 
             <!-- </ul > -->
               <li v-if="role" class="nav-item cart-container position-relative">
@@ -95,9 +96,70 @@ import swal from 'sweetalert';
       return {
         role: null,
         isDarkMode: true,
+        navbarHeightReady: false,
       }
     },
     methods: {
+      closeNavbar() {
+        // Close the navbar collapse on mobile
+        const navbarCollapse = document.querySelector('.navbar-collapse');
+        if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+          navbarCollapse.classList.remove('show');
+        }
+      },
+      updateNavbarHeight() {
+        // Hide sticky sections during measurement
+        document.documentElement.classList.add('measuring-navbar');
+        
+        // Update CSS variable with actual navbar height (collapsed state only)
+        const navbar = document.querySelector('.navbar');
+        const navbarCollapse = document.querySelector('.navbar-collapse');
+        
+        if (navbar) {
+          // Check if navbar is currently transitioning
+          const isTransitioning = navbarCollapse && navbarCollapse.classList.contains('collapsing');
+          
+          if (isTransitioning) {
+            // Wait for transition to complete
+            setTimeout(() => this.updateNavbarHeight(), 100);
+            return;
+          }
+          
+          // Force collapse by removing 'show' class and waiting for transition
+          let wasExpanded = false;
+          
+          if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+            wasExpanded = true;
+            navbarCollapse.classList.remove('show');
+            
+            // Wait for collapse transition to complete (Bootstrap default is 350ms)
+            setTimeout(() => {
+              // Now measure the collapsed height
+              const navbarHeight = navbar.offsetHeight;
+              document.documentElement.style.setProperty('--navbar-height', `${navbarHeight}px`);
+              
+              // Show sticky sections with fade-in
+              document.documentElement.classList.remove('measuring-navbar');
+              this.navbarHeightReady = true;
+              
+              // Restore expanded state if needed
+              if (wasExpanded) {
+                navbarCollapse.classList.add('show');
+              }
+            }, 400); // Wait for Bootstrap's collapse transition
+            
+            return;
+          }
+          
+          // Navbar is already collapsed, measure directly
+          const navbarHeight = navbar.offsetHeight;
+          document.documentElement.style.setProperty('--navbar-height', `${navbarHeight}px`);
+          
+          // Show sticky sections with fade-in
+          document.documentElement.classList.remove('measuring-navbar');
+          this.navbarHeightReady = true;
+        }
+      },
       toggleTheme() {
         this.isDarkMode = !this.isDarkMode;
         const theme = this.isDarkMode ? 'dark' : 'light';
@@ -135,6 +197,35 @@ import swal from 'sweetalert';
         const savedTheme = localStorage.getItem('theme') || 'dark';
         this.isDarkMode = savedTheme === 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
+        
+        // Start with sticky sections hidden
+        document.documentElement.classList.add('measuring-navbar');
+        
+        // Set navbar height CSS variable after DOM is ready
+        this.$nextTick(() => {
+          setTimeout(() => {
+            this.updateNavbarHeight();
+          }, 200);
+        });
+        
+        // Update on window resize
+        window.addEventListener('resize', this.updateNavbarHeight);
+        
+        // Update navbar height after every route change (with delay to avoid transition)
+        this.$router.afterEach(() => {
+          this.navbarHeightReady = false;
+          document.documentElement.classList.add('measuring-navbar'); // Hide sticky sections
+          
+          // Close navbar on navigation
+          this.closeNavbar();
+          
+          setTimeout(() => {
+            this.updateNavbarHeight();
+          }, 500); // Wait for any navbar animations to complete
+        });
+    },
+    beforeUnmount() {
+      window.removeEventListener('resize', this.updateNavbarHeight);
     },
   }
 </script>
@@ -145,11 +236,17 @@ import swal from 'sweetalert';
   background-color: var(--navbar-bg);
   color: var(--accent-color);
   transition: background-color 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 #logo {
   width: 120px;
   margin-left: 0px;
   margin-right: 20px;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+#logo:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
 }
 .dropdown-menu{
   right: 0;
@@ -157,24 +254,172 @@ import swal from 'sweetalert';
   top: 2.8rem;
   background-color: var(--bg-card);
   border-color: var(--border-color);
-}
-.dropdown-item{
-  border-color: var(--border-color);
-  color: var(--text-primary);
-}
-.dropdown-item:hover{
-  background-color: var(--hover-bg);
-  color: var(--accent-color);
-}
-.nav-link{
-  display: flex;
-  height: 100%;
-  justify-items: center;
-  transition: color 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.nav-link:hover {
+/* Dropdown items - Override all Bootstrap and Vue Router styles */
+.dropdown-item,
+.dropdown-item:link,
+.dropdown-item:visited,
+a.dropdown-item,
+a.dropdown-item:link,
+a.dropdown-item:visited {
+  border-color: var(--border-color);
+  color: var(--text-primary) !important;
+  background-color: transparent !important;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  text-decoration: none !important;
+  display: block;
+}
+
+.dropdown-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: linear-gradient(135deg, var(--gold-gradient-start), var(--gold-gradient-end));
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus,
+.dropdown-item:active,
+a.dropdown-item:hover,
+a.dropdown-item:focus,
+a.dropdown-item:active {
+  background-color: var(--hover-bg) !important;
   color: var(--accent-color) !important;
+  padding-left: 2rem;
+  text-decoration: none !important;
+}
+
+.dropdown-item:hover::before,
+.dropdown-item:focus::before {
+  transform: scaleY(1);
+}
+
+/* Elegant Luxury Nav Link Styling - Override ALL Bootstrap and Vue Router classes */
+.nav-link,
+.nav-link:link,
+.nav-link:visited,
+a.nav-link,
+a.nav-link:link,
+a.nav-link:visited {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100%;
+  position: relative;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem !important;
+  text-decoration: none !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+/* Underline animation on hover - for non-dropdown links using ::after */
+.nav-link:not(.dropdown-toggle)::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.nav-link:not(.dropdown-toggle):hover::after,
+.nav-link:not(.dropdown-toggle):focus::after {
+  width: 80%;
+}
+
+/* Underline animation on hover - for dropdown links using ::before (so ::after is free for the arrow) */
+.nav-link.dropdown-toggle::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.nav-link.dropdown-toggle:hover::before,
+.nav-link.dropdown-toggle:focus::before {
+  width: 80%;
+}
+
+.nav-link:hover,
+.nav-link:focus,
+a.nav-link:hover,
+a.nav-link:focus {
+  color: var(--accent-color) !important;
+  transform: translateY(-2px);
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+  background-color: transparent !important;
+  text-decoration: none !important;
+}
+
+/* Active/Selected link styling - Simple highlighted text with glow, NO lines */
+.nav-link:not(.dropdown-toggle).active,
+.nav-link:not(.dropdown-toggle).router-link-active,
+.nav-link:not(.dropdown-toggle).router-link-exact-active,
+a.nav-link:not(.dropdown-toggle).active,
+a.nav-link:not(.dropdown-toggle).router-link-active,
+a.nav-link:not(.dropdown-toggle).router-link-exact-active,
+.nav-item.active .nav-link:not(.dropdown-toggle) {
+  color: var(--accent-color) !important;
+  font-weight: 500 !important;
+  text-shadow: 0 0 12px rgba(212, 175, 55, 0.6), 0 0 20px rgba(212, 175, 55, 0.3);
+  background-color: transparent !important;
+  border-color: transparent !important;
+  text-decoration: none !important;
+}
+
+/* Remove the ::after for active non-dropdown links - no underline */
+.nav-link:not(.dropdown-toggle).active::after,
+.nav-link:not(.dropdown-toggle).router-link-active::after,
+.nav-link:not(.dropdown-toggle).router-link-exact-active::after,
+a.nav-link:not(.dropdown-toggle).active::after,
+a.nav-link:not(.dropdown-toggle).router-link-active::after,
+a.nav-link:not(.dropdown-toggle).router-link-exact-active::after {
+  display: none;
+}
+
+/* Dropdown toggle specific styling */
+.nav-link.dropdown-toggle {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Active dropdown styling - also just highlighted text */
+.nav-link.dropdown-toggle.active,
+.show > .nav-link.dropdown-toggle {
+  color: var(--accent-color) !important;
+  font-weight: 500 !important;
+  text-shadow: 0 0 12px rgba(212, 175, 55, 0.6), 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+/* Remove underline from dropdown when active/open */
+.nav-link.dropdown-toggle.active::before,
+.show > .nav-link.dropdown-toggle::before {
+  display: none;
 }
 
 /* Cart Icon Styling */
@@ -184,21 +429,29 @@ import swal from 'sweetalert';
 
 .cart-link {
   padding: 0.5rem 1rem !important;
-  transition: transform 0.2s ease;
+  transition: transform 0.3s ease;
 }
 
 .cart-link:hover {
-  transform: scale(1.05);
+  transform: scale(1.1) rotate(5deg);
+}
+
+.cart-link.active .cart-icon-wrapper i,
+.cart-link.router-link-active .cart-icon-wrapper i,
+.cart-link.router-link-exact-active .cart-icon-wrapper i {
+  color: var(--gold-gradient-end) !important;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
 }
 
 .cart-icon-wrapper {
   position: relative;
   display: inline-block;
+  transition: all 0.3s ease;
 }
 
 .cart-badge {
   position: absolute;
-  top: -8px;
+  top: -3px;
   right: -10px;
   background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
   color: white;
@@ -211,7 +464,7 @@ import swal from 'sweetalert';
   align-items: center;
   justify-content: center;
   padding: 0 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
   border: 2px solid var(--navbar-bg);
   animation: pulse 2s infinite;
 }
@@ -219,9 +472,11 @@ import swal from 'sweetalert';
 @keyframes pulse {
   0%, 100% {
     transform: scale(1);
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
   }
   50% {
     transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.6);
   }
 }
 
@@ -232,14 +487,61 @@ import swal from 'sweetalert';
 .cart {
   margin-top: -0.5rem;
 }
-#navbarAccount.dropdown-toggle::after{
-  display: inline-block;
-    margin-left: 0.4em;
-    margin-top: 0.7rem;
+
+/* Dropdown toggle arrow positioning - Bootstrap's ::after pseudo-element */
+.dropdown-toggle::after {
+  display: inline-block !important;
+  margin-left: 0.5em !important;
+  vertical-align: 0.2em !important;
+  content: "" !important;
+  border-top: 0.3em solid !important;
+  border-right: 0.3em solid transparent !important;
+  border-bottom: 0 !important;
+  border-left: 0.3em solid transparent !important;
+  transition: transform 0.3s ease, border-top-color 0.3s ease !important;
 }
-#navbarAdmin.dropdown-toggle::after{
-  display: inline-block;
-    margin-left: 0.4em;
-    margin-top: 0.7rem;
+
+/* Specific positioning for navbar dropdowns */
+#navbarAccount.dropdown-toggle::after,
+#navbarAdmin.dropdown-toggle::after {
+  margin-left: 0.5em !important;
+  vertical-align: 0.2em !important;
+}
+
+/* Rotate arrow when dropdown is open */
+.dropdown.show .dropdown-toggle::after,
+.show > .dropdown-toggle::after {
+  transform: rotate(180deg);
+}
+
+/* Dropdown toggle hover effect */
+.dropdown-toggle:hover::after {
+  border-top-color: var(--accent-color) !important;
+}
+
+/* Theme toggle button enhancement */
+.btn-link:hover i {
+  transform: rotate(20deg) scale(1.2);
+  filter: drop-shadow(0 0 8px rgba(193, 142, 50, 0.6));
+}
+
+.btn-link i {
+  transition: all 0.3s ease;
+}
+</style>
+
+<style>
+/* Global styles for sticky sections during navbar measurement */
+html.measuring-navbar .sticky-top,
+html.measuring-navbar .page-sections {
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+html:not(.measuring-navbar) .sticky-top,
+html:not(.measuring-navbar) .page-sections {
+  visibility: visible !important;
+  opacity: 1 !important;
+  transition: opacity 0.3s ease;
 }
 </style>

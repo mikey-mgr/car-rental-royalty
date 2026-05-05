@@ -4,25 +4,15 @@
         <div class="row align-items-center">
             <!-- display image, bootstrap carousel-->
             <div class="col-md-6 col-12">
-                <div id="autoplayCarousel" class="carousel slide" data-bs-ride="troue">
+                <div id="autoplayCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
                     <div class="carousel-inner">
                         <!-- dynamic images -->
                         <div class="carousel-item active">
-                            <img :src="product.imageURL" class="d-block w-100" alt="Vehicle image">
+                            <img :src="product.imageURL" class="d-block w-100" alt="Vehicle image" @click="openLightbox(product.imageURL)" style="cursor: pointer;">
                         </div>
-                        <div v-for="(image, index) in product.carousel_imgs" :key="index" class="carousel-item">
-                            <img :src="image" class="d-block w-100" alt="vehicle image">
+                        <div v-for="(image, index) in filteredCarouselImages" :key="index" class="carousel-item">
+                            <img :src="image" class="d-block w-100" alt="vehicle image" @click="openLightbox(image)" style="cursor: pointer;">
                         </div>
-                        <!-- static images -->
-                        <!-- <div class="carousel-item active">
-                            <img src="../../assets/AppImages//cars/ford.jpg" class="d-block w-100" alt="Vehicle image">
-                        </div>
-                        <div class="carousel-item">
-                            <img src="../../assets/AppImages/cars/car.jpg" class="d-block w-100" alt="Vehicle image">
-                        </div>
-                        <div class="carousel-item">
-                            <img src="../../assets/AppImages/cars/demio.jpg" class="d-block w-100" alt="Vehicle image">
-                        </div> -->
                     </div>
                     <button class="carousel-control-prev" type="button" data-bs-target="#autoplayCarousel" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -66,9 +56,9 @@
                 </form>
                 <div class="features pt-3 mb-3">
                     <h5><strong>Features</strong></h5>
-                    <div class="container p-0">
+                    <ul class="features-list">
                         <li v-for="(feature, index) in product.features" :key="index">{{ feature }}</li>
-                    </div>
+                    </ul>
                 </div>
                 <button v-show="!inWishlist" id="wishlist-button" class="btn mr-3" @click="addToWishlist" :disabled="addedToWishlist">
                     {{wishlistString}}
@@ -118,6 +108,31 @@
                         </div>
                     </div> 
                 </div>
+
+                <!-- Image Lightbox Modal -->
+                <div class="modal fade" id="imageLightbox" tabindex="-1" aria-labelledby="imageLightboxLabel" aria-hidden="true" @click="closeLightbox">
+                    <div class="modal-dialog modal-dialog-centered modal-xl">
+                        <div class="modal-content lightbox-content">
+                            <div class="modal-body p-0 position-relative">
+                                <button type="button" class="btn-close lightbox-close" @click="closeLightbox" aria-label="Close"></button>
+                                <div class="lightbox-image-container" @click.stop>
+                                    <img :src="lightboxImage" class="lightbox-image" :style="{ transform: `scale(${zoomLevel})` }" alt="Vehicle image">
+                                </div>
+                                <div class="zoom-controls">
+                                    <button class="btn btn-light zoom-btn" @click.stop="zoomIn" :disabled="zoomLevel >= 3">
+                                        <i class="bi bi-zoom-in"></i> +
+                                    </button>
+                                    <button class="btn btn-light zoom-btn" @click.stop="zoomOut" :disabled="zoomLevel <= 1">
+                                        <i class="bi bi-zoom-out"></i> -
+                                    </button>
+                                    <button class="btn btn-light zoom-btn" @click.stop="resetZoom">
+                                        Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
             </div>
         </div>
     </div>
@@ -149,7 +164,9 @@ export default {
             wishlist: null,
             wishlistId: null,
             modalText: null,
-            role: null
+            role: null,
+            lightboxImage: null,
+            zoomLevel: 1
         }
     },
     methods: {
@@ -286,41 +303,87 @@ export default {
             }).catch((err) => console.log('err', err));
         },
 
-        //set the midate for the date element
-        // minDate() {
-        //     // Get the current date
-        //     let today = new Date();
-        //     // Format the date as yyyy-mm-dd
-        //     let yyyy = today.getFullYear();
-        //     let mm = today.getMonth() + 1; // January is 0
-        //     let dd = today.getDate();
-        //     if (mm < 10) {
-        //         mm = "0" + mm;
-        //     }
-        //     if (dd < 10) {
-        //         dd = "0" + dd;
-        //     }
-        //     return yyyy + "-" + mm + "-" + dd;
-        // },
+        //open lightbox with selected image
+        openLightbox(imageUrl) {
+            this.lightboxImage = imageUrl;
+            this.zoomLevel = 1;
+            let modal = document.getElementById('imageLightbox');
+            let bsShowModal = new bootstrap.Modal(modal, {toggle: false});
+            bsShowModal.show();
+        },
+
+        //close lightbox
+        closeLightbox() {
+            let modal = document.getElementById('imageLightbox');
+            let bsModal = bootstrap.Modal.getInstance(modal);
+            if (bsModal) {
+                bsModal.hide();
+            }
+            this.zoomLevel = 1;
+        },
+
+        //zoom in
+        zoomIn() {
+            if (this.zoomLevel < 3) {
+                this.zoomLevel += 0.25;
+            }
+        },
+
+        //zoom out
+        zoomOut() {
+            if (this.zoomLevel > 1) {
+                this.zoomLevel -= 0.25;
+            }
+        },
+
+        //reset zoom
+        resetZoom() {
+            this.zoomLevel = 1;
+        },
+    },
+
+    computed: {
+        //set the mindate for the date element
+        minDate() {
+            // Get the current date
+            let today = new Date();
+            // Format the date as yyyy-mm-dd
+            let yyyy = today.getFullYear();
+            let mm = today.getMonth() + 1; // January is 0
+            let dd = today.getDate();
+            if (mm < 10) {
+                mm = "0" + mm;
+            }
+            if (dd < 10) {
+                dd = "0" + dd;
+            }
+            return yyyy + "-" + mm + "-" + dd;
+        },
 
         //set the maxdate for the date element
-        // maxDate() {
-        //     // Get the current date
-        //     let today = new Date();
-        //     // Add 30 days to the date
-        //     let after30Days = new Date(today.setDate(today.getDate() + 30));
-        //     // Format the date as yyyy-mm-dd
-        //     let yyyy = after30Days.getFullYear();
-        //     let mm = after30Days.getMonth() + 1; // January is 0
-        //     let dd = after30Days.getDate();
-        //     if (mm < 10) {
-        //         mm = "0" + mm;
-        //     }
-        //     if (dd < 10) {
-        //         dd = "0" + dd;
-        //     }
-        //     return yyyy + "-" + mm + "-" + dd;
-        // },
+        maxDate() {
+            // Get the current date
+            let today = new Date();
+            // Add 30 days to the date
+            let after30Days = new Date(today.setDate(today.getDate() + 30));
+            // Format the date as yyyy-mm-dd
+            let yyyy = after30Days.getFullYear();
+            let mm = after30Days.getMonth() + 1; // January is 0
+            let dd = after30Days.getDate();
+            if (mm < 10) {
+                mm = "0" + mm;
+            }
+            if (dd < 10) {
+                dd = "0" + dd;
+            }
+            return yyyy + "-" + mm + "-" + dd;
+        },
+
+        // Filter out duplicate images from carousel
+        filteredCarouselImages() {
+            if (!this.product.carousel_imgs) return [];
+            return this.product.carousel_imgs.filter(img => img !== this.product.imageURL);
+        }
     },
 
     mounted() {
@@ -331,6 +394,17 @@ export default {
         this.role = localStorage.getItem("role");
         this.getWishlist();
         this.getCart();
+        
+        // Initialize carousel after component is mounted
+        this.$nextTick(() => {
+            const carouselElement = document.getElementById('autoplayCarousel');
+            if (carouselElement && bootstrap.Carousel) {
+                new bootstrap.Carousel(carouselElement, {
+                    interval: 5000,
+                    ride: 'carousel'
+                });
+            }
+        });
     },
 }
 </script>
@@ -345,14 +419,101 @@ export default {
 .modal-content{
     height: 230px;
 }
+
+/* Carousel improvements */
+.carousel-fade .carousel-item {
+    opacity: 0;
+    transition: opacity 0.6s ease-in-out;
+}
+.carousel-fade .carousel-item.active {
+    opacity: 1;
+}
+.carousel-inner {
+    background-color: #000;
+}
 .d-block.w-100{
     height: 40vh;
     width: 50vh;
     object-fit: cover;
+    display: block;
 }
+
+/* Features list alignment */
+.features-list {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin: 0;
+}
+.features-list li {
+    margin-bottom: 8px;
+}
+
+/* Lightbox styles */
+#imageLightbox .modal-dialog {
+    max-width: 95vw;
+}
+.lightbox-content {
+    background-color: rgba(0, 0, 0, 0.95);
+    border: none;
+    height: auto;
+}
+.lightbox-image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    max-height: 85vh;
+    overflow: auto;
+    padding: 20px;
+}
+.lightbox-image {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+    transform-origin: center center;
+}
+.lightbox-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 1060;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    opacity: 1;
+}
+.lightbox-close:hover {
+    background-color: #fff;
+}
+.zoom-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 1060;
+}
+.zoom-btn {
+    padding: 8px 16px;
+    font-weight: 600;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.9);
+}
+.zoom-btn:hover:not(:disabled) {
+    background-color: #fff;
+}
+.zoom-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .category{
     font-weight: 400;
-}.main-div{
+}
+.main-div{
     padding-top: 30px;
 }
 #wishlist-button {

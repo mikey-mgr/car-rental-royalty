@@ -232,16 +232,58 @@ server.servlet.session.cookie.http-only=true
 
 ### Issue 6: Vue Router 404 on Page Refresh
 
-**Symptom**: Direct navigation to routes (e.g., `/home`) returns 404
+**Symptom**: Direct navigation to routes (e.g., `/home`, `/contact`) returns 404, but clicking links works
 
-**Cause**: Static site doesn't know how to handle client-side routing
+**Cause**: Render's static site hosting doesn't support `_redirects` file like Netlify does
 
-**Solution**: Create `public/_redirects` file
+**Solution**: Use a Node.js web service with the `serve` package instead of static site
+
+**Step 1**: Add `serve` to `package.json` dependencies:
+```json
+"dependencies": {
+  "serve": "^14.2.0",
+  // ... other dependencies
+}
 ```
-/*    /index.html   200
+
+**Step 2**: Update start script in `package.json`:
+```json
+"scripts": {
+  "start": "serve -s dist -l 10000",
+  "build": "vue-cli-service build",
+  // ... other scripts
+}
 ```
 
-This tells Render to serve `index.html` for all routes, letting Vue Router handle navigation.
+**Step 3**: Update `render.yaml` to use Node.js web service:
+```yaml
+# Frontend Web Service (with serve package for Vue Router history mode)
+- type: web
+  name: your-frontend-name
+  env: node
+  buildCommand: npm install --legacy-peer-deps && npm run build
+  startCommand: npx serve -s dist -l $PORT
+  plan: free
+  envVars:
+    - key: VUE_APP_API_URL
+      value: https://your-backend-name.onrender.com
+```
+
+**Why this works**:
+- The `serve` package is designed specifically for serving SPAs
+- The `-s` flag enables single-page app mode (handles client-side routing)
+- The `-l $PORT` flag binds to Render's assigned port
+- It automatically serves `index.html` for all routes, letting Vue Router handle navigation
+
+**Alternative (if you prefer static hosting)**:
+Switch Vue Router to hash mode in `src/router/index.js`:
+```javascript
+const router = createRouter({
+  history: createWebHashHistory(), // Instead of createWebHistory()
+  routes,
+});
+```
+This uses URLs like `/#/home` instead of `/home`, which work with static hosting.
 
 ---
 
@@ -405,9 +447,17 @@ management.endpoint.health.show-details=when-authorized
 legacy-peer-deps=true
 ```
 
-**2. `public/_redirects`** (for Vue Router)
-```
-/*    /index.html   200
+**2. `package.json`** - Add serve dependency and start script
+```json
+{
+  "scripts": {
+    "start": "serve -s dist -l 10000",
+    "build": "vue-cli-service build"
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  }
+}
 ```
 
 **3. `.env.production`** (optional, can use Render env vars instead)
@@ -460,14 +510,16 @@ VUE_APP_API_URL=https://[BACKEND].onrender.com
 ```
 
 **Deployment Settings**:
+- **Runtime**: Node
 - **Build Command**: `npm install --legacy-peer-deps && npm run build`
-- **Publish Directory**: `dist`
+- **Start Command**: `npx serve -s dist -l $PORT`
 - **Plan**: Free
 
 **Verification**:
 - [ ] Site loads without errors
 - [ ] Static assets load correctly
 - [ ] Vue Router navigation works
+- [ ] **Page refresh works on all routes** (no 404 errors)
 - [ ] No CORS errors in console
 - [ ] Authentication works
 - [ ] API calls succeed
@@ -503,7 +555,7 @@ VUE_APP_API_URL=https://[BACKEND].onrender.com
 | Symptom | Check |
 |---------|-------|
 | Build fails | Verify `.npmrc` exists with `legacy-peer-deps=true` |
-| 404 on routes | Verify `public/_redirects` exists |
+| 404 on page refresh | Verify using Node web service with `serve` package, start command is `npx serve -s dist -l $PORT` |
 | API calls fail | Check `VUE_APP_API_URL` is set before build |
 | Auth not working | Verify `withCredentials: true` in axios requests |
 
@@ -522,9 +574,10 @@ VUE_APP_API_URL=https://[BACKEND].onrender.com
 2. **PostgreSQL URL**: Must include `jdbc:` prefix and `:5432` port
 3. **Reserved Keywords**: Use `@Column` annotations to avoid PostgreSQL reserved words
 4. **npm Dependencies**: `.npmrc` with `legacy-peer-deps=true` is critical
-5. **Vue Router**: `_redirects` file required for history mode
+5. **Vue Router**: Use Node.js web service with `serve` package (not static site) for history mode support
 6. **Environment Variables**: Must be set BEFORE build, especially for frontend
-7. **Port Binding**: Use `${PORT}` to bind to Render's assigned port
+7. **Port Binding**: Use `$PORT` environment variable for Render's assigned port
+8. **SameSite Cookies**: Configure `SameSite=None; Secure` for cross-origin authentication
 
 ---
 
@@ -532,10 +585,12 @@ VUE_APP_API_URL=https://[BACKEND].onrender.com
 
 | Service | Limit | Notes |
 |---------|-------|-------|
-| Web Service | 750 hours/month | Spins down after 15 min inactivity |
-| Static Site | Unlimited | Always on |
+| Web Service (Backend) | 750 hours/month | Spins down after 15 min inactivity |
+| Web Service (Frontend) | 750 hours/month | Spins down after 15 min inactivity |
 | PostgreSQL | 1GB, 90 days | Expires after 90 days on free tier |
 | Cold Start | ~30 seconds | First request after spin-down |
+
+**Note**: Using two web services (backend + frontend) means you'll use 1500 hours/month total, which exceeds the free tier limit. Consider upgrading or using hash mode routing with static hosting for the frontend.
 
 ---
 
@@ -637,12 +692,12 @@ services:
       - key: ALLOWED_ORIGINS
         value: https://your-frontend-name.onrender.com,http://localhost:8583
 
-  # Frontend Static Site
+  # Frontend Web Service (with serve package for Vue Router history mode)
   - type: web
     name: your-frontend-name
-    env: static
+    env: node
     buildCommand: npm install --legacy-peer-deps && npm run build
-    staticPublishPath: ./dist
+    startCommand: npx serve -s dist -l $PORT
     plan: free
     envVars:
       - key: VUE_APP_API_URL
@@ -844,15 +899,16 @@ SPRING_DATASOURCE_PASSWORD=N2jEhFAY8HvTfWFkRf57rmBndwkwoSKl
 
 ### Phase 4: Deploy Frontend
 
-#### 4.1 Create Static Site
-1. Dashboard → **"New +"** → **"Static Site"**
+#### 4.1 Create Web Service
+1. Dashboard → **"New +"** → **"Web Service"**
 2. Connect your GitHub repository
 3. Select branch: `render-deployment`
 4. Configure:
    - **Name**: `your-frontend-name`
    - **Branch**: `render-deployment`
+   - **Runtime**: **Node**
    - **Build Command**: `npm install --legacy-peer-deps && npm run build`
-   - **Publish Directory**: `dist`
+   - **Start Command**: `npx serve -s dist -l $PORT`
    - **Plan**: **Free**
 
 #### 4.2 Set Environment Variables
@@ -865,7 +921,7 @@ Click **"Advanced"** → **"Add Environment Variable"**
 **IMPORTANT**: This must be set BEFORE the first build!
 
 #### 4.3 Deploy
-1. Click **"Create Static Site"**
+1. Click **"Create Web Service"**
 2. Wait for build (3-5 minutes)
 3. Monitor logs for errors
 
@@ -873,6 +929,7 @@ Click **"Advanced"** → **"Add Environment Variable"**
 - Visit: `https://your-frontend-name.onrender.com`
 - Check browser console for errors
 - Test API calls (login, fetch data, etc.)
+- **Test page refresh** on different routes (e.g., `/home`, `/contact`) - should not return 404
 
 ---
 

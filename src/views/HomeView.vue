@@ -133,7 +133,7 @@
             </div>
           </div>
           <div class="col-md-12 section-description-text fade-in-scroll">
-            <p class="p-5 m-0">As a result, we've driven over $300 000 in sales and over 1 million leads for our businesses and clients. MGR Communications
+            <p class="p-5 m-0">As a result, we've driven over $300,000 in sales and over 1 million leads for our businesses and clients. MGR Communications
               is a premier reputation film active in Harare, Melbourne and Dubai that specializes in printing, digital marketing, SEO activities,
               web design, and data to drive targeted visibility and engagement that builds brand reputation and delivers profit growth.
               <br><br>
@@ -289,6 +289,7 @@
 import CategoryBox from "../components/Category/CategoryBox.vue";
 import ProductBox from "@/components/ProductBox.vue";
 import heroVideo from '../assets/AppImages/home_page/home-vid.mp4';
+import heroVideoMobile from '../assets/AppImages/home_page/home-vid-mobile.mp4';
 
 export default {
   name: "HomeView",
@@ -301,12 +302,28 @@ export default {
       showImage: false,
       isVideoFadingOut: false,
       videoPlayed: false,
-      videoSrc: heroVideo,
+      videoSrc: this.getVideoSource(),
       observedElements: [],
       videoObserver: null
     }
   },
   methods:{
+    getVideoSource() {
+      // Check if screen is mobile size (less than 768px)
+      const isMobile = window.innerWidth < 768;
+      return isMobile ? heroVideoMobile : heroVideo;
+    },
+    updateVideoSource() {
+      // Update video source when window is resized
+      const newVideoSrc = this.getVideoSource();
+      if (this.videoSrc !== newVideoSrc) {
+        this.videoSrc = newVideoSrc;
+        // Reload video if it's currently playing
+        if (this.$refs.heroVideo) {
+          this.$refs.heroVideo.load();
+        }
+      }
+    },
     onVideoLoaded() {
       // Video loaded
     },
@@ -563,12 +580,17 @@ export default {
     // Add scroll listener for progress bars and parallax
     window.addEventListener('scroll', this.handleScroll);
     window.addEventListener('scroll', this.handleParallax);
+    
+    // Add resize listener to update video source
+    window.addEventListener('resize', this.updateVideoSource);
+    
     this.handleScroll(); // Initial call
   },
   beforeUnmount() {
     // Clean up scroll listeners
     window.removeEventListener('scroll', this.handleScroll);
     window.removeEventListener('scroll', this.handleParallax);
+    window.removeEventListener('resize', this.updateVideoSource);
     
     // Disconnect video observer
     if (this.videoObserver) {
