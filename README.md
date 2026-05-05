@@ -75,6 +75,71 @@ To lint and fix files:
 npm run lint
 ```
 
+## Deploying to Render
+
+Since GitHub Pages doesn't support backend applications, you can deploy this full-stack app to Render for free.
+
+### Prerequisites
+- GitHub account
+- Render account (sign up at https://render.com)
+- Push the `render-deployment` branch to GitHub
+
+### Quick Deployment (Using render.yaml)
+
+1. **Push the deployment branch to GitHub:**
+   ```bash
+   git add .
+   git commit -m "Add Render deployment configuration"
+   git push origin render-deployment
+   ```
+
+2. **Deploy on Render:**
+   - Go to https://dashboard.render.com
+   - Click "New +" → "Blueprint"
+   - Connect your GitHub repository
+   - Select the `render-deployment` branch
+   - Render will automatically create:
+     - Web Service (Spring Boot backend)
+     - Database (PostgreSQL/MySQL)
+
+3. **Configure CORS:**
+   - After deployment, update `application-prod.properties` with your frontend URL
+   - Redeploy to apply changes
+
+### Manual Deployment
+
+1. **Create Database:**
+   - Dashboard → "New +" → "PostgreSQL"
+   - Name: `apex-car-rental-db`
+   - Plan: Free
+   - Save the connection string
+
+2. **Create Web Service:**
+   - Dashboard → "New +" → "Web Service"
+   - Connect repository, select `render-deployment` branch
+   - **Build Command:** `./mvnw clean install -DskipTests`
+   - **Start Command:** `java -jar target/Apex-0.0.1-SNAPSHOT.jar`
+   - **Environment Variables:**
+     ```
+     SPRING_PROFILES_ACTIVE=prod
+     SERVER_PORT=8080
+     DATABASE_URL=<your-database-connection-string>
+     JAVA_TOOL_OPTIONS=-Xmx512m -Xms256m
+     ```
+
+### Important Notes
+
+- **Free Tier:** Service spins down after 15 minutes of inactivity (30s cold start)
+- **Database:** Render offers free PostgreSQL (1GB, 90-day limit)
+- **Memory:** 512MB RAM on free tier
+- **Backend URL:** `https://apex-car-rental-backend.onrender.com`
+
+### Troubleshooting
+
+- **Build fails:** Check Java version (17) and build logs
+- **Database issues:** Verify `DATABASE_URL` environment variable
+- **Won't start:** Check memory settings and application logs
+
 ## Additional Information
 
 - API Documentation: Available via Swagger UI when backend is running
