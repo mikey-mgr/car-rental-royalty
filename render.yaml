@@ -16,6 +16,19 @@ services:
         value: apex_user
       - key: SPRING_DATASOURCE_PASSWORD
         sync: false
+      - key: ALLOWED_ORIGINS
+        value: https://apex-car-rental-frontend.onrender.com,http://localhost:8583
+
+  # Frontend Static Site
+  - type: web
+    name: apex-car-rental-frontend
+    env: static
+    buildCommand: npm install --legacy-peer-deps && npm run build
+    staticPublishPath: ./dist
+    plan: free
+    envVars:
+      - key: VUE_APP_API_URL
+        value: https://apex-car-rental-backend.onrender.com
 
 databases:
   - name: apex-car-rental-db

@@ -61,7 +61,7 @@ export default {
   components: { Navbar, Footer },
   data() {
     return {
-      baseURL : "http://localhost:8081",
+      baseURL : process.env.VUE_APP_API_URL || "http://localhost:8081",
       products: null,
       categories: null,
       cartCount: 0,
