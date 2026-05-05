@@ -380,12 +380,6 @@ export default {
     z-index: 100;
   }
   
-  /* Fallback for different screen sizes */
-  @media (max-width: 991px) {
-    .sticky-top {
-      top: 60px;
-    }
-  }
   .nav-pills {
     --bs-nav-pills-border-radius: 0px;
   }

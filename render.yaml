@@ -26,6 +26,10 @@ services:
     buildCommand: npm install --legacy-peer-deps && npm run build
     staticPublishPath: ./dist
     plan: free
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
       - key: VUE_APP_API_URL
         value: https://apex-car-rental-backend.onrender.com
