@@ -50,7 +50,7 @@ export default {
             
             try {
                 // Step 1: Login via Spring Security form login
-                const loginResponse = await axios({
+                await axios({
                     method: "post",
                     url: `${this.baseURL}/login`,
                     data: new URLSearchParams(body),

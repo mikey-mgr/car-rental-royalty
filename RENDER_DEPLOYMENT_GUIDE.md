@@ -179,9 +179,12 @@ CorsConfigurationSource corsConfigSrc(){
 - "User does not exist" errors after successful signup
 - Works when accessing backend directly, fails from frontend
 
-**Cause**: Session cookies not being sent between frontend and backend
+**Cause**: Session cookies not being sent between frontend and backend due to:
+1. Missing `withCredentials` in frontend requests
+2. Missing `setAllowCredentials` in backend CORS
+3. **SameSite cookie policy blocking cross-origin cookies**
 
-**Solution**: Enable credentials in both frontend and backend
+**Solution**: Enable credentials in both frontend and backend, and configure SameSite cookies
 
 **Frontend** - Add `withCredentials` to axios requests:
 ```javascript
@@ -204,10 +207,26 @@ axios.defaults.withCredentials = true;
 config.setAllowCredentials(true); // Must be true
 ```
 
+**Backend** - Configure SameSite cookies in `application-prod.properties`:
+```properties
+# Session cookie configuration for cross-origin
+server.servlet.session.cookie.same-site=none
+server.servlet.session.cookie.secure=true
+server.servlet.session.cookie.http-only=true
+```
+
 **Why this happens**:
 - Spring Security uses session cookies for authentication
 - Cross-origin requests don't send cookies by default
+- Modern browsers block cross-site cookies unless `SameSite=None` and `Secure=true`
 - Both frontend and backend must explicitly allow credentials
+
+**How to verify it's fixed**:
+1. Open browser DevTools → Network tab
+2. Login and check the `/login` request
+3. Look for `Set-Cookie` header with `SameSite=None; Secure` in response
+4. Check subsequent requests have `Cookie` header
+5. Authenticated endpoints should now work
 
 ---
 
