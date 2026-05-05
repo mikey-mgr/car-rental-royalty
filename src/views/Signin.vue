@@ -47,39 +47,61 @@ export default {
                 email: this.email,
                 password: this.password,
             }
-                axios({
+            
+            try {
+                // Step 1: Login via Spring Security form login
+                const loginResponse = await axios({
                     method: "post",
                     url: `${this.baseURL}/login`,
-                    data: new URLSearchParams(body), // Convert to x-www-form-urlencoded
+                    data: new URLSearchParams(body),
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded",
                     },
-                    withCredentials: true, // CRITICAL: Send cookies with request
-                }).then((res) =>{
-                    let loginInfo = res.data;
-                    if(loginInfo.status=="Login Success"){
-                        this.$emit("usersInfo");
-                        swal({
-                            text: "Login successful, redirecting",
-                            icon: "success"
-                        });
-                        window.location.replace("/home");
-                        localStorage.setItem("token", loginInfo.token);
-                        localStorage.setItem("role", loginInfo.role);
-                    }else {
-                        swal({
-                            text: "Invalid details",
-                            icon: "warning"
-                        })
-                    }
-            }).catch((err) => {
+                    withCredentials: true,
+                    maxRedirects: 0, // Don't follow redirects automatically
+                    validateStatus: (status) => status >= 200 && status < 400, // Accept 3xx redirects
+                });
+                
+                // Step 2: Get user info after successful login
+                const signinResponse = await axios.get(`${this.baseURL}/user/signin`, {
+                    withCredentials: true
+                });
+                
+                const loginInfo = signinResponse.data;
+                if(loginInfo.status === "Login Success"){
+                    this.$emit("usersInfo");
+                    swal({
+                        text: "Login successful, redirecting",
+                        icon: "success"
+                    });
+                    localStorage.setItem("token", loginInfo.token);
+                    localStorage.setItem("role", loginInfo.role);
+                    window.location.replace("/home");
+                } else {
+                    swal({
+                        text: "Invalid details",
+                        icon: "warning"
+                    });
+                }
+            } catch (err) {
                 console.log('err', err);
-                if(err.code == "ERR_NETWORK"){
+                if(err.response && err.response.status === 401){
+                    swal({
+                        text: "Invalid email or password",
+                        icon: "error"
+                    });
+                } else if(err.code === "ERR_NETWORK"){
                     swal({
                         text: "Network error, please check your connection",
                         icon: "error"
-                    })
-                }});
+                    });
+                } else {
+                    swal({
+                        text: "Login failed. Please try again.",
+                        icon: "error"
+                    });
+                }
+            }
         },
     },
     mounted(){

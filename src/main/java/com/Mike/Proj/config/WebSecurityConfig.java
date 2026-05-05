@@ -45,12 +45,24 @@ public class WebSecurityConfig {
     @SuppressWarnings("removal")
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
-        http.csrf().disable().cors().and().authorizeHttpRequests((authz) -> authz
-            .requestMatchers("/product/list", "/product/find/**", "/category/list", "/category/show/**", "/user/**", "/contact/submit").permitAll()
-            .requestMatchers("/cart/**", "/wishlist/**", "/order/create-checkout-session").authenticated()
-            .anyRequest().hasRole("ADMIN"))
-            .formLogin().defaultSuccessUrl("/user/signin", true).usernameParameter("email").permitAll()
-            .and().httpBasic().and().logout((logout) -> logout.logoutSuccessUrl("/user/logout"));
+        http.csrf().disable()
+            .cors()
+            .and()
+            .authorizeHttpRequests((authz) -> authz
+                .requestMatchers("/product/list", "/product/find/**", "/category/list", "/category/show/**", "/user/**", "/contact/submit").permitAll()
+                .requestMatchers("/cart/**", "/wishlist/**", "/order/create-checkout-session").authenticated()
+                .anyRequest().hasRole("ADMIN"))
+            .formLogin()
+                .defaultSuccessUrl("/user/signin", true)
+                .usernameParameter("email")
+                .permitAll()
+            .and()
+            .httpBasic()
+            .and()
+            .logout((logout) -> logout.logoutSuccessUrl("/user/logout"))
+            .sessionManagement(session -> session
+                .sessionFixation().none()
+            );
 
         return http.build();
     }
