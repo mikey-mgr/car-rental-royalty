@@ -1,71 +1,534 @@
-# Complete Guide: Deploying Spring Boot + Vue.js to Render
+# Deploying Spring Boot + Vue.js to Render: Complete Troubleshooting Guide
 
-This guide documents the **complete, tested process** for deploying a full-stack application (Spring Boot backend + Vue.js frontend) to Render, including all errors encountered and their solutions.
+A battle-tested reference for deploying full-stack Java/Vue.js applications to Render, covering all common deployment issues and their solutions.
 
 ---
 
 ## Table of Contents
-1. [Prerequisites](#prerequisites)
-2. [Architecture Overview](#architecture-overview)
-3. [Step-by-Step Deployment](#step-by-step-deployment)
-4. [Common Errors & Solutions](#common-errors--solutions)
-5. [Configuration Files Reference](#configuration-files-reference)
-6. [Post-Deployment Checklist](#post-deployment-checklist)
+1. [Quick Start](#quick-start)
+2. [Critical Issues & Solutions](#critical-issues--solutions)
+3. [Required Configuration Files](#required-configuration-files)
+4. [Deployment Checklist](#deployment-checklist)
 
 ---
 
-## Prerequisites
+## Quick Start
 
-### Required Accounts
-- **GitHub account** with your repository
-- **Render account** (free tier works)
-
-### Local Setup
-- Git installed and configured
-- Your application running locally successfully
-
-### Tech Stack Assumptions
-- **Backend**: Spring Boot 3.x with Java 17
+### Stack Requirements
+- **Backend**: Spring Boot 3.x + Java 17
 - **Frontend**: Vue.js 3.x with Vue Router
-- **Database**: PostgreSQL (Render provides free tier)
-- **Local DB**: MariaDB/MySQL (will be converted to PostgreSQL for production)
+- **Database**: PostgreSQL (Render free tier)
+
+### Deployment Overview
+```
+┌─────────────────────────────────────────┐
+│  Frontend (Static Site)                 │
+│  ├─ Build: npm install && npm run build│
+│  └─ Publish: ./dist                     │
+└────────────┬────────────────────────────┘
+             │ CORS + Credentials
+             ▼
+┌─────────────────────────────────────────┐
+│  Backend (Docker Web Service)           │
+│  ├─ Build: Maven + Docker               │
+│  └─ Port: ${PORT} (auto-assigned)       │
+└────────────┬────────────────────────────┘
+             │ JDBC Connection
+             ▼
+┌─────────────────────────────────────────┐
+│  PostgreSQL Database (Free Tier)        │
+│  └─ Connection: Internal URL + Port     │
+└─────────────────────────────────────────┘
+```
+
+### Deployment Steps
+1. **Create PostgreSQL database** → Get connection details
+2. **Deploy backend** → Set environment variables (DB connection, CORS origins)
+3. **Deploy frontend** → Set backend API URL
+4. **Verify** → Test authentication and API calls
 
 ---
 
-## Architecture Overview
+## Critical Issues & Solutions
 
-### What Gets Deployed
+### Issue 1: PostgreSQL JDBC URL Format
+
+**Symptom**: `Driver org.postgresql.Driver claims to not accept jdbcUrl`
+
+**Cause**: Render provides PostgreSQL URL without `jdbc:` prefix
+
+**Solution**: Add `jdbc:` prefix to database URL in environment variables
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Render Platform                       │
-├─────────────────────────────────────────────────────────┤
-│                                                          │
-│  ┌──────────────────┐      ┌──────────────────┐        │
-│  │  Frontend        │      │  Backend         │        │
-│  │  Static Site     │─────▶│  Web Service     │        │
-│  │  (Vue.js)        │ CORS │  (Spring Boot)   │        │
-│  └──────────────────┘      └──────────────────┘        │
-│                                     │                    │
-│                                     ▼                    │
-│                            ┌──────────────────┐         │
-│                            │  PostgreSQL DB   │         │
-│                            │  (Free Tier)     │         │
-│                            └──────────────────┘         │
-└─────────────────────────────────────────────────────────┘
+# Render provides:
+postgresql://user:pass@host:5432/database
+
+# Spring Boot needs:
+jdbc:postgresql://user:pass@host:5432/database
 ```
 
-### Service URLs
-- **Backend**: `https://your-backend.onrender.com`
-- **Frontend**: `https://your-frontend.onrender.com`
-- **Database**: Internal connection (not publicly accessible)
+**Environment Variable**:
+```
+SPRING_DATASOURCE_URL=jdbc:postgresql://[HOST]:5432/[DATABASE]
+SPRING_DATASOURCE_USERNAME=[USER]
+SPRING_DATASOURCE_PASSWORD=[PASSWORD]
+```
 
 ---
 
-## Step-by-Step Deployment
+### Issue 2: PostgreSQL Reserved Keywords
 
-### Phase 1: Prepare Your Repository
+**Symptom**: `ERROR: syntax error at or near "user"` during table creation
 
-#### 1.1 Create Deployment Branch
+**Cause**: Using PostgreSQL reserved keywords as column names
+
+**Solution**: Use `@Column` annotation with explicit non-reserved name
+```java
+// WRONG - "user" is reserved
+@JoinColumn(name = "user")
+private String user;
+
+// CORRECT
+@Column(name = "user_name")
+private String user;
+```
+
+**Common reserved keywords**: `user`, `order`, `group`, `table`, `select`, `where`, `from`
+
+---
+
+### Issue 3: npm Dependency Conflicts
+
+**Symptom**: `npm error ERESOLVE could not resolve` during frontend build
+
+**Cause**: Vue 3 + older libraries with peer dependency conflicts
+
+**Solution**: Create `.npmrc` file in project root
+```
+legacy-peer-deps=true
+```
+
+This tells npm to ignore peer dependency conflicts during installation.
+
+---
+
+### Issue 4: CORS Blocking API Calls
+
+**Symptom**: `Access-Control-Allow-Origin header is not present` in browser console
+
+**Cause**: Backend not configured to allow frontend origin
+
+**Solution**: Configure CORS to read from environment variable
+
+**Backend CORS Configuration**:
+```java
+@Configuration
+public class CorsConfig {
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                String allowedOrigins = System.getenv()
+                    .getOrDefault("ALLOWED_ORIGINS", "http://localhost:8080");
+                
+                registry.addMapping("/**")
+                        .allowedMethods("*")
+                        .allowedOrigins(allowedOrigins.split(","))
+                        .allowedHeaders("*")
+                        .allowCredentials(true); // CRITICAL for authentication
+            }
+        };
+    }
+}
+```
+
+**Environment Variable** (Backend):
+```
+ALLOWED_ORIGINS=https://your-frontend.onrender.com,http://localhost:8080
+```
+
+**Also update Spring Security CORS** if using Spring Security:
+```java
+@Bean
+CorsConfigurationSource corsConfigSrc(){
+    CorsConfiguration config = new CorsConfiguration();
+    
+    String allowedOrigins = System.getenv()
+        .getOrDefault("ALLOWED_ORIGINS", "http://localhost:8080");
+    
+    for (String origin : allowedOrigins.split(",")) {
+        config.addAllowedOrigin(origin.trim());
+    }
+    
+    config.setAllowedMethods(Arrays.asList("*"));
+    config.setAllowedHeaders(Arrays.asList("*"));
+    config.setAllowCredentials(true); // CRITICAL
+    
+    UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
+    src.registerCorsConfiguration("/**", config);
+    return src;
+}
+```
+
+---
+
+### Issue 5: Authentication Not Working (Session Cookies)
+
+**Symptom**: 
+- Login succeeds but subsequent authenticated requests fail
+- "User does not exist" errors after successful signup
+- Works when accessing backend directly, fails from frontend
+
+**Cause**: Session cookies not being sent between frontend and backend
+
+**Solution**: Enable credentials in both frontend and backend
+
+**Frontend** - Add `withCredentials` to axios requests:
+```javascript
+// In login/auth requests
+axios({
+    method: "post",
+    url: `${baseURL}/login`,
+    data: body,
+    withCredentials: true, // CRITICAL
+}).then(res => {
+    // handle response
+});
+
+// Or set globally in main.js/App.vue
+axios.defaults.withCredentials = true;
+```
+
+**Backend** - Enable credentials in CORS (see Issue 4 above):
+```java
+config.setAllowCredentials(true); // Must be true
+```
+
+**Why this happens**:
+- Spring Security uses session cookies for authentication
+- Cross-origin requests don't send cookies by default
+- Both frontend and backend must explicitly allow credentials
+
+---
+
+### Issue 6: Vue Router 404 on Page Refresh
+
+**Symptom**: Direct navigation to routes (e.g., `/home`) returns 404
+
+**Cause**: Static site doesn't know how to handle client-side routing
+
+**Solution**: Create `public/_redirects` file
+```
+/*    /index.html   200
+```
+
+This tells Render to serve `index.html` for all routes, letting Vue Router handle navigation.
+
+---
+
+### Issue 7: Environment Variables Not Available in Vue
+
+**Symptom**: `process is not defined` or API calls go to wrong URL
+
+**Cause**: Environment variables not set at build time
+
+**Solution**:
+
+1. **Set in Render** before building (Environment tab)
+2. **Use `VUE_APP_` prefix** for Vue CLI:
+```
+VUE_APP_API_URL=https://your-backend.onrender.com
+```
+
+3. **Access in code** with fallback:
+```javascript
+const baseURL = process.env.VUE_APP_API_URL || "http://localhost:8080";
+```
+
+4. **Create `.env.production`** file (optional):
+```
+VUE_APP_API_URL=https://your-backend.onrender.com
+```
+
+---
+
+### Issue 8: Backend Port Binding
+
+**Symptom**: "No open ports detected" or health check fails
+
+**Cause**: App not binding to Render's `PORT` environment variable
+
+**Solution**: Use `${PORT}` in application properties
+```properties
+# application-prod.properties
+server.port=${PORT:8080}
+```
+
+Render automatically sets `PORT` environment variable (usually 10000).
+
+---
+
+### Issue 9: Database Connection Missing Port
+
+**Symptom**: JDBC URL rejected, connection fails
+
+**Cause**: Render's internal database URL sometimes omits port
+
+**Solution**: Manually construct full JDBC URL with port 5432
+```
+# Get from Render database Info page:
+# - Hostname: dpg-xxxxx-a
+# - Port: 5432
+# - Database: your_db_xxxxx
+# - Username: your_user
+# - Password: [long string]
+
+# Construct:
+SPRING_DATASOURCE_URL=jdbc:postgresql://dpg-xxxxx-a:5432/your_db_xxxxx
+```
+
+---
+
+### Issue 10: Actuator Not Enabled
+
+**Symptom**: Health check endpoint returns 404
+
+**Cause**: Actuator dependency not included
+
+**Solution**: Add to `pom.xml`
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+```
+
+Configure in `application-prod.properties`:
+```properties
+management.endpoints.web.exposure.include=health
+management.endpoint.health.show-details=when-authorized
+```
+
+---
+
+## Required Configuration Files
+
+
+### Backend Files
+
+**1. `Dockerfile`** (for Docker deployment)
+```dockerfile
+FROM maven:3.9-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+
+**2. `.dockerignore`**
+```
+target/
+node_modules/
+.git/
+*.md
+.vscode/
+*.log
+```
+
+**3. `src/main/resources/application-prod.properties`**
+```properties
+# Port - Render sets PORT env variable
+server.port=${PORT:8080}
+
+# PostgreSQL Configuration
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.hibernate.ddl-auto=update
+
+# Production optimizations
+spring.jpa.show-sql=false
+logging.level.org.hibernate.SQL=WARN
+
+# Actuator
+management.endpoints.web.exposure.include=health
+management.endpoint.health.show-details=when-authorized
+```
+
+**4. `pom.xml`** - Add PostgreSQL driver
+```xml
+<!-- PostgreSQL for production -->
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>runtime</scope>
+</dependency>
+
+<!-- Actuator for health checks -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+```
+
+---
+
+### Frontend Files
+
+**1. `.npmrc`** (critical for dependency resolution)
+```
+legacy-peer-deps=true
+```
+
+**2. `public/_redirects`** (for Vue Router)
+```
+/*    /index.html   200
+```
+
+**3. `.env.production`** (optional, can use Render env vars instead)
+```
+VUE_APP_API_URL=https://your-backend.onrender.com
+```
+
+**4. Frontend API configuration** (e.g., in `App.vue` or `main.js`)
+```javascript
+const baseURL = process.env.VUE_APP_API_URL || "http://localhost:8080";
+
+// Enable credentials for authentication
+axios.defaults.withCredentials = true;
+```
+
+---
+
+## Deployment Checklist
+
+### Backend Deployment
+
+**Environment Variables** (set in Render dashboard):
+```
+SPRING_PROFILES_ACTIVE=prod
+JAVA_TOOL_OPTIONS=-Xmx512m -Xms256m
+SPRING_DATASOURCE_URL=jdbc:postgresql://[HOST]:5432/[DB]
+SPRING_DATASOURCE_USERNAME=[USER]
+SPRING_DATASOURCE_PASSWORD=[PASSWORD]
+ALLOWED_ORIGINS=https://[FRONTEND].onrender.com,http://localhost:8080
+```
+
+**Deployment Settings**:
+- **Runtime**: Docker
+- **Dockerfile Path**: `./Dockerfile`
+- **Plan**: Free
+
+**Verification**:
+- [ ] Logs show "Started [App] in X seconds"
+- [ ] `/actuator/health` returns `{"status":"UP"}`
+- [ ] No database connection errors
+- [ ] CORS configured correctly
+
+---
+
+### Frontend Deployment
+
+**Environment Variables** (set in Render dashboard):
+```
+VUE_APP_API_URL=https://[BACKEND].onrender.com
+```
+
+**Deployment Settings**:
+- **Build Command**: `npm install --legacy-peer-deps && npm run build`
+- **Publish Directory**: `dist`
+- **Plan**: Free
+
+**Verification**:
+- [ ] Site loads without errors
+- [ ] Static assets load correctly
+- [ ] Vue Router navigation works
+- [ ] No CORS errors in console
+- [ ] Authentication works
+- [ ] API calls succeed
+
+---
+
+### Database Setup
+
+**Steps**:
+1. Create PostgreSQL database (Free plan)
+2. Note connection details from Info page:
+   - Hostname
+   - Port (5432)
+   - Database name
+   - Username
+   - Password
+3. Construct JDBC URL: `jdbc:postgresql://[HOST]:5432/[DB]`
+4. Set backend environment variables
+
+---
+
+## Quick Troubleshooting
+
+### Backend Issues
+| Symptom | Check |
+|---------|-------|
+| Won't start | Check `SPRING_DATASOURCE_URL` format (needs `jdbc:` prefix) |
+| Database errors | Verify port `:5432` is in URL, check credentials |
+| CORS errors | Verify `ALLOWED_ORIGINS` includes frontend URL |
+| Auth not working | Ensure `setAllowCredentials(true)` in CORS config |
+
+### Frontend Issues
+| Symptom | Check |
+|---------|-------|
+| Build fails | Verify `.npmrc` exists with `legacy-peer-deps=true` |
+| 404 on routes | Verify `public/_redirects` exists |
+| API calls fail | Check `VUE_APP_API_URL` is set before build |
+| Auth not working | Verify `withCredentials: true` in axios requests |
+
+### Integration Issues
+| Symptom | Solution |
+|---------|----------|
+| CORS errors | Update `ALLOWED_ORIGINS` in backend, redeploy |
+| Cookies not sent | Enable `withCredentials` in frontend + `setAllowCredentials` in backend |
+| 401/403 errors | Check session cookies in browser DevTools → Network tab |
+
+---
+
+## Key Takeaways
+
+1. **CORS + Credentials**: Most common issue - both frontend and backend must explicitly allow credentials
+2. **PostgreSQL URL**: Must include `jdbc:` prefix and `:5432` port
+3. **Reserved Keywords**: Use `@Column` annotations to avoid PostgreSQL reserved words
+4. **npm Dependencies**: `.npmrc` with `legacy-peer-deps=true` is critical
+5. **Vue Router**: `_redirects` file required for history mode
+6. **Environment Variables**: Must be set BEFORE build, especially for frontend
+7. **Port Binding**: Use `${PORT}` to bind to Render's assigned port
+
+---
+
+## Free Tier Limits
+
+| Service | Limit | Notes |
+|---------|-------|-------|
+| Web Service | 750 hours/month | Spins down after 15 min inactivity |
+| Static Site | Unlimited | Always on |
+| PostgreSQL | 1GB, 90 days | Expires after 90 days on free tier |
+| Cold Start | ~30 seconds | First request after spin-down |
+
+---
+
+## Additional Resources
+
+- [Render Docs](https://render.com/docs)
+- [Spring Boot on Render](https://render.com/docs/deploy-spring-boot)
+- [PostgreSQL on Render](https://render.com/docs/databases)
+
+---
+
+**Last Updated**: Based on deployment experience with Spring Boot 3.2.2, Vue.js 3.2.13, Java 17, PostgreSQL 15
 ```bash
 git checkout -b render-deployment
 ```
@@ -533,6 +996,85 @@ This tells Render to serve `index.html` for all routes, letting Vue Router handl
 2. Create separate `application-prod.properties` with PostgreSQL dialect
 3. Set `SPRING_PROFILES_ACTIVE=prod` in Render
 4. Test locally with PostgreSQL before deploying
+
+---
+
+### Error 9: "User does not exist" but user was just created
+
+**Symptom**: 
+- Can create account successfully
+- Login fails with "User does not exist"
+- Login works when accessing backend directly
+- Authenticated endpoints return 401/403
+
+**Cause**: Session cookies not being sent between frontend and backend
+
+**Root Issues**:
+1. `withCredentials: true` missing from axios login request
+2. `setAllowCredentials(true)` missing from Spring Security CORS config
+3. CORS configuration hardcoded to localhost instead of reading environment variable
+
+**Solution**:
+
+**Step 1**: Add `withCredentials` to login request in `src/views/Signin.vue`:
+```javascript
+axios({
+    method: "post",
+    url: `${this.baseURL}/login`,
+    data: new URLSearchParams(body),
+    headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+    },
+    withCredentials: true, // CRITICAL: Send cookies with request
+}).then((res) => {
+    // ... rest of code
+});
+```
+
+**Step 2**: Update `WebSecurityConfig.java` to allow credentials and read from environment:
+```java
+@Bean
+CorsConfigurationSource corsConfigSrc(){
+    CorsConfiguration config = new CorsConfiguration();
+    
+    // Get allowed origins from environment variable
+    String allowedOrigins = System.getenv()
+        .getOrDefault("ALLOWED_ORIGINS", "http://localhost:8583");
+    
+    for (String origin : allowedOrigins.split(",")) {
+        config.addAllowedOrigin(origin.trim());
+    }
+    
+    config.setAllowedMethods(Arrays.asList("*"));
+    config.setAllowedHeaders(Arrays.asList("*"));
+    config.setAllowCredentials(true); // CRITICAL: Allow cookies
+    
+    UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
+    src.registerCorsConfiguration("/**", config);
+
+    return src;
+}
+```
+
+**Step 3**: Verify `ALLOWED_ORIGINS` environment variable is set in Render backend:
+```
+ALLOWED_ORIGINS=https://your-frontend-name.onrender.com,http://localhost:8583
+```
+
+**Step 4**: Redeploy both backend and frontend
+
+**Why this happens**:
+- Spring Security uses session cookies for authentication
+- Without `withCredentials: true`, cookies aren't sent with cross-origin requests
+- Without `setAllowCredentials(true)`, backend rejects cookies from cross-origin requests
+- Result: Each request appears unauthenticated even after successful login
+
+**How to verify it's fixed**:
+1. Open browser DevTools → Network tab
+2. Login and check the `/login` request
+3. Look for `Set-Cookie` header in response
+4. Check subsequent requests have `Cookie` header
+5. Authenticated endpoints should now work
 
 ---
 
