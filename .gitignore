@@ -8,3 +8,5 @@ target/
 *.iml
 *.log
 .env
+UPGRADE_GUIDE.md
+SVG_CAR_LOADING_ANIMATION.md

@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12 text-center justify-content-center d-flex pt-3">
-                <div id="signup-div" class="flex-item border p-5">
+                <div id="signup-div" class="flex-item p-5">
                     <label for="email"><h2 class="">Create Account</h2></label>
                     <form @submit="signup" class="form-group">
                         <div class="form-group pt-4">

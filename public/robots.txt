@@ -1,0 +1,15 @@
+# Allow all search engines to crawl the site
+User-agent: *
+Allow: /
+
+# Disallow admin pages from search engines
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /cart
+Disallow: /wishlist
+
+# Sitemap location
+Sitemap: https://apex-car-rental-frontend.onrender.com/sitemap.xml
+
+# Crawl delay (optional - helps prevent server overload)
+Crawl-delay: 10

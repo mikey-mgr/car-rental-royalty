@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12 justify-content-center text-start d-flex pt-3">
-                <div id="signin-div" class="flex-item border p-5">
+                <div id="signin-div" class="flex-item p-5">
                     <h2 class="">Sign In</h2>
                     <form @submit="signin" class="form-group">
                         <div class="form-group">
@@ -15,7 +15,7 @@
                         </div>
                         <button type="submit" class="btn btn-primary mt-4">Login</button>
                         <hr class="mb-5">
-                        <label class="col-12 font-italic">Don't have an Account?</label>
+                        <label class="col-12 pl-0 font-italic">Don't have an Account?</label>
                         <router-link :to="{name: 'SignupView'}"> 
                                 <button class="btn btn-primary create-account">Create Account</button>
                         </router-link>    

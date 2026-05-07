@@ -9,11 +9,9 @@
     "start": "serve -s dist -l 10000"
   },
   "dependencies": {
-    "@popperjs/core": "^2.11.8",
     "@vue/compat": "^3.4.31",
     "axios": "^1.7.2",
     "bootstrap": "^5.3.3",
-    "bootstrap-icons": "^1.13.1",
     "chart.js": "^4.4.3",
     "core-js": "^3.37.1",
     "mutationobserver-shim": "^0.3.7",

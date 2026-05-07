@@ -836,6 +836,15 @@ export default {
   transition: opacity 1.5s ease-out 0.5s, transform 1.5s ease-out 0.5s;
 }
 
+.banner h3,
+.banner h5 {
+  color: white;
+  -webkit-text-stroke: 7px black;
+  paint-order: stroke fill;
+  text-shadow: 0 0 15px rgba(212, 175, 55, 0.8),
+               0 0 30px rgba(212, 175, 55, 0.5);
+}
+
 .banner.banner-visible {
   opacity: 1;
   transform: translateY(0);
@@ -946,8 +955,14 @@ export default {
 /* Ensure sections have proper background */
 .section-text {
   background-color: var(--bg-secondary);
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
   z-index: 4;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.section-text h2,
+.section-text p {
+  color: var(--text-primary) !important;
 }
 
 .section-description-text {
@@ -1004,6 +1019,14 @@ export default {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
   
+  /* Light mode page sections - keep gold text, change background to white */
+  [data-theme="light"] .page-sections {
+    background: linear-gradient(135deg, rgb(255, 255, 255), rgb(248, 248, 248)) !important;
+    color: var(--accent-color) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border-bottom: 4px solid rgba(212, 175, 55, 0.3) !important;
+  }
+  
   /* Animated progress bar */
   .page-sections::after {
     content: '';
@@ -1032,9 +1055,20 @@ export default {
     box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
   }
   
+  /* Light mode hover - lighter background */
+  [data-theme="light"] .page-sections:hover {
+    background: linear-gradient(135deg, rgb(245, 245, 245), rgb(235, 235, 235)) !important;
+    color: var(--accent-color) !important;
+  }
+  
   .page-sections.active {
     background: linear-gradient(135deg, var(--deep-sapphire), var(--royal-midnight-blue)) !important;
     border-bottom: 4px solid transparent !important;
+  }
+  
+  /* Light mode active page sections - white background */
+  [data-theme="light"] .page-sections.active {
+    background: linear-gradient(135deg, rgb(255, 255, 255), rgb(248, 248, 248)) !important;
   }
   
   .page-sections.active::after {

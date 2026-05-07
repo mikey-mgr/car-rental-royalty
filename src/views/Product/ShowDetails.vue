@@ -1,6 +1,6 @@
 <template>
 <div class="main-div">
-    <div class="container p-3 border" v-if="product">
+    <div class="container p-3" v-if="product">
         <div class="row align-items-center">
             <!-- display image, bootstrap carousel-->
             <div class="col-md-6 col-12">
@@ -320,6 +320,17 @@ export default {
                 bsModal.hide();
             }
             this.zoomLevel = 1;
+            // Remove any lingering backdrops
+            this.removeBackdrops();
+        },
+
+        // Remove any lingering modal backdrops
+        removeBackdrops() {
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
         },
 
         //zoom in
@@ -404,7 +415,23 @@ export default {
                     ride: 'carousel'
                 });
             }
+
+            // Add event listeners to clean up backdrops when modals are hidden
+            const modals = ['bookingModal', 'registerModal', 'imageLightbox'];
+            modals.forEach(modalId => {
+                const modalElement = document.getElementById(modalId);
+                if (modalElement) {
+                    modalElement.addEventListener('hidden.bs.modal', () => {
+                        this.removeBackdrops();
+                    });
+                }
+            });
         });
+    },
+
+    beforeUnmount() {
+        // Clean up any lingering backdrops when component is destroyed
+        this.removeBackdrops();
     },
 }
 </script>
@@ -415,9 +442,39 @@ export default {
     --bs-modal-footer-border-width: none;
     --bs-modal-header-border-color: none;
     --bs-modal-header-border-width: none;
+    z-index: 1055 !important;
+}
+.modal-backdrop {
+    z-index: 1050 !important;
 }
 .modal-content{
     height: 230px;
+    z-index: 1056 !important;
+}
+
+/* Close button visibility in dark mode */
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Modal footer buttons - add bottom margin on mobile */
+@media (max-width: 576px) {
+    .modal-footer {
+        padding-top: 0;
+    }
+}
+
+/* Lightbox modal should be above other modals */
+#imageLightbox {
+    z-index: 1060 !important;
+}
+#imageLightbox .modal-backdrop {
+    z-index: 1059 !important;
+}
+
+/* Lightbox close button - keep it white */
+#imageLightbox .btn-close {
+    filter: none;
 }
 
 /* Carousel improvements */

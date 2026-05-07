@@ -4,7 +4,7 @@
         <!-- Navbar content -->
         <!--    Logo-->
         <router-link class="navbar-brand p-0 mr-0" :to="{ name: 'HomeView' }" >
-          <img id="logo" src="../../public/logo-dark.png"/>
+          <img id="logo" src="../../public/logo-dark.jpeg"/>
         </router-link>
         <!--    Burger Button-->
         <button
@@ -60,11 +60,11 @@
               <li class="nav-item"><router-link :class="{'active': $route.path==='/contact'}" class="nav-link text-light" :to="{name: 'ContactUs'}" @click="closeNavbar">CONTACT</router-link></li>
             
               <!-- Theme Toggle -->
-              <!-- <li class="nav-item">
-                <button @click="toggleTheme" class="btn btn-link nav-link text-light" style="border: none; background: none;">
-                  <i :class="isDarkMode ? 'bi bi-sun-fill' : 'bi bi-moon-fill'" style="font-size: 20px; color: #c18e32;"></i>
+              <li class="nav-item theme-toggle-wrapper">
+                <button @click="toggleTheme" class="theme-toggle-button" aria-label="Toggle dark/light mode">
+                  <i :class="isDarkMode ? 'bi bi-sun-fill' : 'bi bi-moon-fill'" class="theme-icon"></i>
                 </button>
-              </li> -->
+              </li>
 
             <!-- </ul > -->
               <li v-if="role" class="nav-item cart-container position-relative">
@@ -235,18 +235,40 @@ import swal from 'sweetalert';
 .navbar{
   background-color: var(--navbar-bg);
   color: var(--accent-color);
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Light mode navbar adjustments */
+[data-theme="light"] .navbar {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Navbar toggler icon visibility in light mode */
+[data-theme="light"] .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(25, 25, 25, 0.75)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 #logo {
   width: 120px;
   margin-left: 0px;
   margin-right: 20px;
   transition: transform 0.3s ease, filter 0.3s ease;
+  content: url('../../public/logo-dark.jpeg');
 }
+
+/* Switch to white logo in light mode */
+[data-theme="light"] #logo {
+  content: url('../../public/logo-white.jpeg');
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
 #logo:hover {
   transform: scale(1.05);
   filter: brightness(1.1);
+}
+
+[data-theme="light"] #logo:hover {
+  filter: brightness(0.9) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 .dropdown-menu{
   right: 0;
@@ -324,6 +346,13 @@ a.nav-link:visited {
   text-decoration: none !important;
   background-color: transparent !important;
   border: none !important;
+  color: var(--text-primary) !important;
+}
+
+/* Light mode nav links - ensure visibility */
+[data-theme="light"] .nav-link,
+[data-theme="light"] a.nav-link {
+  color: rgb(25, 25, 25) !important;
 }
 
 /* Underline animation on hover - for non-dropdown links using ::after */
@@ -519,14 +548,48 @@ a.nav-link:not(.dropdown-toggle).router-link-exact-active::after {
   border-top-color: var(--accent-color) !important;
 }
 
-/* Theme toggle button enhancement */
-.btn-link:hover i {
-  transform: rotate(20deg) scale(1.2);
-  filter: drop-shadow(0 0 8px rgba(193, 142, 50, 0.6));
+/* Theme Toggle Button Styling */
+.theme-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
 }
 
-.btn-link i {
+.theme-toggle-button {
+  background: transparent;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.3s ease;
+  outline: none;
+}
+
+.theme-toggle-button:hover {
+  transform: translateY(-2px);
+}
+
+.theme-icon {
+  font-size: 26px;
+  color: var(--accent-color);
+  transition: all 0.3s ease;
+}
+
+.theme-toggle-button:hover .theme-icon {
+  transform: rotate(20deg) scale(1.2);
+  filter: drop-shadow(0 0 8px rgba(193, 142, 50, 0.6));
+  text-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 991px) {
+  .theme-toggle-wrapper {
+    margin: 0.5rem 0;
+  }
 }
 </style>
 

@@ -213,6 +213,9 @@ export default {
 .card-img-top{
     width: 5.8rem;
     height: 5.8rem;
+    background-color: white;
+    padding: 0.5rem;
+    border-radius: 8px;
 }
 .card {
   background-color: var(--bg-card) !important;

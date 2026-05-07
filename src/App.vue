@@ -2,12 +2,10 @@
   <!-- Global Loading Overlay -->
   <div v-if="isBackendLoading" class="backend-loading-overlay">
     <div class="loading-content">
-      <div class="spinner-container">
-        <div class="custom-spinner" :style="{ borderTopColor: currentColor, borderRightColor: currentColor }"></div>
-        <div class="spinner-glow" :style="{ background: `radial-gradient(circle, ${currentGlowColor} 0%, transparent 70%)` }"></div>
+      <div class="car-animation-container">
+        <img src="/car-only.svg" alt="Loading..." class="loading-car" />
       </div>
       <h3 class="loading-text">Starting up services...</h3>
-      <p class="loading-subtext">This may take up to 30 seconds on first load</p>
       <div class="loading-dots">
         <span class="dot"></span>
         <span class="dot"></span>
@@ -42,10 +40,10 @@
   :data1="data1"
   :colors="colors"
   ></router-view>
-  <Footer />
+  <AppFooter />
   
   <!-- Sticky WhatsApp Button -->
-  <a href="https://wa.me/254788667111?text=Hi%2C%20I%27m%20interested%20in%20renting%20a%20vehicle.%20Can%20you%20help%20me%3F" target="_blank" rel="noopener noreferrer" class="whatsapp-float" aria-label="Chat on WhatsApp">
+  <a href="https://wa.me/263717827381?text=Hi%2C%20I%27m%20interested%20in%20renting%20a%20vehicle.%20Can%20you%20help%20me%3F" target="_blank" rel="noopener noreferrer" class="whatsapp-float" aria-label="Chat on WhatsApp">
     <i class="bi bi-whatsapp"></i>
   </a>
 </template>
@@ -53,7 +51,7 @@
 <script>
 import Navbar from "./components/Navbar.vue";
 import axios from 'axios';
-import Footer from "./components/Footer.vue";
+import AppFooter from "./components/Footer.vue";
 import bootstrap from 'bootstrap/dist/js/bootstrap.bundle'
 import swal from "sweetalert";
 
@@ -80,7 +78,7 @@ document.addEventListener('scroll', function(){
 })
 
 export default {
-  components: { Navbar, Footer },
+  components: { Navbar, AppFooter },
   data() {
     return {
       baseURL : process.env.VUE_APP_API_URL || "http://localhost:8081",
@@ -98,31 +96,13 @@ export default {
       labels1: [],
       data1: [],
       isBackendLoading: true,
-      currentColor: 'rgb(212, 175, 55)', // Start with metallic gold
-      currentGlowColor: 'rgba(212, 175, 55, 0.3)',
-      colorIndex: 0,
-      colorCycleInterval: null,
       retryInterval: null,
-      // Website color palette - Gold, Bootstrap Blue, Green, Red, White
-      colorPalette: [
-        { color: 'rgb(212, 175, 55)', glow: 'rgba(212, 175, 55, 0.3)' },  // Metallic Gold
-        { color: 'rgb(13, 110, 253)', glow: 'rgba(13, 110, 253, 0.3)' },  // Bootstrap Blue
-        { color: 'rgb(25, 135, 84)', glow: 'rgba(25, 135, 84, 0.3)' },    // Bootstrap Green
-        { color: 'rgb(220, 53, 69)', glow: 'rgba(220, 53, 69, 0.3)' },    // Bootstrap Red
-        { color: 'rgb(245, 245, 240)', glow: 'rgba(245, 245, 240, 0.3)' }, // Ivory White
-      ],
     }
   },
   methods: {
-    //method to cycle through colors for the loading spinner
-    cycleColors() {
-      this.colorIndex = (this.colorIndex + 1) % this.colorPalette.length;
-      this.currentColor = this.colorPalette[this.colorIndex].color;
-      this.currentGlowColor = this.colorPalette[this.colorIndex].glow;
-    },
-
     //method to check if backend is ready and retry
     async checkBackendHealth() {
+      console.log('Checking backend health...');
       try {
         // Try to fetch the public endpoints
         await axios.all([
@@ -148,10 +128,7 @@ export default {
         this.pieChartConfig(res_cat.data, res_prod.data);
         // Hide loading overlay once data is fetched
         this.isBackendLoading = false;
-        // Clear intervals
-        if (this.colorCycleInterval) {
-          clearInterval(this.colorCycleInterval);
-        }
+        // Clear retry interval
         if (this.retryInterval) {
           clearInterval(this.retryInterval);
         }
@@ -284,23 +261,13 @@ export default {
   },
 
   mounted() {
-    // Start color cycling for loading spinner
-    this.colorCycleInterval = setInterval(() => {
-      if (this.isBackendLoading) {
-        this.cycleColors();
-      }
-    }, 1200); // Change color every spinner revolution (1.2s)
-
     this.fetchData();
     this.adminInfo();
     this.token = localStorage.getItem("token");
   },
 
   beforeUnmount() {
-    // Clean up intervals when component is destroyed
-    if (this.colorCycleInterval) {
-      clearInterval(this.colorCycleInterval);
-    }
+    // Clean up retry interval when component is destroyed
     if (this.retryInterval) {
       clearInterval(this.retryInterval);
     }
@@ -350,55 +317,80 @@ router-view{
   animation: slideUp 0.6s ease-out;
 }
 
-.spinner-container {
+.car-animation-container {
   position: relative;
-  width: 120px;
+  width: 100vw;
   height: 120px;
   margin: 0 auto 2rem;
+  overflow: hidden;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-.custom-spinner {
-  width: 120px;
-  height: 120px;
-  border: 4px solid rgba(255, 255, 255, 0.1);
-  border-top: 4px solid rgb(212, 175, 55);
-  border-right: 4px solid rgb(212, 175, 55);
-  border-radius: 50%;
-  animation: spin 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-  position: relative;
-  z-index: 2;
-  transition: border-top-color 0.6s ease, border-right-color 0.6s ease;
-}
-
-.spinner-glow {
+.loading-car {
+  width: 180px;
+  height: auto;
   position: absolute;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100px;
-  height: 100px;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.3) 0%, transparent 70%);
-  border-radius: 50%;
-  animation: pulse 2s ease-in-out infinite;
-  z-index: 1;
-  transition: background 0.6s ease;
+  transform: translateY(-50%);
+  animation: carDrive 5s infinite;
+}
+
+@keyframes carDrive {
+  0% {
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-timing-function: cubic-bezier(0.6, 0, 1, 0.4);
+  }
+  20% {
+    left: calc(100% + 90px);
+    transform: translate(-50%, -50%);
+    animation-timing-function: linear;
+  }
+  35% {
+    left: calc(100% + 90px);
+    transform: translate(-50%, -50%);
+    animation-timing-function: linear;
+  }
+  35.01% {
+    left: -90px;
+    transform: translate(-50%, -50%);
+    animation-timing-function: linear;
+  }
+  50% {
+    left: -90px;
+    transform: translate(-50%, -50%);
+    animation-timing-function: linear;
+  }
+  75% {
+    left: 45%;
+    transform: translate(-50%, -50%);
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.4, 1);
+  }
+  82% {
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-timing-function: linear;
+  }
+  100% {
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
 }
 
 .loading-text {
-  color: rgb(245, 245, 240);
+  color: var(--text-primary);
   font-size: 1.8rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
   letter-spacing: 0.5px;
   animation: textGlow 2s ease-in-out infinite;
+  transition: color 0.3s ease;
 }
 
-.loading-subtext {
-  color: rgba(245, 245, 240, 0.6);
-  font-size: 1rem;
-  font-weight: 400;
-  margin: 0 0 1.5rem 0;
-  animation: fadeInOut 3s ease-in-out infinite;
+/* Light mode loading overlay */
+[data-theme="light"] .backend-loading-overlay {
+  background: linear-gradient(135deg, rgb(250, 250, 248) 0%, rgb(240, 240, 238) 100%);
 }
 
 .loading-dots {
@@ -426,26 +418,6 @@ router-view{
 
 .loading-dots .dot:nth-child(3) {
   animation-delay: 0.4s;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.5;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.2);
-    opacity: 0.8;
-  }
 }
 
 @keyframes fadeIn {

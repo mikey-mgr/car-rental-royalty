@@ -7,7 +7,7 @@
                     <li class="mb-2">
                         <a href="#" class="footer-link">
                             <router-link class="navbar-brand" :to="{ name: 'HomeView' }" >
-                                <img id="logo" src="../../public/logo-dark.png"/>
+                                <img id="logo" src="../../public/logo-dark.jpeg"/>
                             </router-link>
                         </a>
                     </li>
@@ -96,9 +96,21 @@ li{
 ul{
     padding: 0px;
 }
+
+/* Override Bootstrap text-light class in footer for theme support */
+footer .text-light {
+    color: var(--text-primary) !important;
+}
 #logo {
   width: 150px;
+  content: url('../../public/logo-dark.jpeg');
+  transition: filter 0.3s ease;
+}
 
+/* Switch to white logo in light mode */
+[data-theme="light"] #logo {
+  content: url('../../public/logo-white.jpeg');
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 @media screen {
     .container{

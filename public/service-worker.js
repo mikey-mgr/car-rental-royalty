@@ -1,28 +1,12 @@
 // Service Worker for caching video files and assets
+// ONLY RUNS IN PRODUCTION (not on localhost)
 const CACHE_NAME = 'apex-car-rental-v1';
 const VIDEO_CACHE = 'apex-videos-v1';
 
-// Assets to cache immediately
-const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/js/app.js',
-  '/js/chunk-vendors.js',
-  '/css/app.css'
-];
-
-// Install event - cache static assets
+// Install event - skip caching on install
 self.addEventListener('install', (event) => {
   console.log('Service Worker: Installing...');
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Service Worker: Caching static assets');
-        return cache.addAll(STATIC_ASSETS.map(url => new Request(url, {cache: 'reload'})));
-      })
-      .then(() => self.skipWaiting())
-      .catch((err) => console.log('Service Worker: Cache failed', err))
-  );
+  self.skipWaiting(); // Activate immediately
 });
 
 // Activate event - clean up old caches
@@ -47,7 +31,30 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Handle video files specially
+  // IGNORE localhost requests (dev mode)
+  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+    return; // Let browser handle it normally
+  }
+
+  // IGNORE webpack HMR and hot-update files
+  if (request.url.includes('hot-update') || 
+      request.url.includes('webpack') ||
+      request.url.includes('sockjs-node') ||
+      request.url.includes('/ws')) {
+    return; // Don't cache dev files
+  }
+
+  // IGNORE API calls (let them go to network)
+  if (request.url.includes('/api/') || 
+      request.url.includes(':8081') ||
+      request.url.includes('/category/') ||
+      request.url.includes('/product/') ||
+      request.url.includes('/cart/') ||
+      request.url.includes('/wishlist/')) {
+    return; // Don't cache API requests
+  }
+
+  // Handle video files specially (PRODUCTION ONLY)
   if (request.url.includes('.mp4') || request.url.includes('.webm')) {
     event.respondWith(
       caches.open(VIDEO_CACHE).then((cache) => {
@@ -62,7 +69,6 @@ self.addEventListener('fetch', (event) => {
           return fetch(request).then((networkResponse) => {
             // Only cache successful responses
             if (networkResponse && networkResponse.status === 200) {
-              // Clone the response before caching
               const responseToCache = networkResponse.clone();
               cache.put(request, responseToCache);
               console.log('Service Worker: Video cached', request.url);
@@ -70,7 +76,8 @@ self.addEventListener('fetch', (event) => {
             return networkResponse;
           }).catch((err) => {
             console.error('Service Worker: Video fetch failed', err);
-            throw err;
+            // Return network error, don't cache
+            return fetch(request);
           });
         });
       })
@@ -78,30 +85,35 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle other assets with cache-first strategy
-  event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      return fetch(request).then((networkResponse) => {
-        // Cache successful responses for static assets
-        if (networkResponse && networkResponse.status === 200 && 
-            (request.url.includes('/js/') || 
-             request.url.includes('/css/') || 
-             request.url.includes('/img/') ||
-             request.url.includes('.jpg') ||
-             request.url.includes('.png') ||
-             request.url.includes('.jpeg') ||
-             request.url.includes('.svg'))) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseToCache);
-          });
+  // Handle images (PRODUCTION ONLY)
+  if (request.url.includes('.jpg') ||
+      request.url.includes('.png') ||
+      request.url.includes('.jpeg') ||
+      request.url.includes('.svg') ||
+      request.url.includes('.gif') ||
+      request.url.includes('.webp')) {
+    event.respondWith(
+      caches.match(request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
         }
-        return networkResponse;
-      });
-    })
-  );
+
+        return fetch(request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+          return networkResponse;
+        }).catch(() => {
+          // If fetch fails, try cache one more time
+          return caches.match(request);
+        });
+      })
+    );
+    return;
+  }
+
+  // For everything else, network first (don't cache JS/CSS in dev)
 });
