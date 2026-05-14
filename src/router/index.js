@@ -20,6 +20,7 @@ import Users from "../views/Users";
 import Vehicles from "../views/Vehicles";
 import AboutUs from "../views/AboutUs";
 import ContactUs from "../views/ContactUs";
+import HealthView from "../views/HealthView.vue";
 import "../views/Admin.vue"
 import NotFound from "../views/NotFound.vue"
 
@@ -161,6 +162,11 @@ const routes = [
     name: 'AboutUs',
     component: AboutUs
   },
+  {
+    path: '/health',
+    name: 'FrontendHealth',
+    component: HealthView
+  },
   //the not found path
   { path: '/:pathMatch(.*)*',
     name: 'NotFound',
@@ -174,9 +180,9 @@ const router = createRouter({
 
   scrollBehavior(to, from, savedPosition) {
     // Return a promise to handle async scroll restoration
-    return new Promise((resolve) => {
-      // Small delay to ensure DOM is ready
-      setTimeout(() => {
+      return new Promise((resolve) => {
+        // Delay to ensure DOM and navbar measurements are ready (helps sticky headers)
+        setTimeout(() => {
         // If clicking the same route (same path), always scroll to top
         if (to.path === from.path) {
           resolve({ top: 0, behavior: 'smooth' });
@@ -196,7 +202,7 @@ const router = createRouter({
             resolve({ top: 0, behavior: 'auto' });
           }
         }
-      }, 100);
+      }, 500);
     });
   },
 });

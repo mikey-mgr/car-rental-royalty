@@ -1,17 +1,15 @@
 <template>
   <div id="home">
-    <div class="background-container parallax-bg" id="background-div">
+    <div class="background-container" id="background-div">
       <!-- Video element -->
       <video 
-        v-if="!videoPlayed"
         ref="heroVideo"
         class="hero-video"
-        :class="{ 'fade-out': isVideoFadingOut }"
         muted 
         playsinline
         preload="auto"
-        @ended="onVideoEnded"
-        @timeupdate="checkVideoTime"
+        loop
+        crossorigin="anonymous"
         @error="onVideoError"
         @loadeddata="onVideoLoaded"
         @canplay="onVideoCanPlay"
@@ -20,22 +18,167 @@
         Your browser does not support the video tag.
       </video>
       
-      <!-- Image element (hidden initially, fades in before video ends) -->
-      <div 
-        class="hero-image"
-        :class="{ 'fade-in': showImage }"
-      ></div>
-      
-      <!-- Banner inside background -->
-      <div class="container">
-        <div class="container text-center banner py-5" :class="{ 'banner-visible': showImage }">
-          <h3>Apex Car Rental Group</h3>
-          <h5 class="display-6">Apex BRAND, Apex SERVICES!</h5>
+      <!-- Translucent black backdrop with copywriting -->
+      <div class="hero-backdrop">
+        <div class="hero-backdrop-content">
+          <h1 class="hero-backdrop-title">Experience Luxury on the Road</h1>
+          <p class="hero-backdrop-subtitle">Premium car rental services across Africa, Australia, and the Middle East</p>
+          <div class="hero-backdrop-cta">
+            <button class="btn btn-primary" @click="scrollToPickup">Book Your Ride</button>
+          </div>
         </div>
       </div>
+      
+      <div class="scroll-indicator" :class="{ visible: showScrollIndicator, hidden: !showScrollIndicator }">
+        <img :src="scrollDownIcon" alt="Scroll down indicator">
+      </div>
     </div>
-      <!-- sections -->
-      <div class="nav-pills nav-fill mt-3" id="sections">
+        <section class="pickup-location-area">
+          <div class="container">
+            <div class="pickup-card">
+              <div class="pickup-card-header">
+                <h4 class="m-0">Find a Vehicle</h4>
+                <p class="m-0 pickup-subtitle">Choose location and dates, then browse available fleets.</p>
+              </div>
+              <form class="row g-3 align-items-end" @submit="goToVehicles">
+                <div class="col-12 col-md-4">
+                  <label class="form-label field-label" for="pickupLocation">Pick-up Location</label>
+                  <select id="pickupLocation" v-model="pickupLocation" class="form-select pickup-input">
+                    <option disabled value="">Select location</option>
+                    <option>34 Frank Johnson</option>
+                    <option>Harare International Airport</option>
+                  </select>
+                </div>
+                <div class="col-12 col-md-3">
+                  <label class="form-label field-label" for="pickupDate">Pickup Date</label>
+                  <input
+                    id="pickupDate"
+                    v-model="pickupDate"
+                    :type="pickupDateInputType"
+                    :min="minDate"
+                    class="form-control pickup-input"
+                    placeholder="Select pickup date"
+                    @focus="onDateFocus('pickup')"
+                    @blur="onDateBlur('pickup')"
+                  />
+                </div>
+                <div class="col-12 col-md-2">
+                  <label class="form-label field-label" for="dropoffDate">Dropoff Date</label>
+                  <input
+                    id="dropoffDate"
+                    v-model="dropoffDate"
+                    :type="dropoffDateInputType"
+                    :min="minDate"
+                    class="form-control pickup-input"
+                    placeholder="Select dropoff date"
+                    @focus="onDateFocus('dropoff')"
+                    @blur="onDateBlur('dropoff')"
+                  />
+                </div>
+                <div class="col-12 col-md-1">
+                  <label class="form-label field-label" for="dropoffTime">Time</label>
+                  <input id="dropoffTime" v-model="dropoffTime" type="time" class="form-control pickup-input" placeholder="HH:MM" />
+                </div>
+                <div class="col-12 col-md-2">
+                  <button class="btn btn-primary pickup-btn w-100" type="submit">
+                    Find your Car
+                  </button>
+                </div>
+              </form>
+              <div class="row g-2 mt-1 align-items-end">
+                <div class="col-12">
+                  <label class="form-label field-label" for="vehicleKeyword">Vehicle name (optional)</label>
+                  <input
+                    id="vehicleKeyword"
+                    v-model="vehicleKeyword"
+                    type="search"
+                    class="form-control pickup-input"
+                    placeholder="e.g. Fortuner, Mercedes, Note"
+                    autocomplete="off"
+                  />
+                </div>
+              </div>
+
+              <div class="brand-marquee mt-4">
+                <div class="brand-track" :style="{ '--brand-duration': brandTickerDuration + 's' }">
+                  <div class="brand-segment">
+                    <div v-for="(logo, idx) in brandLogos" :key="'seg1-' + idx" class="brand-pill">
+                      <img :src="logo.src" :alt="logo.alt">
+                    </div>
+                  </div>
+                  <div class="brand-segment" aria-hidden="true">
+                    <div v-for="(logo, idx) in brandLogos" :key="'seg2-' + idx" class="brand-pill">
+                      <img :src="logo.src" :alt="logo.alt">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+      
+        <!-- sections -->
+
+
+      <div class="nav-pills nav-fill" id="sections">
+        <!-- Our Fleets dropdown -->
+        <section class="nav-item text-start">
+          <div class="nav-link page-sections sticky-top active"
+              data-toggle="collapse" aria-label="Toggle-navigation"
+                aria-expanded="false" data-target="ourFleets"
+                  aria-controls="ourFleets"
+                  @click="scrollToSection">
+                  Our Fleets
+          </div>
+            <div class="row" id="ourFleets">
+              <div class="col-12 text-center">
+                <h2 class="py-3 mt-5">What we're offering...</h2>
+              </div>
+            </div>
+          <div class="container fade-in-scroll mb-5">
+          <!--    display categories & Products-->
+            <div class="row justify-content-evenly">
+              <!-- Categories -->
+              <div v-for="(category, index) in displayedCategories" :key="'cat-' + index"
+                   class="col-md-6 col-xl-4 col-12 pt-3 my-2 justify-content-around card-stagger"
+                   :style="`animation-delay: ${index * 0.1}s`">
+                <CategoryBox :category="category" />
+              </div>
+              <!-- Products -->
+              <div v-for="(product, index) in displayedProducts" :key="'prod-' + index"
+                   class="col-md-6 col-xl-4 col-12 pt-3 my-2 justify-content-around card-stagger"
+                :style="`animation-delay: ${(index + displayedCategories.length) * 0.1}s`">
+                <ProductBox :product="product"/>
+              </div>
+            </div>
+            
+            <!-- Show More Button (mobile only) -->
+            <div v-if="isMobile && (hasMoreCategories || hasMoreProducts)" class="text-center mt-4">
+              <button @click="showAllItems = !showAllItems" class="btn btn-outline-primary show-more-btn">
+                <span v-if="!showAllItems">Show More Vehicles</span>
+                <span v-else>Show Less</span>
+                <i class="ms-2" :class="showAllItems ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
+              </button>
+            </div>
+          </div>
+            
+          <div class="row g-0">
+              <div class="col-lg-7 text-white section-text slide-in-left">
+                <div class="container-fluid section-description-text pe-xl-0 h-100">
+                  <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
+                    <h2 class="">Our Fleets</h2>
+                    <p>You've got the drive to travel in luxury, and we've got the tools, know-how and knowledge to help you take charge
+                        of your travel. Lets get you started on the path to your very own Apex car rental hire.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-5 slide-in-right">
+                <img src="../assets/AppImages/products/cars-exec.jpg" class="img-fluid max-h-100-vh parallax-img" alt="cars">
+              </div>
+          </div>
+        </section>
           <!-- our values dropdown -->
         <section class="nav-item text-start">
           <div class="nav-link page-sections active sticky-top"
@@ -44,10 +187,10 @@
                   aria-controls="ourValues" id="ourValuesBtn"
                   @click="scrollToSection">
                   Our Values
-        </div>
+          </div>
           <div class="row g-0" id="ourValues" aria-labelledby="ourValuesBtn">
             <div class="col-md-6 text-white section-text slide-in-left">
-              <div class="container-fluid pe-xl-0 h-100">
+              <div class="container-fluid section-description-text pe-xl-0 h-100">
                 <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
                   <h2 class="">Our Values</h2>
                   <p>We always place the interests of our customers first. We always conduct business with implementation of high
@@ -92,7 +235,7 @@
         </div>
           <div class="row g-0" id="ourVision">
             <div class="col-md-6 text-white section-text slide-in-left">
-              <div class="container-fluid pe-xl-0 h-100">
+              <div class="container-fluid section-description-text pe-xl-0 h-100">
                 <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
                   <h2 class="">Our Vision</h2>
                   <p>Our Vision is to become one of the leading brands in the rental industry
@@ -121,7 +264,7 @@
               <img src="../assets/AppImages/home_page/know-how.jpg" class="img-fluid max-h-100-vh parallax-img" alt="our know how">
             </div>
             <div class="col-md-6 text-white section-text slide-in-right">
-              <div class="container-fluid pe-xl-0 h-100">
+              <div class="container-fluid section-description-text pe-xl-0 h-100">
                 <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
                   <h2 class="">Our Know-How</h2>
                   <p>Apex Car Rental brand was founded by MGR Communications, a renowned world-class telecommunications and
@@ -133,7 +276,7 @@
             </div>
           </div>
           <div class="col-md-12 section-description-text fade-in-scroll">
-            <p class="p-5 m-0">As a result, we've driven over $300,000 in sales and over 1 million leads for our businesses and clients. MGR Communications
+            <p class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 mb-0">As a result, we've driven over $300,000 in sales and over 1 million leads for our businesses and clients. MGR Communications
               is a premier reputation film active in Harare, Melbourne and Dubai that specializes in printing, digital marketing, SEO activities,
               web design, and data to drive targeted visibility and engagement that builds brand reputation and delivers profit growth.
               <br><br>
@@ -160,7 +303,7 @@
         </div>
           <div class="row g-0" id="ourLocation">
             <div class="col-md-6 text-white section-text slide-in-left">
-              <div class="container-fluid pe-xl-0 h-100">
+              <div class="container-fluid section-description-text pe-xl-0 h-100">
                 <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
                   <h2 class="">Our Locations</h2>
                   <p>We are a premium car rental group in Africa, Australia and the Middle East. It doesn't matter where you are located,
@@ -208,80 +351,27 @@
                 </span>
               </div>
             </div>
-          </div>
-        </div>
-
-        <!-- Our Fleets dropdown -->
-        <div class="nav-item text-start">
-          <div class="nav-link page-sections sticky-top active"
-              data-toggle="collapse" aria-label="Toggle-navigation"
-                aria-expanded="false" data-target="ourFleets"
-                  aria-controls="ourFleets"
-                  @click="scrollToSection">
-                  Our Fleets
-        </div>
-          <div class="row g-0" id="ourFleets">
-            <div class="col-lg-7 text-white section-text slide-in-left">
-              <div class="container-fluid pe-xl-0 h-100">
-                <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
-                  <h2 class="">Our Fleets</h2>
-                  <p>You've got the drive to travel in luxury, and we've got the tools, know-how and knowledge to help you take charge
-                      of your travel. Lets get you started on the path to your very own Apex car rental hire.
-                  </p>
+            <div class="pt-4 pb-4 bottom-section">
+              <div class="container">
+                <div class="row align-items-center g-4">
+                  <div class="col-12 col-md-8 text-center text-md-start">
+                    <h3 class="text-primary mb-2">TELL US WHERE YOU WANT TO GO</h3>
+                    <p class="mb-0">We assure you we can get you there safe and sound!</p>
+                  </div>
+                  <div class="col-12 col-md-4 text-center text-md-end">
+                    <router-link class="btn btn-primary contact-us px-4 py-2" :to="{name: 'ContactUs'}">
+                      CONTACT US
+                    </router-link>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="col-lg-5 slide-in-right">
-              <img src="../assets/AppImages/cars/cars-exec.jpg" class="img-fluid max-h-100-vh parallax-img" alt="cars">
-            </div>
-          </div>
-          
-          <!--    display categories-->
-          <div class="container fade-in-scroll">
-            <div class="row">
-              <div class="col-12 text-center">
-                <h2 class="pt-3 mt-4"> Top Categories</h2>
-              </div>
-            </div>
-            <div class="row justify-content-evenly">
-              <div v-for="index in this.categorySize" :key="index"
-                   class="col-md-6 col-xl-4 col-12 pt-3 my-2 justify-content-around card-stagger"
-                   :style="`animation-delay: ${index * 0.1}s`">
-                <CategoryBox :category="categories[index-1]" />
-              </div>
-            </div>
-          </div>
-
-          <!--    display Products-->
-          <div class="container py-4 fade-in-scroll">
-            <div class="row">
-              <div class="col-12 text-center">
-                <h2 class="pt-3 pb-3">Top Vehicles</h2>
-              </div>
-            </div>
-            <div class="row justify-content-evenly">
-              <div v-for="index in this.productSize" :key="index"
-                class="col-md-6 col-xl-4 col-12 pt-3 my-2 justify-content-around card-stagger"
-                :style="`animation-delay: ${index * 0.1}s`">
-                <ProductBox :product="products[index-1]"/>
-              </div>
-            </div>
           </div>
         </div>
-      </div>
       <!-- <iframe src="https://maps.google.com/maps?q=35.856737, 10.606619&z=15&output=embed" width="360" height="270" frameborder="0" style="border:0"></iframe> -->
-      <div class="container pt-4">
-        <div class="row">
-          <div class="col-md-8 mb-3">
-            <h3 class="text-primary">TELL US WHERE YOU WANT TO GO</h3>
-            We assure you we can get you there safe and sound!
-          </div>
-          <div class="col-md-4 col-xs-12 col-sm-12">
-            <router-link class="btn btn-primary col-12 contact-us" :to="{name: 'ContactUs'}">CONTACT US</router-Link>
-          </div>
-        </div>
-      </div>
+      
   
+    </div>
   </div>
 </template>
 
@@ -290,6 +380,7 @@ import CategoryBox from "../components/Category/CategoryBox.vue";
 import ProductBox from "@/components/ProductBox.vue";
 import heroVideo from '../assets/AppImages/home_page/home-vid.mp4';
 import heroVideoMobile from '../assets/AppImages/home_page/home-vid-mobile.mp4';
+import scrollDownIcon from '../assets/AppImages/home_page/scroll-down.svg';
 
 export default {
   name: "HomeView",
@@ -299,15 +390,47 @@ export default {
     return {
       categorySize: 0,
       productSize: 0,
-      showImage: false,
-      isVideoFadingOut: false,
-      videoPlayed: false,
+      showScrollIndicator: false,
       videoSrc: this.getVideoSource(),
+      scrollDownIcon,
       observedElements: [],
-      videoObserver: null
+      videoObserver: null,
+      showAllItems: false,
+      mobileBreakpoint: 768,
+      isMobile: false,
+
+      pickupLocation: "",
+      pickupDate: null,
+      dropoffDate: null,
+      dropoffTime: null,
+      pickupDateInputType: "text",
+      dropoffDateInputType: "text",
+      brandLogos: [
+        { src: require("../assets/AppImages/car-logos/benz.png"), alt: "Benz" },
+        { src: require("../assets/AppImages/car-logos/mazda.png"), alt: "Mazda" },
+        { src: require("../assets/AppImages/car-logos/nissan.png"), alt: "Nissan" },
+        { src: require("../assets/AppImages/car-logos/toyota.png"), alt: "Toyota" },
+        { src: require("../assets/AppImages/car-logos/honda.png"), alt: "Honda" },
+        { src: require("../assets/AppImages/car-logos/subaru.png"), alt: "Subaru" },
+        { src: require("../assets/AppImages/car-logos/lamborghini.svg"), alt: "Lamborghini" },
+        { src: require("../assets/AppImages/car-logos/porsche.png"), alt: "Porsche" },
+        { src: require("../assets/AppImages/car-logos/jeep.svg"), alt: "Jeep" },
+        { src: require("../assets/AppImages/car-logos/ferrari.png"), alt: "Ferrari" },
+        { src: require("../assets/AppImages/car-logos/lexus.png"), alt: "Lexus" },
+        { src: require("../assets/AppImages/car-logos/ford.png"), alt: "Ford" },
+        { src: require("../assets/AppImages/car-logos/hyundai.svg"), alt: "Hyundai" },
+        { src: require("../assets/AppImages/car-logos/volkswagen.png"), alt: "Volkswagen" },
+        { src: require("../assets/AppImages/car-logos/volvo.svg"), alt: "Volvo" },
+        { src: require("../assets/AppImages/car-logos/tesla.jpg"), alt: "Tesla" },
+      ],
     }
   },
   methods:{
+    goToVehicles(e) {
+      e.preventDefault();
+      this.$router.push({ name: 'VehiclesView' });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
     getVideoSource() {
       // Check if screen is mobile size (less than 768px)
       const isMobile = window.innerWidth < 768;
@@ -337,43 +460,33 @@ export default {
         if (isInViewport) {
           const playPromise = video.play();
           if (playPromise !== undefined) {
-            playPromise
-              .then(() => {
-                // Video playing
-              })
-              .catch(() => {
-                // Autoplay failed, show image immediately
-                this.showImage = true;
-                this.videoPlayed = true;
-              });
+            playPromise.catch(() => {
+              // Autoplay failed, video will loop silently when user interacts
+            });
           }
-        } else {
-          // Not in viewport, show image
-          this.showImage = true;
-          this.videoPlayed = true;
         }
       }
-    },
-    checkVideoTime() {
-      const video = this.$refs.heroVideo;
-      if (video && !this.videoPlayed && video.duration) {
-        const timeRemaining = video.duration - video.currentTime;
-        // Start fade transition 1.5 seconds before video ends
-        if (timeRemaining <= 1.5 && !this.showImage) {
-          this.showImage = true;
-          this.isVideoFadingOut = true;
-        }
-      }
-    },
-    onVideoEnded() {
-      this.videoPlayed = true;
-      this.showImage = true;
     },
     onVideoError() {
-      // Video error, show image immediately
-      this.showImage = true;
-      this.videoPlayed = true;
+      // Video error - the loop will continue if video is not fully broken
+      console.warn('Video playback error, video will attempt to loop');
     },
+    onDateFocus(field) {
+      if (field === "pickup") {
+        this.pickupDateInputType = "date";
+      } else {
+        this.dropoffDateInputType = "date";
+      }
+    },
+    onDateBlur(field) {
+      if (field === "pickup" && !this.pickupDate) {
+        this.pickupDateInputType = "text";
+      }
+      if (field === "dropoff" && !this.dropoffDate) {
+        this.dropoffDateInputType = "text";
+      }
+    },
+    
     preloadAssets() {
       // Preload and cache the background image
       const img = new Image();
@@ -489,7 +602,36 @@ export default {
         });
       }
     },
+    scrollToPickup() {
+      // Scroll to the pickup location section
+      const pickupSection = document.querySelector('.pickup-location-area');
+      if (pickupSection) {
+        const elementPosition = pickupSection.getBoundingClientRect().top + window.pageYOffset;
+        const navbar = document.querySelector('.navbar');
+        const navbarHeight = navbar ? navbar.offsetHeight : 70;
+        const offsetPosition = elementPosition - navbarHeight;
+        
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+    },
+    checkMobile() {
+      this.isMobile = window.innerWidth < this.mobileBreakpoint;
+      // Reset showAllItems when switching from mobile to desktop
+      if (!this.isMobile) {
+        this.showAllItems = false;
+      }
+    },
     handleScroll() {
+      const shouldHideIndicator = window.scrollY > (window.innerHeight * 0.35);
+      if (shouldHideIndicator && this.showScrollIndicator) {
+        this.showScrollIndicator = false;
+      } else if (!shouldHideIndicator && !this.showScrollIndicator) {
+        this.showScrollIndicator = true;
+      }
+
       // Update scroll progress for each section
       const sections = document.querySelectorAll('.page-sections');
       const navbar = document.querySelector('.navbar');
@@ -557,10 +699,61 @@ export default {
       });
     }
   },
+  computed: {
+    brandTickerDuration() {
+      return Math.max(28, this.brandLogos.length * 3);
+    },
+    minDate() {
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const yyyy = tomorrow.getFullYear();
+      let mm = tomorrow.getMonth() + 1;
+      let dd = tomorrow.getDate();
+      if (mm < 10) mm = "0" + mm;
+      if (dd < 10) dd = "0" + dd;
+      return `${yyyy}-${mm}-${dd}`;
+    },
+    allCategories() {
+      return this.categories.slice(0, this.categorySize);
+    },
+    allProducts() {
+      return this.products.slice(0, this.productSize);
+    },
+    displayedCategories() {
+      if (!this.isMobile || this.showAllItems) {
+        return this.allCategories;
+      }
+      return this.allCategories.slice(0, 2);
+    },
+    displayedProducts() {
+      if (!this.isMobile || this.showAllItems) {
+        return this.allProducts;
+      }
+      const displayedCatCount = this.displayedCategories.length;
+      const maxItems = 3;
+      const remainingSlots = Math.max(0, maxItems - displayedCatCount);
+      return this.allProducts.slice(0, remainingSlots);
+    },
+    hasMoreCategories() {
+      return this.allCategories.length > this.displayedCategories.length;
+    },
+    hasMoreProducts() {
+      return this.allProducts.length > this.displayedProducts.length;
+    },
+    totalItems() {
+      return this.allCategories.length + this.allProducts.length;
+    },
+    displayedTotal() {
+      return this.displayedCategories.length + this.displayedProducts.length;
+    }
+  },
   mounted() {
     this.categorySize = Math.min(6, this.categories.length );
     this.productSize = Math.min(8, this.products.length);
+    this.checkMobile();
     this.preloadAssets();
+    this.showScrollIndicator = true; // Show scroll indicator immediately
     
     // Calculate and set navbar height
     this.$nextTick(() => {
@@ -581,8 +774,9 @@ export default {
     window.addEventListener('scroll', this.handleScroll);
     window.addEventListener('scroll', this.handleParallax);
     
-    // Add resize listener to update video source
+    // Add resize listener to update video source and check mobile
     window.addEventListener('resize', this.updateVideoSource);
+    window.addEventListener('resize', this.checkMobile);
     
     this.handleScroll(); // Initial call
   },
@@ -591,6 +785,7 @@ export default {
     window.removeEventListener('scroll', this.handleScroll);
     window.removeEventListener('scroll', this.handleParallax);
     window.removeEventListener('resize', this.updateVideoSource);
+    window.removeEventListener('resize', this.checkMobile);
     
     // Disconnect video observer
     if (this.videoObserver) {
@@ -602,6 +797,165 @@ export default {
 
 
 <style scoped>
+/* Search / Pickup section */
+.pickup-location-area {
+  position: relative;
+  background: linear-gradient(135deg, rgba(16, 32, 64, 0.95), rgba(10, 20, 40, 0.95));
+  padding: 2.25rem 0;
+  z-index: 5;
+}
+
+[data-theme="light"] .pickup-location-area {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 248, 248, 0.98));
+}
+
+.pickup-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.25rem 1.25rem 1.5rem;
+  box-shadow: 0 14px 50px rgba(0, 0, 0, 0.25);
+}
+
+.pickup-card-header h4 {
+  color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.pickup-subtitle {
+  color: var(--text-primary);
+  opacity: 0.85;
+}
+
+.pickup-input {
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.pickup-btn {
+  background-color: #f0c14b;
+  color: black;
+  border-color: #f0c14b;
+  border-radius: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.pickup-btn:hover {
+  background-color: white;
+  color: black;
+  border-color: #f0c14b;
+}
+
+.brand-marquee {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.brand-track {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  width: max-content;
+  animation: brandTicker var(--brand-duration, 45s) linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.brand-segment {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 12px;
+  padding-right: 12px;
+}
+
+.brand-pill {
+  flex: 0 0 auto;
+  width: clamp(96px, calc((100vw - 140px) / 5), 168px);
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 10px;
+}
+
+.brand-pill img {
+  max-height: 28px;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  opacity: 0.95;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
+}
+
+@keyframes brandTicker {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.scroll-indicator {
+  position: fixed;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  z-index: 12;
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+}
+
+.scroll-indicator.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  animation: scrollBounce 1.6s ease-in-out infinite;
+}
+
+.scroll-indicator.hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(10px);
+}
+
+.scroll-indicator img {
+  width: 38px;
+  height: 38px;
+  filter: brightness(0) invert(1);
+}
+
+[data-theme="light"] .scroll-indicator img {
+  filter: brightness(0) invert(0);
+}
+
+@keyframes scrollBounce {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0); 
+  }
+  50% {
+    transform: translateX(-50%) translateY(8px); 
+  }
+}
+
+.pickup-input::placeholder {
+  color: rgba(128, 128, 128, 0.85);
+}
+
+@media (max-width: 768px) {
+  .pickup-location-area {
+    padding: 1.5rem 0;
+  }
+  .brand-pill {
+    width: clamp(88px, 28vw, 140px);
+    height: 48px;
+  }
+}
 /* Animation Keyframes */
 @keyframes fadeInUp {
   from {
@@ -818,24 +1172,7 @@ export default {
   transform: scale(1.05);
 }
 
-/* Banner animation */
-.banner {
-  position: absolute;
-  bottom: 15%;
-  left: 0;
-  right: 0;
-  margin: 0 auto;
-  z-index: 10;
-  background-color: transparent !important;
-  color: var(--ivory-white);
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
-  width: 100%;
-  max-width: 100%;
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 1.5s ease-out 0.5s, transform 1.5s ease-out 0.5s;
-}
-
+/* Banner animation - now fixed with background */
 .banner h3,
 .banner h5 {
   color: white;
@@ -843,11 +1180,6 @@ export default {
   paint-order: stroke fill;
   text-shadow: 0 0 15px rgba(212, 175, 55, 0.8),
                0 0 30px rgba(212, 175, 55, 0.5);
-}
-
-.banner.banner-visible {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 @media (max-width: 500px) {
@@ -902,11 +1234,14 @@ export default {
   background-color: #0d6efd;
 }
 #background-div {
-  margin-top: -8.4rem;
-  margin-bottom: 0;
+  position: fixed;
+top: 0;
+  left: 0;
+width: 100%;
   height: 100vh;
-  position: relative;
-  overflow: hidden;
+    overflow: hidden;
+z-index: 0;
+  margin: 0 !important;
 }
 
 /* Video styling */
@@ -919,31 +1254,11 @@ export default {
   object-fit: cover;
   z-index: 2;
   opacity: 1;
-  transition: opacity 1.5s ease-in-out;
 }
 
-.hero-video.fade-out {
-  opacity: 0;
-}
-
-/* Image styling */
+/* Image styling - hidden as fallback */
 .hero-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url("../assets/AppImages/home_page/home.jpeg");
-  background-size: cover;
-  background-position: center;
-  z-index: 1;
-  opacity: 0;
-  transition: opacity 1.5s ease-in-out;
-}
-
-.hero-image.fade-in {
-  opacity: 1;
-  z-index: 3;
+  display: none;
 }
 
 /* Ensure content is above video/image */
@@ -952,79 +1267,56 @@ export default {
   z-index: 4;
 }
 
-/* Ensure sections have proper background */
-.section-text {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary) !important;
-  z-index: 4;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.section-text h2,
-.section-text p {
-  color: var(--text-primary) !important;
-}
-
-.section-description-text {
-  background-color: var(--bg-card);
-  z-index: 4;
-}
-
-#sections {
-  background-color: var(--bg-primary);
-}
-/* .section-text{
-  background-color: #102040;
-}
-.section-description-text{
-  background-color: rgba(255, 253, 208, 0.85);
-} */
-.section-text p{
-  font-size: large;
-}
-.img-fluid{
-  object-fit: cover;
-}
-.map-stats {
+/* Add spacer for fixed background */
+#home {
   position: relative;
+  padding-top: 100vh;
+  background-color: var(--bg-primary);
+  isolation: isolate;
+  z-index: 1;
 }
-  #heading {
-    font-weight: 400;
-  }
-  div{
-    transition: all 1s ease-in-out 0s;
-  }
-  .sticky-top{
-    position: sticky !important;
-    top: var(--navbar-height, 70px);
-    z-index: 100;
-  }
-  
-  .page-sections{
+
+/* Section nav: compact, no pill chrome */
+#home #sections.nav-pills.nav-fill {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: fit-content;
+  max-width: 100%;
+}
+
+#home #sections .nav-item {
+  width: fit-content;
+  max-width: 100%;
+}
+
+#home > .nav-item.text-start {
+  width: fit-content;
+  max-width: 100%;
+}
+
+#home .page-sections{
     display: flex;
     justify-content: center;
     padding: 20px 16px;
-    background: linear-gradient(135deg, var(--bg-secondary), var(--royal-midnight-blue)) !important;
     color: var(--accent-color) !important;
     font-weight: 700 !important;
     font-size: 1.2rem !important;
     letter-spacing: 2px !important;
     border: none !important;
-    border-bottom: 4px solid rgba(212, 175, 55, 0.2) !important;
-    transition: all 0.3s ease;
     text-transform: uppercase;
     font-family: 'MV Boli', 'Brush Script MT', cursive !important;
     position: relative;
     overflow: visible;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease, top 0.3s ease;
   }
-  
+
+
   /* Light mode page sections - keep gold text, change background to white */
   [data-theme="light"] .page-sections {
-    background: linear-gradient(135deg, rgb(255, 255, 255), rgb(248, 248, 248)) !important;
     color: var(--accent-color) !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    border-bottom: 4px solid rgba(212, 175, 55, 0.3) !important;
   }
   
   /* Animated progress bar */
@@ -1075,6 +1367,309 @@ export default {
     animation: shimmer 2s infinite;
   }
   
+/* Push sections down to account for fixed background */
+#sections {
+  background-color: var(--bg-primary);
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure sections have proper background */
+.section-text {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary) !important;
+  z-index: 4;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.section-text h2,
+.section-text p {
+  color: var(--text-primary) !important;
+}
+
+.section-description-text {
+  background-color: var(--bg-card);
+  z-index: 4;
+}
+
+/* Provide a solid base behind late-page sections like fleets + footer */
+.bottom-section {
+  background-color: var(--bg-primary);
+}
+
+/* Bottom section background */
+.bottom-section {
+  background-color: var(--bg-primary);
+  padding: 2rem 1rem;
+  margin: 0;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+/* Hero Backdrop with Elegant Overlay */
+.hero-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.75) 0%,
+    rgba(0, 0, 0, 0.6) 50%,
+    rgba(0, 0, 0, 0.75) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  pointer-events: none;
+  backdrop-filter: blur(2px);
+}
+
+.hero-backdrop-content {
+  text-align: center;
+  padding: 2rem;
+  max-width: 900px;
+  pointer-events: auto;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.hero-backdrop-title {
+  color: #ffffff;
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 1.25rem;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #ffffff 0%, #f0c14b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+.hero-backdrop-subtitle {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1.35rem;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  font-weight: 400;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-backdrop-cta .btn {
+  background: linear-gradient(135deg, #f0c14b 0%, #c18e32 100%);
+  color: #1a1a1a;
+  border: none;
+  padding: 0.875rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-backdrop-cta .btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.hero-backdrop-cta .btn:hover {
+  background: linear-gradient(135deg, #ffd966 0%, #d4a03a 100%);
+  color: #000000;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
+}
+
+.hero-backdrop-cta .btn:hover::before {
+  left: 100%;
+}
+
+.hero-backdrop-cta .btn:active {
+  transform: translateY(0);
+}
+
+/* Light mode adjustments */
+[data-theme="light"] .hero-backdrop {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.65) 0%,
+    rgba(0, 0, 0, 0.5) 50%,
+    rgba(0, 0, 0, 0.65) 100%
+  );
+}
+
+[data-theme="light"] .hero-backdrop-title {
+  background: linear-gradient(135deg, #f0c14b 0%, #ffd700 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="light"] .hero-backdrop-subtitle {
+  color: rgba(255, 255, 255, 0.98);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .hero-backdrop-content {
+    padding: 1.5rem;
+    max-width: 95%;
+  }
+  
+  .hero-backdrop-title {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .hero-backdrop-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 0 0.5rem;
+  }
+  
+  .hero-backdrop-cta .btn {
+    padding: 0.7rem 1.8rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-backdrop-title {
+    font-size: 1.6rem;
+  }
+  
+  .hero-backdrop-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .hero-backdrop-content {
+    padding: 1rem;
+  }
+}
+
+/* Optional: Add a subtle decorative line */
+.hero-backdrop-content::before {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #f0c14b, transparent);
+  margin: 0 auto 1.5rem auto;
+  border-radius: 2px;
+}
+
+@media (max-width: 768px) {
+  .hero-backdrop-content::before {
+    width: 40px;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Keep banner styling consistent */
+.banner {
+  position: fixed;
+  bottom: 15%;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  z-index: 10;
+  background-color: transparent !important;
+  width: 100%;
+  max-width: 100%;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1.5s ease-out 0.5s, transform 1.5s ease-out 0.5s;
+}
+
+.banner h5 {
+  color: white;
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.8), 0 0 40px rgba(212, 175, 55, 0.5);
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+@media (max-width: 500px) {
+  .banner {
+    bottom: 20%;
+  }
+  .banner h5 {
+    font-size: 1.2rem;
+  }
+}
+
+/* Animation keyframes if not already present */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Ensure banner is visible on fixed background */
+.banner {
+  position: fixed;
+  bottom: 15%;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  z-index: 10;
+  background-color: transparent !important;
+  color: var(--ivory-white);
+  width: 100%;
+  max-width: 100%;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1.5s ease-out 0.5s, transform 1.5s ease-out 0.5s;
+}
+/* .section-text{
+  background-color: #102040;
+}
+.section-description-text{
+  background-color: rgba(255, 253, 208, 0.85);
+} */
+.section-text p{
+  font-size: large;
+}
+.img-fluid{
+  object-fit: cover;
+}
+.map-stats {
+  position: relative;
+}
+  #heading {
+    font-weight: 400;
+  }
+  div{
+    transition: all 1s ease-in-out 0s;
+  }
+  .sticky-top{
+    position: sticky !important;
+    top: var(--navbar-height, 70px);
+    z-index: 100;
+    transition: top 0.3s ease;
+    will-change: top;
+  }
+  
   @keyframes shimmer {
     0%, 100% {
       box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
@@ -1090,6 +1685,7 @@ export default {
   .nav-item {
     position: relative;
     z-index: 1;
+    background-color: var(--bg-primary);
   }
   
   .row.g-0 {
@@ -1122,4 +1718,46 @@ export default {
       padding-bottom: 40px;
     }
   }
+
+/* Show More Button Styling */
+.show-more-btn {
+  background: linear-gradient(135deg, transparent, transparent);
+  border: 2px solid var(--accent-color, #f0c14b);
+  color: var(--accent-color, #f0c14b);
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.show-more-btn:hover {
+  background: linear-gradient(135deg, var(--accent-color, #f0c14b), var(--gold-gradient-end, #c18e32));
+  color: #1a1a1a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+  border-color: transparent;
+}
+
+.show-more-btn:active {
+  transform: translateY(0);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .show-more-btn {
+    padding: 0.6rem 1.5rem;
+    font-size: 0.9rem;
+    width: auto;
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .show-more-btn {
+    min-width: 180px;
+    padding: 0.5rem 1.2rem;
+    font-size: 0.85rem;
+  }
+}
 </style>

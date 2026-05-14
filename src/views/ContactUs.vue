@@ -1,5 +1,5 @@
 <template>
-    <div id="home">
+    <div id="home" class="pb-4">
         <div id="background-div"></div>
         <div class="contact mb-5">
             <div class="container p-5 text-center contact-us col-sm-10">
@@ -51,7 +51,19 @@
                             <textarea v-model="message" rows="5" class="form-control" id="message" placeholder="Enter Message" style="height: 125px !important" required></textarea>
                         </div>
                         <div class="col-12 mt-4">
-                            <button class="btn btn-primary contact-btn col-5" type="submit">Send Message</button>
+                            <button
+                              class="btn btn-primary contact-btn col-5"
+                              type="submit"
+                              :disabled="isSubmitting"
+                            >
+                              <span
+                                v-if="isSubmitting"
+                                class="spinner-border spinner-border-sm me-2 button-spinner"
+                                role="status"
+                                aria-hidden="true"
+                              ></span>
+                              <span>{{ isSubmitting ? 'Sending...' : 'Send Message' }}</span>
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -134,14 +146,14 @@
             </div>
           </div>
         </div>
-    </div>
-    <div class="container mt-5 px-5">
-        <h3>Visit us</h3>
-        <a class="text-decoration-none text-dark" href="https://maps.app.goo.gl/SU6bUuAfL1exDXXH8">
-        </a>
-    </div>
-    <div class="container mt-4 px-5" style="height: 60vh">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3799.4174172123485!2d31.049516075055923!3d-17.77206898318216!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTfCsDQ2JzE5LjUiUyAzMcKwMDMnMDcuNSJF!5e0!3m2!1sen!2szw!4v1777922138615!5m2!1sen!2szw" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <div class="container mt-5 px-5">
+            <h3>Visit us</h3>
+            <a class="text-decoration-none text-dark" href="https://maps.app.goo.gl/SU6bUuAfL1exDXXH8">
+            </a>
+        </div>
+        <div class="container mt-4 px-5" style="height: 60vh">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3799.4174172123485!2d31.049516075055923!3d-17.77206898318216!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTfCsDQ2JzE5LjUiUyAzMcKwMDMnMDcuNSJF!5e0!3m2!1sen!2szw!4v1777922138615!5m2!1sen!2szw" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
     </div>
 </template>
 
@@ -160,13 +172,20 @@ export default {
             city: null,
             country: null,
             phone: null,
-            message: null
+            message: null,
+            isSubmitting: false
         }
     },
 
     methods: {
         async contactUs(e){
             e.preventDefault();
+
+            if (this.isSubmitting) {
+                return;
+            }
+
+            this.isSubmitting = true;
             const message = {
                 name: this.firstName + " " + this.lastName,
                 email: this.email,
@@ -190,7 +209,15 @@ export default {
                     });
                     window.location.replace("/home");
                 }
-            }).catch((err) => console.log('err', err));
+            }).catch((err) => {
+                console.log('err', err);
+                swal({
+                    text: "Message failed to send. Please try again.",
+                    icon: "error"
+                });
+            }).finally(() => {
+                this.isSubmitting = false;
+            });
         }
     },
 }
@@ -200,7 +227,7 @@ export default {
 #background-div {
   margin-top: -55px;
   margin-bottom: -20px;
-  background: url("../assets/AppImages/cars/keys.jpg");
+  background: url("../assets/AppImages/keys.jpg");
   background-size: cover !important;
   min-height: 90vh;
 }
@@ -226,6 +253,9 @@ export default {
 }
 .contact-btn:hover{
     transform: translateY(-2px);
+}
+.button-spinner {
+  color: black;
 }
 .call-btn{
     border-radius: 0;

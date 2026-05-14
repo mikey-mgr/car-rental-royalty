@@ -1,5 +1,5 @@
 <template>
-  <div id="home">
+  <div id="home" class="pb-4">
     <div class="" id="background-div"></div>
     <div class="about mb-5">
      <div class="container p-5 text-center about-us col-sm-10">
@@ -142,18 +142,15 @@
 
         
     </div>
-    <!-- end of navs -->
-
-
-  </div>
-  <div class="container my-5">
-    <h3>Visit us at our location</h3>
-    <button @click="openDirections" class="btn btn-luxury">
-      Get Directions to Apex Car Rental <i class="bi bi-geo-alt-fill ms-2"></i>
-    </button>
-  </div>
-  <div class="container mt-4" style="height: 60vh">
-      <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3799.4174172123485!2d31.049516075055923!3d-17.77206898318216!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTfCsDQ2JzE5LjUiUyAzMcKwMDMnMDcuNSJF!5e0!3m2!1sen!2szw!4v1777922138615!5m2!1sen!2szw" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <div class="container my-5">
+      <h3>Visit us at our location</h3>
+      <button @click="openDirections" class="btn btn-luxury">
+        Get Directions to Apex Car Rental <i class="bi bi-geo-alt-fill ms-2"></i>
+      </button>
+    </div>
+    <div class="container mt-4" style="height: 60vh">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3799.4174172123485!2d31.049516075055923!3d-17.77206898318216!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTfCsDQ2JzE5LjUiUyAzMcKwMDMnMDcuNSJF!5e0!3m2!1sen!2szw!4v1777922138615!5m2!1sen!2szw" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
   </div>
   </template>
 
@@ -282,6 +279,11 @@ export default {
         document.documentElement.style.setProperty('--navbar-height', `${navbarHeight}px`);
       }
     });
+    // Keep sticky sections hidden briefly while navbar measurements settle
+    document.documentElement.classList.add('measuring-navbar');
+    setTimeout(() => {
+      document.documentElement.classList.remove('measuring-navbar');
+    }, 600);
     
     // Add scroll listener for progress bars
     window.addEventListener('scroll', this.handleScroll);
@@ -311,23 +313,21 @@ export default {
   background-size: cover !important;
   min-height: 90vh;
 }
-.page-sections{
+#home .page-sections{
     display: flex;
     justify-content: center;
     padding: 20px 16px;
-    background: linear-gradient(135deg, var(--bg-secondary), var(--royal-midnight-blue)) !important;
     color: var(--accent-color) !important;
     font-weight: 700 !important;
     font-size: 1.2rem !important;
     letter-spacing: 2px !important;
     border: none !important;
-    border-bottom: 4px solid rgba(212, 175, 55, 0.2) !important;
-    transition: all 0.3s ease;
     text-transform: uppercase;
     font-family: 'MV Boli', 'Brush Script MT', cursive !important;
     position: relative;
     overflow: visible;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease, top 0.3s ease;
   }
   
   /* Light mode page sections - keep gold text, change background to white */
@@ -397,6 +397,8 @@ export default {
     position: sticky !important;
     top: var(--navbar-height, 70px);
     z-index: 100;
+    transition: top 0.3s ease;
+    will-change: top;
   }
   
   .nav-pills {

@@ -65,8 +65,24 @@
                     </div>
                 </div>
                 <div class="col-12 mt-3">
-                    <button type="submit" class="btn btn-success mx-2">Submit</button>
-                    <button class="btn btn-danger" @click="deleteProduct">
+                    <button
+                      type="submit"
+                      class="btn btn-success mx-2"
+                      :disabled="isSubmitting"
+                    >
+                      <span
+                        v-if="isSubmitting"
+                        class="spinner-border spinner-border-sm me-2 button-spinner"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      <span>{{ isSubmitting ? 'Saving...' : 'Submit' }}</span>
+                    </button>
+                    <button
+                      class="btn btn-danger"
+                      @click="deleteProduct"
+                      :disabled="isSubmitting"
+                    >
                         Delete
                     </button>
                 </div>
@@ -84,7 +100,8 @@
             product: null,
             id: null,
             features: ["", "", ""],
-            carouselImg: ["", "", "", ""]
+            carouselImg: ["", "", "", ""],
+            isSubmitting: false
         }
     },
 
@@ -141,6 +158,11 @@
 
         async editProduct(e) {
             e.preventDefault();
+            if (this.isSubmitting) {
+                return;
+            }
+
+            this.isSubmitting = true;
             this.product.features = this.features;
             this.product.carousel_imgs = this.carouselImg;
             await axios.post(`${this.baseURL}/product/update/${this.id}`, this.product)
@@ -156,9 +178,22 @@
                         text: 'Something went wrong',
                         icon: 'warning'
                     });
-                }).catch(err => console.log('err', err));
+                }).catch(err => {
+                    console.log('err', err);
+                    swal({
+                        text: 'Failed to update car. Please try again.',
+                        icon: 'error'
+                    });
+                }).finally(() => {
+                    this.isSubmitting = false;
+                });
         },
         async deleteProduct(){
+            if (this.isSubmitting) {
+                return;
+            }
+
+            this.isSubmitting = true;
             await axios.delete(`${this.baseURL}/product/delete/${this.id}`)
             .then((res) =>{
                 if(res.data.message == "Product deleted successfully"){
@@ -174,7 +209,15 @@
                         icon: 'warning'
                     })
                 }
-            }).catch((err) => console.log('err', err))
+            }).catch((err) => {
+                console.log('err', err);
+                swal({
+                    text: 'Failed to delete car. Please try again.',
+                    icon: 'error'
+                });
+            }).finally(() => {
+                this.isSubmitting = false;
+            })
         }
     },
     mounted() {
@@ -192,5 +235,8 @@
 }
 label{
     font-weight: bold;
+}
+.button-spinner {
+    color: black;
 }
 </style>

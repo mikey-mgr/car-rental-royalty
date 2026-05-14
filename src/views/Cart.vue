@@ -13,7 +13,7 @@
                         class="row mt-2 d-flex justify-content-evenly">
                         <div class="col-md-3 embed-responsive-16by9 justify-content-around">
                             <!-- dynamic image -->
-                            <img :src="cartItem.product.imageURL" alt="vehicle image" class="w-100 card-image-top embed-responsive-item">
+                            <img :src="productImage(cartItem.product)" alt="vehicle image" class="w-100 card-image-top embed-responsive-item">
 
                             <!-- static image -->
                             <!-- <img src="../assets/AppImages/cars/demio.jpg" alt="Vehicle image" 
@@ -64,6 +64,7 @@
 <script>
 import axios from 'axios';
 import swal from 'sweetalert';
+import { resolveImageUrl } from '@/utils/resolveImageUrl';
 
 export default {
     name: 'CartView',
@@ -76,6 +77,9 @@ export default {
     },
 
     methods:{
+        productImage(product) {
+            return resolveImageUrl(product?.imageURL);
+        },
         //book a vehicle
         bookRental(){
             this.$router.push({name: 'CheckoutPage'});

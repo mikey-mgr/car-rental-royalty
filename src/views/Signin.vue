@@ -13,7 +13,19 @@
                             <label for="password">Password</label>
                             <input v-model="password" id="password" type="password" class="form-control" required>
                         </div>
-                        <button type="submit" class="btn btn-primary mt-4">Login</button>
+                        <button
+                          type="submit"
+                          class="btn btn-primary mt-4"
+                          :disabled="isSubmitting"
+                        >
+                          <span
+                            v-if="isSubmitting"
+                            class="spinner-border spinner-border-sm me-2 button-spinner"
+                            role="status"
+                            aria-hidden="true"
+                          ></span>
+                          <span>{{ isSubmitting ? 'Logging in...' : 'Login' }}</span>
+                        </button>
                         <hr class="mb-5">
                         <label class="col-12 pl-0 font-italic">Don't have an Account?</label>
                         <router-link :to="{name: 'SignupView'}"> 
@@ -38,11 +50,18 @@ export default {
         return{
             email: null,
             password: null,
+            isSubmitting: false,
         };
     },
     methods: {
         async signin (e){
             e.preventDefault();
+
+            if (this.isSubmitting) {
+                return;
+            }
+
+            this.isSubmitting = true;
             const body = {
                 email: this.email,
                 password: this.password,
@@ -101,11 +120,15 @@ export default {
                         icon: "error"
                     });
                 }
+            } finally {
+                this.isSubmitting = false;
             }
         },
     },
     mounted(){
-        
+        // Keep route for compatibility, but use modal as the primary UX
+        this.$emit('openAuthModal', 'login');
+        this.$router.replace({ name: 'HomeView' });
     }
     
 }
@@ -117,6 +140,10 @@ export default {
     background-color: #f0c14b;
     color: black;
     border-color: #f0c14b;
+}
+
+.button-spinner {
+    color: black;
 }
 
 /* @media screen {

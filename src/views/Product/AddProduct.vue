@@ -66,7 +66,19 @@
                     </div>
                 </div>
                 <div class="container">
-                    <button type="submit" class="btn btn-primary btn-add-prod mt-3">Add Vehicle</button>
+                    <button
+                      type="submit"
+                      class="btn btn-primary btn-add-prod mt-3"
+                      :disabled="isSubmitting"
+                    >
+                      <span
+                        v-if="isSubmitting"
+                        class="spinner-border spinner-border-sm me-2 button-spinner"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      <span>{{ isSubmitting ? 'Adding Vehicle...' : 'Add Vehicle' }}</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -87,7 +99,8 @@
                 price: "",
                 bookingStatus: "",
                 features: ["", "", ""],
-                carouselImg: ["", "", "", ""]
+                carouselImg: ["", "", "", ""],
+                isSubmitting: false
             }
         },
         computed: {
@@ -143,6 +156,11 @@
 
             addProduct(e) {
                 e.preventDefault();
+                if (this.isSubmitting) {
+                    return;
+                }
+
+                this.isSubmitting = true;
                 const newProduct = {
                     categoryId: this.categoryId,
                     description: this.description,
@@ -168,6 +186,12 @@
                     window.location.replace("/admin/vehicles")
                 }).catch((err)=> {
                     console.log("err", err);
+                    swal({
+                        text: "Failed to add vehicle. Please try again.",
+                        icon: "error"
+                    });
+                }).finally(() => {
+                    this.isSubmitting = false;
                 })
             }
         }
@@ -178,6 +202,9 @@
   border-color: #c18e32;
   background-color: #c18e32;
   color: white;
+}
+.button-spinner {
+  color: black;
 }
 .btn-add-prod:hover{
   color: black;

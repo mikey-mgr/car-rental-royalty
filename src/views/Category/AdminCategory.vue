@@ -1,5 +1,5 @@
 <template>
-    <div class="container" v-if="users">
+    <div class="container py-4" v-if="users">
       <div class="row">
         <div class="col-12 text-center">
           <h3 class="pt-4 pb-4">Admin Categories</h3>

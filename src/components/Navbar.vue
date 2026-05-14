@@ -19,7 +19,7 @@
         >
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse mx-4 justify-content-center" id="navbarSupportedContent">
+        <div class="collapse navbar-collapse mr-4 justify-content-center" id="navbarSupportedContent">
           <ul class="navbar-nav justify-content-evenly w-100">
               <li class="nav-item dropdown" v-if="role == 'ADMIN'">
                 <a href="" class="nav-link text-light dropdown-toggle"  :class="{'active': $route.path==='/admin' || $route.path==='/admin/vehicle' || $route.path==='/admin/category' || $route.path==='/admin/users'}" id="navbarAdmin" data-toggle="dropdown">
@@ -51,9 +51,9 @@
                 </a>
                 <ul class="dropdown-menu account-dropdown" aria-labelledby="navbarAccount">
                   <router-link v-if="token" class="dropdown-item" :to="{name: 'WishList'}" @click="closeNavbar">Wishlist</router-link>
-                  <router-link v-if="!token" class="dropdown-item" :to="{name: 'SignupView'}" @click="closeNavbar">Signup</router-link>
+                  <a v-if="!token" class="dropdown-item" href="#" @click.prevent="openAuth('signup')">Signup</a>
                   <li><hr class="dropdown-divider"></li>
-                  <router-link v-if="!token" class="dropdown-item" :to="{name: 'SigninView'}" @click="closeNavbar">Login</router-link>
+                  <a v-if="!token" class="dropdown-item" href="#" @click.prevent="openAuth('login')">Login</a>
                   <a href="#" v-if="token" @click="logout" class="dropdown-item">Logout</a>
                 </ul>
               </li>
@@ -187,6 +187,10 @@ import swal from 'sweetalert';
           })
         }).catch((err) => console.log('err', err));
       },
+      openAuth(tab) {
+        this.closeNavbar();
+        this.$emit('openAuthModal', tab);
+      }
     },
     mounted(){
         this.token = localStorage.getItem("token");
@@ -235,8 +239,13 @@ import swal from 'sweetalert';
 .navbar{
   background-color: var(--navbar-bg);
   color: var(--accent-color);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  transform: translateY(0);
+}
+
+.navbar.navbar-hidden {
+  transform: translateY(-100%);
 }
 
 /* Light mode navbar adjustments */
@@ -249,9 +258,8 @@ import swal from 'sweetalert';
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(25, 25, 25, 0.75)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 #logo {
-  width: 120px;
-  margin-left: 0px;
-  margin-right: 20px;
+  width: 75px;
+  margin: 5px 0px 5px 20px;
   transition: transform 0.3s ease, filter 0.3s ease;
   content: url('../../public/logo-dark.jpeg');
 }
@@ -560,7 +568,7 @@ a.nav-link:not(.dropdown-toggle).router-link-exact-active::after {
 .theme-toggle-button {
   background: transparent;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -587,8 +595,31 @@ a.nav-link:not(.dropdown-toggle).router-link-exact-active::after {
 
 /* Mobile responsive adjustments */
 @media (max-width: 991px) {
+  /* Mobile menu: left-align items (instead of centered) */
+  .navbar-collapse {
+    justify-content: flex-start !important;
+  }
+  .navbar-nav {
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+  }
+  .nav-link,
+  a.nav-link {
+    justify-content: flex-start !important;
+    width: 100% !important;
+  }
+
+  a.nav-link.text-light{
+    padding-left: 0px !important;
+  }
+
   .theme-toggle-wrapper {
     margin: 0.5rem 0;
+  }
+
+  #navbarSupportedContent{
+    margin-left: 20px;
   }
 }
 </style>

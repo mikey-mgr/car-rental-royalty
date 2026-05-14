@@ -1,17 +1,36 @@
 <template>
-  <!-- Global Loading Overlay -->
+  <!-- Global Initial-Boot Loading / Error Overlay (only while app is mounting and backend is not ready) -->
   <div v-if="isBackendLoading" class="backend-loading-overlay">
     <div class="loading-content">
-      <div class="car-animation-container">
-        <img src="/car-only.svg" alt="Loading..." class="loading-car" />
-      </div>
-      <h3 class="loading-text">Starting up services...</h3>
-      <div class="loading-dots">
-        <span class="dot"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
-      </div>
+      <template v-if="!backendBootFailed">
+        <div class="car-animation-container">
+          <img src="/car-only.svg" alt="Loading..." class="loading-car" />
+        </div>
+        <div class="loading-dots" aria-hidden="true">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+      </template>
+
+      <template v-else>
+        <div class="boot-error-icon mb-3" aria-hidden="true">
+          <i class="bi bi-wifi-off"></i>
+        </div>
+        <h3 class="loading-text mb-2">We're having trouble connecting to our servers.</h3>
+        <button class="btn btn-primary boot-retry-btn" @click="retryBoot">
+          Try Again
+        </button>
+      </template>
     </div>
+  </div>
+
+  <!-- Top Route/Data Loading Progress Bar (non-blocking, YouTube-style) -->
+  <div v-if="isRouteLoading" class="route-progress-bar">
+    <div
+      class="route-progress-inner"
+      :style="{ width: routeProgress + '%' }"
+    ></div>
   </div>
 
   <Navbar :cartCount="cartCount" 
@@ -20,6 +39,7 @@
   :users="users"
   @clearUsers="clearUsers"
   @usersInfo="usersInfo"
+  @openAuthModal="openAuthModal"
   :baseURL="baseURL"
   ></Navbar>
 
@@ -30,6 +50,7 @@
   @fetchData="fetchData"
   @adminInfo="adminInfo"
   @usersInfo="usersInfo"
+  @openAuthModal="openAuthModal"
   :usrCartItems="usrCartItems"
   :usrTotalCost="usrTotalCost"
   :users="users"
@@ -40,6 +61,126 @@
   :data1="data1"
   :colors="colors"
   ></router-view>
+
+  <!-- Auth Modal (Login / Signup) -->
+  <div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content auth-modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ authTab === 'signup' ? 'Create Account' : 'Sign In' }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form v-if="authTab === 'login'" @submit="modalSignin" class="row g-3">
+            <div class="col-12">
+              <label for="authEmail" class="form-label">Email</label>
+              <input v-model="authLoginEmail" id="authEmail" type="email" class="form-control" required>
+            </div>
+            <div class="col-12">
+              <label for="authPassword" class="form-label">Password</label>
+              <input v-model="authLoginPassword" id="authPassword" type="password" class="form-control" required>
+            </div>
+            <div class="col-12 d-flex justify-content-between align-items-center">
+              <label class="form-label small fst-italic">
+                Don't have an account?
+              </label>
+              <button type="submit" class="btn btn-primary" :disabled="authSubmitting">
+                <span
+                  v-if="authSubmitting"
+                  class="spinner-border spinner-border-sm me-2 button-spinner"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                <span>{{ authSubmitting ? 'Logging in...' : 'Login' }}</span>
+              </button>
+            </div>
+            <div class="d-flex justify-content-start w-100 m-0">
+              <button
+                class="m-0 p-0 border-0 bg-transparent text-warning link-primary"
+                type="button"
+                @click="authTab = 'signup'"
+              >
+                Sign up
+              </button>
+            </div>
+          </form>
+
+          
+          <!-- <ul class="nav nav-pills mb-3 auth-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                :class="{ active: authTab === 'login' }"
+                type="button"
+                @click="authTab = 'login'"
+              >
+                Login
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                :class="{ active: authTab === 'signup' }"
+                type="button"
+                @click="authTab = 'signup'"
+              >
+                Sign up
+              </button>
+            </li>
+          </ul> -->
+
+
+
+
+          <form v-else @submit="modalSignup" class="row g-3">
+            <div class="col-12">
+              <label for="authSignupEmail" class="form-label">Email</label>
+              <input v-model="authSignupEmail" id="authSignupEmail" type="email" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label for="authFirstName" class="form-label">First Name</label>
+              <input v-model="authFirstName" id="authFirstName" type="text" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label for="authLastName" class="form-label">Last Name</label>
+              <input v-model="authLastName" id="authLastName" type="text" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label for="authSignupPassword" class="form-label">Password</label>
+              <input v-model="authSignupPassword" id="authSignupPassword" type="password" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label for="authSignupConfirm" class="form-label">Confirm Password</label>
+              <input v-model="authSignupConfirmPassword" id="authSignupConfirm" type="password" class="form-control" required>
+            </div>
+            <div class="col-12 d-flex justify-content-between align-items-center">
+              <label class="form-label small fst-italic">
+                Already have an account?
+              </label>
+              <button type="submit" class="btn btn-primary" :disabled="authSubmitting">
+                <span
+                  v-if="authSubmitting"
+                  class="spinner-border spinner-border-sm me-2 button-spinner"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                <span>{{ authSubmitting ? 'Creating account...' : 'Create Account' }}</span>
+              </button>
+            </div>
+            <div class="d-flex justify-content-start w-100 m-0">
+              <button
+                class="m-0 p-0 border-0 bg-transparent text-warning link-primary"
+                type="button"
+                @click="authTab = 'login'"
+              >
+                Sign in
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
   <AppFooter />
   
   <!-- Sticky WhatsApp Button -->
@@ -95,8 +236,27 @@ export default {
       colors: [],
       labels1: [],
       data1: [],
-      isBackendLoading: true,
+      isBackendLoading: false,
+      showOverlayTimer: null,
+      firstVisitTimer: null,
+      backendBootFailed: false,
+      backendBootTimer: null,
       retryInterval: null,
+      lastScrollY: 0,
+      navbarVisible: true,
+      isRouteLoading: false,
+      routeProgress: 0,
+      routeTimer: null,
+
+      authTab: 'login',
+      authSubmitting: false,
+      authLoginEmail: null,
+      authLoginPassword: null,
+      authSignupEmail: null,
+      authFirstName: null,
+      authLastName: null,
+      authSignupPassword: null,
+      authSignupConfirmPassword: null,
     }
   },
   methods: {
@@ -118,22 +278,42 @@ export default {
       }
     },
 
-    //method to fetch all products and categories
+    //method to fetch all products and categories (runs during initial app boot)
     async fetchData() {
-      await axios.all([axios.get(this.baseURL + "/category/list"), 
-                          axios.get(this.baseURL + "/product/list")])
+      await axios.all([
+        axios.get(this.baseURL + "/category/list", { timeout: 8000 }), 
+        axios.get(this.baseURL + "/product/list", { timeout: 8000 })
+      ])
       .then(axios.spread((res_cat, res_prod) => {
         this.categories = res_cat.data;
         this.products = res_prod.data;
         this.pieChartConfig(res_cat.data, res_prod.data);
-        // Hide loading overlay once data is fetched
+
+        // Hide initial-boot loading overlay once data is fetched
+        if (this.showOverlayTimer) {
+          clearTimeout(this.showOverlayTimer);
+          this.showOverlayTimer = null;
+        }
         this.isBackendLoading = false;
+
+        if (this.backendBootTimer) {
+          clearTimeout(this.backendBootTimer);
+          this.backendBootTimer = null;
+        }
+        this.backendBootFailed = false;
+
         // Clear retry interval
         if (this.retryInterval) {
           clearInterval(this.retryInterval);
         }
       })).catch((err) => {
         console.log('Backend not available, showing loading screen...', err);
+
+        // If we've already timed out into error state, don't auto-retry
+        if (this.backendBootFailed) {
+          return;
+        }
+
         // Keep showing loading if backend is not ready
         // Start retry interval to check backend health
         if (!this.retryInterval) {
@@ -257,6 +437,220 @@ export default {
 
     clearUsers(){
       this.users = null
+    },
+
+    handleNavbarScroll() {
+      const currentScrollY = window.scrollY;
+      const scrollDelta = currentScrollY - this.lastScrollY;
+      const navbar = document.querySelector('.navbar');
+      
+      if (!navbar) return;
+      
+      // Only hide navbar if scrolling down more than 5px
+      if (scrollDelta > 5 && this.navbarVisible) {
+        this.navbarVisible = false;
+        navbar.classList.add('navbar-hidden');
+        document.documentElement.setAttribute('data-navbar-hidden', 'true');
+        // Update CSS variable to 0 when navbar is hidden
+        document.documentElement.style.setProperty('--navbar-height', '0px');
+      }
+      // Show navbar if scrolling up more than 5px
+      else if (scrollDelta < -5 && !this.navbarVisible) {
+        this.navbarVisible = true;
+        navbar.classList.remove('navbar-hidden');
+        document.documentElement.setAttribute('data-navbar-hidden', 'false');
+        // Restore navbar height when shown
+        const navbarHeight = navbar.offsetHeight;
+        document.documentElement.style.setProperty('--navbar-height', `${navbarHeight}px`);
+      }
+      
+      this.lastScrollY = currentScrollY;
+    },
+
+    // ROUTE PROGRESS BAR HELPERS
+    startRouteProgress() {
+      // Do not start a new bar while the initial backend overlay is active
+      if (this.isBackendLoading) {
+        return;
+      }
+
+      this.isRouteLoading = true;
+      this.routeProgress = 0;
+
+      if (this.routeTimer) {
+        clearInterval(this.routeTimer);
+      }
+
+      // Increment progress in a non-linear, NProgress-style way
+      this.routeTimer = setInterval(() => {
+        if (this.routeProgress < 30) {
+          this.routeProgress += 10;
+        } else if (this.routeProgress < 70) {
+          this.routeProgress += 5;
+        } else if (this.routeProgress < 90) {
+          this.routeProgress += 2;
+        } else {
+          // Stop auto-increment near completion; finalization will handle the rest
+          clearInterval(this.routeTimer);
+          this.routeTimer = null;
+        }
+
+        if (this.routeProgress > 95) {
+          this.routeProgress = 95;
+        }
+      }, 200);
+    },
+
+    finishRouteProgress() {
+      if (!this.isRouteLoading) return;
+
+      if (this.routeTimer) {
+        clearInterval(this.routeTimer);
+        this.routeTimer = null;
+      }
+
+      this.routeProgress = 100;
+
+      // Give users a moment to see the completed bar before hiding it
+      setTimeout(() => {
+        this.isRouteLoading = false;
+        this.routeProgress = 0;
+      }, 250);
+    },
+
+    retryBoot() {
+      this.backendBootFailed = false;
+      this.isBackendLoading = true;
+      this.fetchData();
+    },
+
+    openAuthModal(tab = 'login') {
+      this.authTab = tab;
+      const modalEl = document.getElementById('authModal');
+      if (!modalEl) return;
+
+      // bootstrap bundle is already imported (as "bootstrap")
+      const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      bsModal.show();
+    },
+
+    async modalSignin(e) {
+      e.preventDefault();
+      if (this.authSubmitting) return;
+      this.authSubmitting = true;
+
+      const body = {
+        email: this.authLoginEmail,
+        password: this.authLoginPassword,
+      };
+
+      try {
+        await axios({
+          method: "post",
+          url: `${this.baseURL}/login`,
+          data: new URLSearchParams(body),
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          withCredentials: true,
+          maxRedirects: 0,
+          validateStatus: (status) => status >= 200 && status < 400,
+        });
+
+        const signinResponse = await axios.get(`${this.baseURL}/user/signin`, {
+          withCredentials: true
+        });
+
+        const loginInfo = signinResponse.data;
+        if (loginInfo.status === "Login Success") {
+          this.usersInfo();
+          swal({
+            text: "Login successful, redirecting",
+            icon: "success"
+          });
+          localStorage.setItem("token", loginInfo.token);
+          localStorage.setItem("role", loginInfo.role);
+
+          const modalEl = document.getElementById('authModal');
+          const bsModal = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
+          if (bsModal) bsModal.hide();
+
+          window.location.replace("/home");
+        } else {
+          swal({
+            text: "Invalid details",
+            icon: "warning"
+          });
+        }
+      } catch (err) {
+        console.log('err', err);
+        if (err.response && err.response.status === 401) {
+          swal({
+            text: "Invalid email or password",
+            icon: "error"
+          });
+        } else if (err.code === "ERR_NETWORK") {
+          swal({
+            text: "Network error, please check your connection",
+            icon: "error"
+          });
+        } else {
+          swal({
+            text: "Login failed. Please try again.",
+            icon: "error"
+          });
+        }
+      } finally {
+        this.authSubmitting = false;
+      }
+    },
+
+    async modalSignup(e) {
+      e.preventDefault();
+      if (this.authSubmitting) return;
+      this.authSubmitting = true;
+
+      try {
+        if (this.authSignupPassword !== this.authSignupConfirmPassword) {
+          swal({
+            text: "Passwords don't match, please try again",
+            icon: "error"
+          });
+          return;
+        }
+
+        const user = {
+          email: this.authSignupEmail,
+          firstName: this.authFirstName,
+          lastName: this.authLastName,
+          password: this.authSignupPassword,
+        };
+
+        await axios.post(`${this.baseURL}/user/signup`, user);
+
+        swal({
+          text: "Signup successful, please login now",
+          icon: "success"
+        });
+
+        // Switch to login tab after signup
+        this.authTab = 'login';
+      } catch (err) {
+        console.error('err', err);
+        if (err.response && err.response.data == "User with email is already present") {
+          swal({
+            text: "A user with this email already exists",
+            icon: "info"
+          });
+        } else {
+          swal({
+            text: "Signup failed. Please try again.",
+            icon: "error"
+          });
+        }
+      } finally {
+        this.authSubmitting = false;
+      }
     }
   },
 
@@ -264,12 +658,83 @@ export default {
     this.fetchData();
     this.adminInfo();
     this.token = localStorage.getItem("token");
+    
+    // Add scroll listener for navbar hide/show on all pages
+    window.addEventListener('scroll', this.handleNavbarScroll);
+
+    // Hook into router navigation for top progress bar
+    if (this.$router) {
+      this.$router.beforeEach((to, from, next) => {
+        this.startRouteProgress();
+        next();
+      });
+
+      this.$router.afterEach(() => {
+        this.finishRouteProgress();
+      });
+    }
+
+    // Start backend overlay timers after initial render (5s delay then 10s error)
+    // Begin countdown only after frontend finished initial render.
+    const startOverlayCountdown = () => {
+      if (this.categories === null && this.products === null) {
+        this.backendBootFailed = false;
+        if (this.showOverlayTimer) clearTimeout(this.showOverlayTimer);
+        this.showOverlayTimer = setTimeout(() => {
+          this.isBackendLoading = true;
+        }, 2500);
+
+        if (this.backendBootTimer) clearTimeout(this.backendBootTimer);
+        this.backendBootTimer = setTimeout(() => {
+          this.backendBootFailed = true;
+          if (this.retryInterval) { clearInterval(this.retryInterval); this.retryInterval = null; }
+        }, 10000);
+      }
+    };
+
+    // If it's the user's first-ever visit, show a mandatory 3s intro loader (simple localStorage flag)
+    try {
+      const hasVisited = localStorage.getItem('hasVisited');
+      if (!hasVisited) {
+        // Force loader for 3s, then start the normal overlay countdown
+        this.isBackendLoading = true;
+        if (this.firstVisitTimer) clearTimeout(this.firstVisitTimer);
+        this.firstVisitTimer = setTimeout(() => {
+          this.isBackendLoading = false;
+          try {
+            localStorage.setItem('hasVisited', '1');
+          } catch (e) {
+            console.warn('Unable to persist first-visit flag to localStorage', e);
+          }
+          startOverlayCountdown();
+        }, 3000);
+      } else {
+        startOverlayCountdown();
+      }
+    } catch (e) {
+      // If localStorage isn't available for any reason fall back to normal behavior
+      startOverlayCountdown();
+    }
   },
 
   beforeUnmount() {
     // Clean up retry interval when component is destroyed
     if (this.retryInterval) {
       clearInterval(this.retryInterval);
+    }
+    // Remove scroll listener
+    window.removeEventListener('scroll', this.handleNavbarScroll);
+
+    // Clean up route progress timer
+    if (this.routeTimer) {
+      clearInterval(this.routeTimer);
+    }
+
+    if (this.backendBootTimer) {
+      clearTimeout(this.backendBootTimer);
+    }
+    if (this.firstVisitTimer) {
+      clearTimeout(this.firstVisitTimer);
     }
   }
 };
@@ -287,14 +752,44 @@ body {
 div{
   font-family: Akrobat-Regular, sans-serif
 }
+
+.container{
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
 #app{
-  margin-top: 8.4rem;
+  margin-top: 85px;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
 }
 router-view{
   min-height: 90vh;
+}
+
+/* Route / Page Transition Top Progress Bar (reuses gold gradient styling) */
+.route-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  z-index: 9500;
+  background: transparent;
+  pointer-events: none;
+}
+
+.route-progress-inner {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(
+    90deg,
+    var(--gold-gradient-start, #c18e32),
+    var(--gold-gradient-end, #f0c14b)
+  );
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
+  transition: width 0.2s ease-out;
 }
 
 /* Backend Loading Overlay */
@@ -310,6 +805,31 @@ router-view{
   align-items: center;
   z-index: 9999;
   animation: fadeIn 0.3s ease-in;
+}
+
+.boot-error-icon {
+  font-size: 48px;
+  color: var(--accent-color);
+  text-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+}
+
+.boot-retry-btn {
+  background-color: #f0c14b;
+  color: black;
+  border-color: #f0c14b;
+  border-radius: 8px;
+  padding: 0.6rem 1.25rem;
+  font-weight: 600;
+}
+
+.boot-retry-btn:hover {
+  background-color: white;
+  color: black;
+  border-color: #f0c14b;
+}
+
+.button-spinner {
+  color: black;
 }
 
 .loading-content {
@@ -384,7 +904,6 @@ router-view{
   font-weight: 600;
   margin-bottom: 0.5rem;
   letter-spacing: 0.5px;
-  animation: textGlow 2s ease-in-out infinite;
   transition: color 0.3s ease;
 }
 
@@ -541,6 +1060,29 @@ body:has(.backend-loading-overlay) {
 
 /* If there's a modal, ensure modal is above */
 .modal {
-  z-index: 1050;
+  z-index: 1055;
+}
+
+[data-theme="dark"] .auth-modal-content{
+  background-color: var(--royal-midnight-blue) !important;
+}
+
+.modal-open{
+  padding-right: 0px !important;
+}
+
+[data-theme="dark"] .btn-close{
+  filter: invert(1) grayscale(100%) brightness(200%)
+}
+
+.modal-backdrop {
+    z-index: 1050 !important;
+}
+
+#app > footer {
+  position: relative;
+  z-index: 40;
+  isolation: isolate;
+  background-color: var(--navbar-bg) !important;
 }
 </style>

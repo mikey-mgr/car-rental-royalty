@@ -1,10 +1,10 @@
 <template>
-    <div class="card w-100 h-100 card-hover" style="margin-top: 10px; width: 18rem">
+    <div class="card w-100 h-100 card-hover" style="width: 18rem; min-height: 18rem;">
       <div class="embed-responsive embed-responsive-16by9 image-container">
         <!-- dynamic image -->
         <img
           class="card-img-top embed-responsive-item card-image"
-          :src="category.imageUrl"
+          :src="resolvedImageUrl"
           alt="Category Image"
         />
         <!-- static image -->
@@ -22,17 +22,26 @@
         <p class="card-text">
           {{ category.description }}
         </p>
-        <router-link :to="{name: 'EditCategory', params: {id: category.id}}"
-                     v-show="$route.name == 'AdminCategory'">
-          <button class="btn btn-primary edit-cat">Edit</button>
-        </router-link>
+        <div class="card-actions">
+          <router-link :to="{name: 'EditCategory', params: {id: category.id}}"
+                       v-show="$route.name == 'AdminCategory'">
+            <button class="btn btn-primary edit-cat">Edit</button>
+          </router-link>
+        </div>
       </div>
     </div>
   </template>
   <script>
+  import { resolveImageUrl } from "@/utils/resolveImageUrl";
+
   export default {
     name: "CategoryBox",
     props: ["category"],
+    computed: {
+      resolvedImageUrl() {
+        return resolveImageUrl(this.category?.imageUrl);
+      },
+    },
     methods: {},
   };
   </script>
@@ -63,6 +72,16 @@
   
   .card-img-top {
     object-fit: cover;
+  }
+  .card-body {
+    display: flex;
+    flex-direction: column;
+  }
+  .card-actions {
+    margin-top: auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
   }
   a {
     text-decoration: none;

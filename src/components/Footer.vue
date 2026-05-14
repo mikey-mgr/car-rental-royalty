@@ -73,23 +73,39 @@ export default {
 <style scoped>
 
 footer{
-    margin-top: 40px;
-    background-color: var(--footer-bg);
+    /* margin above footer is transparent and showed the fixed hero; use padding so the band is painted */
+    margin-top: 0;
+    padding-top: 40px;
+    position: relative;
+    z-index: 40;
+    isolation: isolate;
+    background-color: var(--navbar-bg) !important;
     font-size: 16px;
     transition: background-color 0.3s ease;
 }
 .footer-link{
     text-decoration: none;
     color: var(--text-primary);
-    transition: color 0.3s ease;
+    transition: color 0.2s ease;
 }
 .media-icon{
-    color: var(--accent-color);
+    color: #334155; /* match footer text by default */
     font-size: larger;
+    transition: color 0.15s ease, transform 0.15s ease;
 }
 .footer-link:hover{
-    color: var(--accent-color);
+    color: var(--accent-color) !important; transform: translateY(-2px);
 }
+
+/* Brand base colors for icons */
+.media-icon.bi-instagram { color: #E1306C; }
+.media-icon.bi-linkedin { color: #0A66C2; }
+.media-icon.bi-twitter { color: #1DA1F2; }
+.media-icon.bi-facebook { color: #1877F2; }
+.media-icon.bi-youtube { color: #FF0000; }
+
+/* On hover, highlight to accent color for emphasis */
+.media-icon:hover { color: var(--accent-color) !important; transform: translateY(-2px); }
 li{
     padding-bottom: 10px;
 }
@@ -102,7 +118,7 @@ footer .text-light {
     color: var(--text-primary) !important;
 }
 #logo {
-  width: 150px;
+  width: 95px;
   content: url('../../public/logo-dark.jpeg');
   transition: filter 0.3s ease;
 }

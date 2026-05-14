@@ -1,5 +1,5 @@
 <template>
-    <div class="container" v-if="users">
+    <div class="container py-4" v-if="users">
         <div class="row">
             <div class="col-12 mt-4 mb-4 text-center">
                 <h3>Admin Vehicles</h3>
