@@ -20,6 +20,7 @@ import Users from "../views/Users";
 import Vehicles from "../views/Vehicles";
 import AboutUs from "../views/AboutUs";
 import ContactUs from "../views/ContactUs";
+import TermsAndConditions from "../views/TermsAndConditions";
 import HealthView from "../views/HealthView.vue";
 import "../views/Admin.vue"
 import NotFound from "../views/NotFound.vue"
@@ -155,6 +156,11 @@ const routes = [
     path: '/contact',
     name: 'ContactUs',
     component: ContactUs
+  },
+  {
+    path: '/terms-and-conditions',
+    name: 'TermsAndConditions',
+    component: TermsAndConditions
   },
   //show all vehicles
   {

@@ -43,7 +43,7 @@
                 <div class="col-md-2 col-9">
                     <ul  class="list-unstyled">
                     <li class="text-light fw-bold pb-2">Legal</li>
-                    <li><a href="#" class="footer-link">Terms & Conditions</a></li>
+                    <li><router-link class="text-decoration-none footer-link" :to="{name: 'TermsAndConditions'}">Terms & Conditions</router-link></li>
                     <li><a href="#" class="footer-link">Privacy Policy</a></li>
                     <li><a href="#" class="footer-link">Feedback</a></li>
                     <li><a href="#" class="footer-link">Cookie Policy</a></li>
@@ -52,9 +52,9 @@
                 <div class="col-md-2 col-9">
                     <ul  class="list-unstyled">
                         <li><router-link class="text-decoration-none footer-link" :to="{name: 'ContactUs'}">Contact Us</router-link></li>
-                        <li><address class="text-light">36912 The Chase<br>
-                                    Mt. Pleasant, Harare<br>
-                                    <a href="#" class="footer-link">0788667111</a>
+                        <li><address class="text-light">2870 Mainway Meadows<br>
+                                    Waterfalls, Harare<br>
+                                    <a href="tel:+263712768037" class="footer-link">+263712768037</a>
                             </address>
                         </li>
                     </ul>
