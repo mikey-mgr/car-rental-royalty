@@ -1,4 +1,4 @@
-# Apex Car Rental
+# DeRoyalty Car Rental
 
 A full-stack e-commerce application for car rentals with Vue.js frontend and Spring Boot backend.
 
@@ -110,7 +110,7 @@ Since GitHub Pages doesn't support backend applications, you can deploy this ful
 
 1. **Create Database:**
    - Dashboard → "New +" → "PostgreSQL"
-   - Name: `apex-car-rental-db`
+   - Name: `DeRoyalty-car-rental-db`
    - Plan: Free
    - Save the connection string
 
@@ -118,7 +118,7 @@ Since GitHub Pages doesn't support backend applications, you can deploy this ful
    - Dashboard → "New +" → "Web Service"
    - Connect repository, select `render-deployment` branch
    - **Build Command:** `./mvnw clean install -DskipTests`
-   - **Start Command:** `java -jar target/Apex-0.0.1-SNAPSHOT.jar`
+   - **Start Command:** `java -jar target/DeRoyalty-0.0.1-SNAPSHOT.jar`
    - **Environment Variables:**
      ```
      SPRING_PROFILES_ACTIVE=prod
@@ -132,7 +132,7 @@ Since GitHub Pages doesn't support backend applications, you can deploy this ful
 - **Free Tier:** Service spins down after 15 minutes of inactivity (30s cold start)
 - **Database:** Render offers free PostgreSQL (1GB, 90-day limit)
 - **Memory:** 512MB RAM on free tier
-- **Backend URL:** `https://apex-car-rental-backend.onrender.com`
+- **Backend URL:** `https://deroyalty-car-rental-backend.onrender.com`
 
 ### Troubleshooting
 
@@ -202,7 +202,7 @@ If you update videos and need users to download new versions:
 
 1. **Update cache version** in `public/service-worker.js`:
    ```javascript
-   const VIDEO_CACHE = 'apex-videos-v2'; // Change v1 to v2
+   const VIDEO_CACHE = 'deroyalty-videos-v2'; // Change v1 to v2
    ```
 
 2. **Rebuild and deploy:**
@@ -250,7 +250,7 @@ If you update videos and need users to download new versions:
 Your site now has comprehensive SEO and social media sharing optimization:
 
 #### 1. Open Graph Meta Tags (WhatsApp, Facebook, LinkedIn)
-- **Title:** "Apex Car Rental - Premium Vehicle Rentals"
+- **Title:** "DeRoyalty Car Rental - Premium Vehicle Rentals"
 - **Description:** Business description with key services
 - **Image:** Logo appears in link previews
 - **URL:** Canonical URL for proper indexing
@@ -264,7 +264,7 @@ Your site now has comprehensive SEO and social media sharing optimization:
 - **Primary meta tags:** Title, description, keywords
 - **Robots:** Tells search engines to index and follow links
 - **Language:** English
-- **Author:** Apex Car Rental Group
+- **Author:** DeRoyalty Car Rental Group
 - **Geo tags:** Zimbabwe, Harare location
 
 #### 4. Structured Data (JSON-LD)
@@ -291,7 +291,7 @@ When you share your site link on:
 
 **WhatsApp:**
 - Shows: Logo image
-- Title: "Apex Car Rental - Premium Vehicle Rentals"
+- Title: "DeRoyalty Car Rental - Premium Vehicle Rentals"
 - Description: Business summary
 
 **Facebook/LinkedIn:**
@@ -364,7 +364,7 @@ When you share your site link on:
 ### Google Search Console Setup
 
 1. Go to: https://search.google.com/search-console
-2. Add property: `apex-car-rental-frontend.onrender.com`
+2. Add property: `deroyalty-car-rental-frontend.onrender.com`
 3. Verify ownership (HTML file or meta tag)
 4. Submit sitemap: `/sitemap.xml`
 5. Monitor indexing status and search performance
@@ -410,7 +410,7 @@ When adapting this template for other SMEs, update:
    - Adjust disallowed paths
 
 4. **Logo/Images:**
-   - Use `logo-square.jpeg` (1200x630px recommended)
+   - Use `logo-dark.jpg` (1200x630px recommended)
    - Optimize images for web (compress)
    - Add descriptive alt text
 

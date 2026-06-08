@@ -2,10 +2,10 @@
 // This worker uses Cache-First strategy for static assets and videos
 // CRITICAL: Handles HTTP Range Requests (206 Partial Content) for video seeking/streaming
 
-const CACHE_VERSION = 'apex-cache-v2';
-const STATIC_CACHE = 'apex-static-v2';
-const VIDEO_CACHE = 'apex-videos-v2';
-const IMAGE_CACHE = 'apex-images-v2';
+const CACHE_VERSION = 'deroyalty-cache-v2';
+const STATIC_CACHE = 'deroyalty-static-v2';
+const VIDEO_CACHE = 'deroyalty-videos-v2';
+const IMAGE_CACHE = 'deroyalty-images-v2';
 
 const STATIC_ASSETS = [
   '/',

@@ -4,7 +4,7 @@
         <!-- Navbar content -->
         <!--    Logo-->
         <router-link class="navbar-brand p-0 mr-0" :to="{ name: 'HomeView' }" >
-          <img id="logo" src="../../public/logo-dark.jpeg"/>
+          <img id="logo" src="../../public/logo-dark.jpg"/>
         </router-link>
         <!--    Burger Button-->
         <button
@@ -261,12 +261,12 @@ import swal from 'sweetalert';
   width: 75px;
   margin: 5px 0px 5px 20px;
   transition: transform 0.3s ease, filter 0.3s ease;
-  content: url('../../public/logo-dark.jpeg');
+  content: url('../../public/logo-dark.jpg');
 }
 
 /* Switch to white logo in light mode */
 [data-theme="light"] #logo {
-  content: url('../../public/logo-white.jpeg');
+  content: url('../../public/logo-white.jpg');
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 

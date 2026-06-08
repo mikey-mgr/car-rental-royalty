@@ -9,7 +9,7 @@ Disallow: /cart
 Disallow: /wishlist
 
 # Sitemap location
-Sitemap: https://apex-car-rental-frontend.onrender.com/sitemap.xml
+Sitemap: https://deroyalty-car-rental-frontend.onrender.com/sitemap.xml
 
 # Crawl delay (optional - helps prevent server overload)
 Crawl-delay: 10

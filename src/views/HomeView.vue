@@ -169,7 +169,7 @@
                   <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
                     <h2 class="">Our Fleets</h2>
                     <p>You've got the drive to travel in luxury, and we've got the tools, know-how and knowledge to help you take charge
-                        of your travel. Lets get you started on the path to your very own Apex car rental hire.
+                        of your travel. Lets get you started on the path to your very own DeRoyalty Car Rental hire.
                     </p>
                   </div>
                 </div>
@@ -205,17 +205,17 @@
             <!-- <div class="row p-5 mx-0"></div> -->
             <div class="row g-0 p-5 section-description-text fade-blur">
               <div class="col-lg-5 d-flex">
-                <img src="../assets/AppImages/home_page/ceo1.jpg" class="img-fluid max-h-100-vh parallax-img float-animation" alt="Apex Ceo">
+                <img src="../assets/AppImages/home_page/ceo1.jpg" class="img-fluid max-h-100-vh parallax-img float-animation" alt="DeRoyalty Ceo">
               </div>
               <div class="col-lg-7">
                 <div class="container-fluid pe-xl-0 h-100">
                   <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 pt-1 py-xl-0">
                     <h1 class="p-0 m-0" style="font-size: 80px;">,,</h1>
                     <p class="typewriter-text">Talent is the No. 1 priority for a CEO. You think it's about vision and strategy, but you have to get the
-                        right people first. Trustworthiness, honesty and reliability are the keystone values of Apex Car Rental.
+                        right people first. Trustworthiness, honesty and reliability are the keystone values of DeRoyalty Car Rental.
                         We are entirely committed to creating fully-cusomized service at the right price, whether it is for an
                         individual or a company's needs. It's as simple as that - we are the brand you can trust. <br><br>
-                        <strong>Mikey MGR</strong><br>CEO - Apex Car Rental
+                        <strong>Braso</strong><br>CEO - DeRoyalty Car Rental
                     </p>
                   </div>
                 </div>
@@ -267,8 +267,8 @@
               <div class="container-fluid section-description-text pe-xl-0 h-100">
                 <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
                   <h2 class="">Our Know-How</h2>
-                  <p>Apex Car Rental brand was founded by MGR Communications, a renowned world-class telecommunications and
-                      marketing company from Zimbabwe. During the last decade MGR Communications has worked well with many globally
+                  <p>DeRoyalty Car Rental brand was founded by Braso Communications, a renowned world-class telecommunications and
+                      marketing company from Zimbabwe. During the last decade Braso Communications has worked well with many globally
                       well-known companies around Europe, North America and Africa.
                   </p>
                 </div>
@@ -276,7 +276,7 @@
             </div>
           </div>
           <div class="col-md-12 section-description-text fade-in-scroll">
-            <p class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 mb-0">As a result, we've driven over $300,000 in sales and over 1 million leads for our businesses and clients. MGR Communications
+            <p class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 mb-0">As a result, we've driven over $300,000 in sales and over 1 million leads for our businesses and clients. Braso Communications
               is a premier reputation film active in Harare, Melbourne and Dubai that specializes in printing, digital marketing, SEO activities,
               web design, and data to drive targeted visibility and engagement that builds brand reputation and delivers profit growth.
               <br><br>
@@ -307,7 +307,7 @@
                 <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
                   <h2 class="">Our Locations</h2>
                   <p>We are a premium car rental group in Africa, Australia and the Middle East. It doesn't matter where you are located,
-                      there will always be a convenient Apex car rental branch nearby to help you continue your journery.
+                      there will always be a convenient DeRoyalty Car Rental branch nearby to help you continue your journery.
                   </p>
                 </div>
               </div>
@@ -317,7 +317,7 @@
             </div>
           </div>
           <div class="col-12 map-container text-center w-100 bg-light-gray py-4 px-3 py-lg-9 fade-zoom">
-            <img src="../assets/AppImages/map/map-main.png" class="img-fluid max-h-100-vh" title="Apex Car Rental">
+            <img src="../assets/AppImages/map/map-main.png" class="img-fluid max-h-100-vh" title="DeRoyalty Car Rental">
             <div class="px-3 px-lg-0 map-stats d-flex flex-column flex-sm-row justify-content-evenly align-items-center mt-4">
               <div class="d-flex flex-column justify-content-center align-items-center mb-4 fade-in-scroll">
                 <div class="count-wrapper">

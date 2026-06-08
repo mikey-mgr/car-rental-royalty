@@ -82,7 +82,7 @@
                     <div class="card-body">
                         <div class="container pb-4 px-0">
                         <h5 class="card-title">Contact Center</h5>
-                            <p class="card-text">Email:<br><a href="#">office@apexcarrental.com</a></p>
+                            <p class="card-text">Email:<br><a href="#">office@DeRoyaltycarrental.com</a></p>
                             <p>Phone: <br>+263776543210</p><br>
                             <p>(available 24/7, sometimes you may be required to wait)</p>
                         </div>
@@ -97,7 +97,7 @@
                     <div class="card-body">
                         <div class="container px-0">
                         <h5 class="card-title">Ceo Office</h5>
-                            <p class="card-text">Email: <br><a href="#">mgr@apexcarrental.com</a></p>
+                            <p class="card-text">Email: <br><a href="#">Braso@DeRoyaltycarrental.com</a></p>
                             <p>Phone: <br>+263788667111 <br>+263789123454</p><br>
                             <p>(available 24/7, sometimes you may be required to wait)</p>
                         </div>

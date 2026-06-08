@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.CarRental</groupId>
-	<artifactId>Apex</artifactId>
+	<artifactId>DeRoyalty</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Apex</name>
-	<description>Apex Car Rental Backend</description>
+	<name>DeRoyalty</name>
+	<description>DeRoyalty Car Rental Backend</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>

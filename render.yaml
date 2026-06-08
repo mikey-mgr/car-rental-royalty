@@ -1,7 +1,7 @@
 services:
   # Backend Service
   - type: web
-    name: apex-car-rental-backend
+    name: deroyalty-car-rental-backend
     env: docker
     dockerfilePath: ./Dockerfile
     plan: free
@@ -11,24 +11,24 @@ services:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
       - key: SPRING_DATASOURCE_URL
-        value: jdbc:postgresql://dpg-d7st1rbbc2fs73d3ighg-a:5432/car_rental_qnd8
+        value: jdbc:postgresql://dpg-d8j9eebtqb8s73bucr60-a/car_rental_qnd81?sslmode=require
       - key: SPRING_DATASOURCE_USERNAME
         value: apex_user
       - key: SPRING_DATASOURCE_PASSWORD
         sync: false
       - key: ALLOWED_ORIGINS
-        value: https://apex-car-rental-frontend.onrender.com,http://localhost:8583
+        value: https://deroyalty-car-rental-frontend.onrender.com,http://localhost:8583
 
   # Frontend Web Service (with serve package for Vue Router history mode)
   - type: web
-    name: apex-car-rental-frontend
+    name: deroyalty-car-rental-frontend
     env: node
     buildCommand: npm install --legacy-peer-deps && npm run build
     startCommand: npx serve -s dist -l $PORT
     plan: free
     envVars:
       - key: VUE_APP_API_URL
-        value: https://apex-car-rental-backend.onrender.com
+        value: https://deroyalty-car-rental-backend.onrender.com
 
 databases:
   - name: apex-car-rental-db

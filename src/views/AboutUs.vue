@@ -5,7 +5,7 @@
      <div class="container p-5 text-center about-us col-sm-10">
         <div class="row">
           <h1 class="display-6">About Us</h1>
-          <h4 class="mb-5">Apex Car Rental<br><br></h4>
+          <h4 class="mb-5">DeRoyalty Car Rental<br><br></h4>
           <p class="text-start mt-5" style="font-size: large;">Our vision is to become the most customer centric company in car rental industry. We will be persistent in building strong relationships with our customers and business partners.<br><br>
               We will be constantly focusing on innovation and delivery of simple high-quality service to our customers. <br><br>
               We are convinced that we need to innovate and control the high technology behind our services, and to participate only in markets where we can make significant contribution. <br><br>
@@ -20,7 +20,7 @@
         <h4 class="mb-4 display-5 animated">
             Our World</h4>
         <p class="obs mb-0 animated">
-            Apex Car Rental</p>
+            DeRoyalty Car Rental</p>
       </div>
     <div class="px-3 px-lg-0 map-stats d-flex flex-column flex-sm-row justify-content-evenly align-items-center mt-4">
       <div class="d-flex flex-column justify-content-center align-items-center mb-4">
@@ -125,7 +125,7 @@
                 <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
                   <h2 class="">Worldwide Locations</h2>
                   <p>We are a premium car rental group in Africa, Australia and the Middle East. It doesn't matter where you are located,
-                      there will always be a convenient Apex car rental branch nearby to help you continue your journery.
+                      there will always be a convenient DeRoyalty Car Rental branch nearby to help you continue your journery.
                   </p>
                 </div>
               </div>
@@ -135,7 +135,7 @@
             </div>
           </div>
           <div class="col-12 map-container text-center w-100 bg-light-gray py-4 px-3 py-lg-9">
-            <img src="../assets/AppImages/map/map-main.png" class="img-fluid max-h-100-vh" title="Apex Car Rental">
+            <img src="../assets/AppImages/map/map-main.png" class="img-fluid max-h-100-vh" title="DeRoyalty Car Rental">
           </div>
         </div>
 
@@ -145,7 +145,7 @@
     <div class="container my-5">
       <h3>Visit us at our location</h3>
       <button @click="openDirections" class="btn btn-luxury">
-        Get Directions to Apex Car Rental <i class="bi bi-geo-alt-fill ms-2"></i>
+        Get Directions to DeRoyalty Car Rental <i class="bi bi-geo-alt-fill ms-2"></i>
       </button>
     </div>
     <div class="container mt-4" style="height: 60vh">
@@ -159,9 +159,9 @@ export default {
   name: 'AboutUs',
   methods: {
     openDirections() {
-      // Apex Car Rental coordinates
+      // DeRoyalty Car Rental coordinates
       const destination = '-17.770207,31.052499';
-      const destinationName = 'Apex Car Rental';
+      const destinationName = 'DeRoyalty Car Rental';
       
       // Open Google Maps immediately (without waiting for geolocation)
       const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}&destination_place_id=${destinationName}`;

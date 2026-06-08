@@ -17,7 +17,11 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
 # Copy the built jar from the build stage
-COPY --from=build /app/target/Apex-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /app/target/DeRoyalty-0.0.1-SNAPSHOT.jar app.jar
+
+# Copy AppImages so DataInitializer can read assets at runtime
+# DataInitializer expects files at `src/assets/AppImages/...` relative to WORKDIR
+COPY --from=build /app/src/assets/AppImages ./src/assets/AppImages
 
 # Expose port
 EXPOSE 8080
