@@ -1,7 +1,7 @@
 // Luxury Color Palette
 :root {
   // Primary Colors
-  --royal-midnight-blue: rgb(10, 20, 40);
+  --royal-midnight-blue: rgb(8, 1, 81);
   --metallic-gold: rgb(212, 175, 55);
   --charcoal-black: rgb(25, 25, 25);
   --ivory-white: rgb(245, 245, 240);
@@ -19,8 +19,8 @@
   --accent-color: var(--metallic-gold);
   --hover-bg: rgba(30, 50, 90, 0.85);
   --border-color: rgba(212, 175, 55, 0.6);
-  --navbar-bg: rgb(16, 32, 64);
-  --footer-bg: rgb(16, 32, 64);
+  --navbar-bg: var(--royal-midnight-blue);
+  --footer-bg: var(--royal-midnight-blue);
 }
 
 // Light Mode

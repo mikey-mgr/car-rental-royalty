@@ -410,7 +410,7 @@ When adapting this template for other SMEs, update:
    - Adjust disallowed paths
 
 4. **Logo/Images:**
-   - Use `logo-dark.jpg` (1200x630px recommended)
+   - Use `royalty-logo-dark.jpeg` (1200x630px recommended)
    - Optimize images for web (compress)
    - Add descriptive alt text
 

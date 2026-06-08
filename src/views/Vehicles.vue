@@ -276,7 +276,7 @@ export default {
 
 <style scoped>
 .bg-body-tertiary {
-  background-color: rgb(16, 32, 64);
+  background-color: var(--royal-midnight-blue);
 }
 #search-button-navbar {
   background-color: #c18e32;

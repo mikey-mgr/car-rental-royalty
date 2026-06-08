@@ -799,7 +799,7 @@ router-view{
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(135deg, rgb(10, 20, 40) 0%, rgb(16, 32, 64) 100%);
+  background: linear-gradient(135deg, var(--royal-midnight-blue) 0%, var(--royal-midnight-blue) 100%);
   display: flex;
   justify-content: center;
   align-items: center;
