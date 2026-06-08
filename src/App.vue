@@ -184,7 +184,7 @@
   <AppFooter />
   
   <!-- Sticky WhatsApp Button -->
-  <a href="https://wa.me/263717827381?text=Hi%2C%20I%27m%20interested%20in%20renting%20a%20vehicle.%20Can%20you%20help%20me%3F" target="_blank" rel="noopener noreferrer" class="whatsapp-float" aria-label="Chat on WhatsApp">
+  <a href="https://wa.me/263712768037?text=Hi%2C%20I%27m%20interested%20in%20renting%20a%20vehicle.%20Can%20you%20help%20me%3F" target="_blank" rel="noopener noreferrer" class="whatsapp-float" aria-label="Chat on WhatsApp">
     <i class="bi bi-whatsapp"></i>
   </a>
 </template>

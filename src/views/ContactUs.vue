@@ -83,7 +83,8 @@
                         <div class="container pb-4 px-0">
                         <h5 class="card-title">Contact Center</h5>
                             <p class="card-text">Email:<br><a href="#">office@DeRoyaltycarrental.com</a></p>
-                            <p>Phone: <br>+263776543210</p><br>
+                            <p>Phone: <br><a href="tel:+263712768037">+263712768037</a></p>
+                            <p>Address:<br>2870 Mainway Meadows<br>Waterfalls, Harare</p><br>
                             <p>(available 24/7, sometimes you may be required to wait)</p>
                         </div>
                             <a href="#contact-form" class="btn btn-primary call-btn px-5" style="bottom: 0;">Call now</a>
@@ -98,7 +99,7 @@
                         <div class="container px-0">
                         <h5 class="card-title">Ceo Office</h5>
                             <p class="card-text">Email: <br><a href="#">Braso@DeRoyaltycarrental.com</a></p>
-                            <p>Phone: <br>+263788667111 <br>+263789123454</p><br>
+                            <p>Phone: <br><a href="tel:+263712768037">+263712768037</a></p><br>
                             <p>(available 24/7, sometimes you may be required to wait)</p>
                         </div>
                             <a href="#contact-form" class="btn btn-primary call-btn px-5">Call now</a>
@@ -148,6 +149,11 @@
         </div>
         <div class="container mt-5 px-5">
             <h3>Visit us</h3>
+            <address>
+                2870 Mainway Meadows<br>
+                Waterfalls, Harare<br>
+                <a href="tel:+263712768037">+263712768037</a>
+            </address>
             <a class="text-decoration-none text-dark" href="https://maps.app.goo.gl/SU6bUuAfL1exDXXH8">
             </a>
         </div>
