@@ -7,7 +7,7 @@
                     <li class="mb-2">
                         <a href="#" class="footer-link">
                             <router-link class="navbar-brand" :to="{ name: 'HomeView' }" >
-                                <img id="logo" src="../../public/logo-dark.jpg"/>
+                                <img id="logo" src="../../public/royalty-logo-dark.jpeg"/>
                             </router-link>
                         </a>
                     </li>
@@ -119,13 +119,13 @@ footer .text-light {
 }
 #logo {
   width: 95px;
-  content: url('../../public/logo-dark.jpg');
+  content: url('../../public/royalty-logo-dark.jpeg');
   transition: filter 0.3s ease;
 }
 
 /* Switch to white logo in light mode */
 [data-theme="light"] #logo {
-  content: url('../../public/logo-white.jpg');
+  content: url('../../public/royalty-logo-white.jpeg');
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 @media screen {
