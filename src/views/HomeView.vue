@@ -215,7 +215,7 @@
                         right people first. Trustworthiness, honesty and reliability are the keystone values of DeRoyalty Car Rental.
                         We are entirely committed to creating fully-cusomized service at the right price, whether it is for an
                         individual or a company's needs. It's as simple as that - we are the brand you can trust. <br><br>
-                        <strong>Braso</strong><br>CEO - DeRoyalty Car Rental
+                        <strong>Brian Langsoni</strong><br>CEO - DeRoyalty Car Rental
                     </p>
                   </div>
                 </div>
