@@ -11,7 +11,7 @@
                             </router-link>
                         </a>
                     </li>
-                    <li class="text-light fw-bold pb-2">Follow us on our Social platforms</li>
+                    <li class="text-light pb-2">Follow us on our Social platforms</li>
                     <li class="row justify-content-start">
                         <div class="row">
                             <div class="footer-link col text-start"><a href="https://instagram.com/" class="footer-link media-icon bi bi-instagram"></a></div>
@@ -125,12 +125,32 @@ footer .text-light {
 
 /* Switch to white logo in light mode */
 [data-theme="light"] #logo {
-  content: url('../../public/royalty-logo-white.jpeg');
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    content: url('../../public/royalty-logo-white.jpeg');
+    /* remove drop-shadow for cleaner flat logo */
+    filter: none;
+}
+/* Ensure logo has no drop-shadow in any theme */
+#logo {
+    filter: none !important;
+}
+/* Footer heading list items uppercase and Akrobat regular */
+footer li.fw-bold {
+    text-transform: uppercase;
+    font-family: var(--font-akrobat-regular) !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.02em;
 }
 @media screen {
     .container{
         padding: 48px 36px 0px
     }
+}
+
+/* Component-scoped override: ensure footer heading items use Akrobat Regular */
+.text-light.fw-bold.pb-2,
+.text-light.fw-bold {
+    font-family: var(--font-akrobat-regular) !important;
+    font-weight: 400 !important;
+    text-transform: uppercase !important;
 }
 </style>

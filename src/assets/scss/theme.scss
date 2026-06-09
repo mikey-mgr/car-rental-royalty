@@ -4,11 +4,17 @@
   --royal-midnight-blue: rgb(8, 1, 81);
   --metallic-gold: rgb(212, 175, 55);
   --charcoal-black: rgb(25, 25, 25);
-  --ivory-white: rgb(245, 245, 240);
+  --ivory-white: rgb(255, 255, 255);
   --warm-gray: rgb(180, 180, 180);
   --deep-sapphire: rgba(30, 50, 90, 0.85);
   --gold-gradient-start: rgb(212, 175, 55);
   --gold-gradient-end: rgb(255, 215, 0);
+
+  // Fonts
+  --font-akrobat: 'Akrobat', sans-serif;
+  --font-akrobat-regular: 'Akrobat', sans-serif;
+  --font-akrobat-bold: 'Akrobat', sans-serif;
+  --font-roboto: 'Roboto', sans-serif;
 
   // Dark Mode (Default)
   --bg-primary: var(--royal-midnight-blue);
@@ -21,6 +27,38 @@
   --border-color: rgba(212, 175, 55, 0.6);
   --navbar-bg: var(--royal-midnight-blue);
   --footer-bg: var(--royal-midnight-blue);
+  --page-bg: var(--deep-sapphire);
+}
+
+/* Typography */
+/* General page text uses Roboto Light */
+body, html, #app {
+  font-family: var(--font-roboto);
+  font-weight: 300;
+}
+
+/* Navbar and footer general text should use Roboto Light */
+.navbar, footer, .footer {
+  font-family: var(--font-roboto);
+  font-weight: 300;
+}
+
+/* Nav links, navbar titles, and footer headings use Akrobat regular */
+.navbar a, nav a, .nav-link, .nav-link.dropdown-toggle, .navbar-brand, .footer h1, .footer h2, .footer h3 {
+  font-family: var(--font-akrobat-regular);
+  font-weight: 400;
+}
+
+/* Page section headings use Akrobat-bold */
+/* Page section headings use Akrobat-bold */
+main h1, main h2, main h3, .page-section h1, .page-section h2, .section-title {
+  font-family: var(--font-akrobat-bold);
+  font-weight: 700;
+}
+
+/* Ensure inline SVGs using currentColor inherit proper font-based color rules */
+svg {
+  font-family: inherit;
 }
 
 // Light Mode
@@ -33,13 +71,17 @@
   --accent-color: rgb(212, 175, 55);
   --hover-bg: rgba(212, 175, 55, 0.1);
   --border-color: rgba(212, 175, 55, 0.3);
-  --navbar-bg: rgb(245, 245, 240);
-  --footer-bg: rgb(240, 240, 238);
+  /* Keep navbar/footer pure white in light mode for clean separation */
+  --navbar-bg: rgb(255, 255, 255);
+  --footer-bg: rgb(255, 255, 255);
+  /* Page background should be slightly off-white so navbar/footer are distinct */
+  --page-bg: rgb(250, 250, 248);
 }
 
 // Global Styles
 body {
-  background-color: var(--bg-primary);
+  /* Use page background separate from navbar/footer for clearer separation */
+  background-color: var(--page-bg);
   color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -73,6 +115,102 @@ body {
 
 .text-accent {
   color: var(--accent-color) !important;
+}
+
+/* Enforce Roboto Light for general content with high specificity to override component-scoped styles */
+html, body, #app, main, section, .page, .content, .container, .row, p, li, a, span, input, button, textarea {
+  font-family: var(--font-roboto) !important;
+  font-weight: 300 !important;
+}
+
+/* Navbar general text should use Roboto Light, but keep nav links in Akrobat */
+.navbar, .navbar p, .navbar span, .navbar .brand-text {
+  font-family: var(--font-roboto) !important;
+  font-weight: 300 !important;
+}
+
+/* Footer general text uses Roboto Light; footer headings/titles use Akrobat and uppercase */
+footer, .footer, footer p, footer a, footer li, .footer .footer-link {
+  font-family: var(--font-roboto) !important;
+  font-weight: 300 !important;
+}
+footer h1, footer h2, footer h3, .footer h1, .footer h2, .footer h3 {
+  font-family: var(--font-akrobat-bold) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+}
+
+/* Nav links and section headings remain Akrobat with strong specificity */
+
+/* Force nav links to Akrobat regular and uppercase (covers .nav-link.page-sections.sticky-top.active as well) */
+.navbar .nav-link,
+.nav-item > .nav-link,
+.nav-link,
+.nav-link.dropdown-toggle,
+.nav-link.page-sections,
+.sticky-top .nav-link,
+.nav-link.active,
+.nav-link.router-link-active,
+.nav-link.router-link-exact-active {
+  font-family: var(--font-akrobat-regular) !important;
+  font-weight: 400 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* Ensure page-section h2 elements use Akrobat bold */
+.page-section h2,
+.page-sections h2,
+.section-title h2,
+.section-title,
+main h2 {
+  font-family: var(--font-akrobat-bold) !important;
+  font-weight: 700 !important;
+}
+
+/* Footer headings (e.g., li.fw-bold) uppercase and Akrobat-regular */
+footer li.fw-bold,
+footer .fw-bold {
+  font-family: var(--font-akrobat-regular) !important;
+  font-weight: 400 !important;
+  text-transform: uppercase !important;
+}
+
+/* Extra-specific selectors requested by user: ensure Akrobat regular for these exact cases */
+.nav-link.text-light,
+.nav-link.text-light.dropdown-toggle,
+.nav-link.page-sections.sticky-top,
+.nav-link.page-sections.sticky-top.active,
+footer .text-light.fw-bold.pb-2,
+footer li.text-light.fw-bold.pb-2 {
+  font-family: var(--font-akrobat-regular) !important;
+  font-weight: 400 !important;
+  text-transform: uppercase !important;
+}
+
+/* Specific element that should match navbar/footer background */
+.section-description-text {
+  background-color: var(--navbar-bg) !important;
+}
+
+/* Keep general content in Roboto Light; exclude navbar/footer which have their own font rules */
+main, .page-content, .container, .content, .card-body, .card, p, li, span {
+  font-family: var(--font-roboto) !important;
+  font-weight: 300 !important;
+}
+.navbar .nav-link, .nav-link, .nav a, .nav-link.dropdown-toggle, .navbar-brand {
+  font-family: var(--font-akrobat-regular) !important;
+  font-weight: 400 !important;
+}
+
+main h1, main h2, main h3, .page-section h1, .page-section h2, .section-title {
+  font-family: var(--font-akrobat-bold) !important;
+  font-weight: 700 !important;
+}
+
+/* Make section-description-text match navbar/footer background exactly */
+.section-description-text {
+  background-color: var(--navbar-bg) !important;
 }
 
 // Button Styles

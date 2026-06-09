@@ -298,7 +298,6 @@ export default {
 
 <style scoped>
 #home{
-  background-color: var(--bg-primary);
   transition: background-color 0.3s ease;
 }
   .about-us{
@@ -318,15 +317,10 @@ export default {
     justify-content: center;
     padding: 20px 16px;
     color: var(--accent-color) !important;
-    font-weight: 700 !important;
-    font-size: 1.2rem !important;
-    letter-spacing: 2px !important;
     border: none !important;
     text-transform: uppercase;
-    font-family: 'MV Boli', 'Brush Script MT', cursive !important;
     position: relative;
     overflow: visible;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease, top 0.3s ease;
   }
   
@@ -360,7 +354,6 @@ export default {
     cursor: pointer;
     background: linear-gradient(135deg, var(--hover-bg), var(--deep-sapphire)) !important;
     color: var(--ivory-white) !important;
-    letter-spacing: 2px !important;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
   }
@@ -372,7 +365,7 @@ export default {
   }
   
   .page-sections.active {
-    background: linear-gradient(135deg, var(--deep-sapphire), var(--royal-midnight-blue)) !important;
+    background: var(--royal-midnight-blue) !important;
     border-bottom: 4px solid transparent !important;
   }
   

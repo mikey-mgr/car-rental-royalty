@@ -262,12 +262,14 @@ import swal from 'sweetalert';
   margin: 5px 0px 5px 20px;
   transition: transform 0.3s ease, filter 0.3s ease;
   content: url('../../public/royalty-logo-dark.jpeg');
+  filter: none !important;
 }
 
 /* Switch to white logo in light mode */
 [data-theme="light"] #logo {
   content: url('../../public/royalty-logo-white.jpeg');
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  /* remove drop-shadow for cleaner flat logo */
+  filter: none;
 }
 
 #logo:hover {
@@ -276,7 +278,7 @@ import swal from 'sweetalert';
 }
 
 [data-theme="light"] #logo:hover {
-  filter: brightness(0.9) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  filter: brightness(0.9);
 }
 .dropdown-menu{
   right: 0;
@@ -347,8 +349,6 @@ a.nav-link:visited {
   justify-content: center !important;
   height: 100%;
   position: relative;
-  font-weight: 500;
-  letter-spacing: 0.5px;
   transition: all 0.3s ease;
   padding: 0.5rem 1rem !important;
   text-decoration: none !important;
@@ -477,7 +477,7 @@ a.nav-link:not(.dropdown-toggle).router-link-exact-active::after {
 .cart-link.router-link-active .cart-icon-wrapper i,
 .cart-link.router-link-exact-active .cart-icon-wrapper i {
   color: var(--gold-gradient-end) !important;
-  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+  filter: none !important;
 }
 
 .cart-icon-wrapper {
@@ -589,7 +589,7 @@ a.nav-link:not(.dropdown-toggle).router-link-exact-active::after {
 
 .theme-toggle-button:hover .theme-icon {
   transform: rotate(20deg) scale(1.2);
-  filter: drop-shadow(0 0 8px rgba(193, 142, 50, 0.6));
+  filter: none !important;
   text-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
 }
 
@@ -610,6 +610,15 @@ a.nav-link:not(.dropdown-toggle).router-link-exact-active::after {
     width: 100% !important;
   }
 
+  /* Component-scoped override: force Akrobat Regular for light nav links */
+  .nav-link.text-light,
+  .nav-link.text-light.dropdown-toggle,
+  .nav-link.text-light.dropdown-toggle:link,
+  .nav-link.text-light.dropdown-toggle:visited {
+    font-family: var(--font-akrobat-regular) !important;
+    font-weight: 400 !important;
+    text-transform: uppercase !important;
+  }
   a.nav-link.text-light{
     padding-left: 0px !important;
   }
