@@ -6,6 +6,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import './assets/scss/theme.scss' // Import luxury theme
+import './plugins/axios' // Configure Axios with CSRF and security headers
 
 createApp(App).use(router).mount('#app')
 

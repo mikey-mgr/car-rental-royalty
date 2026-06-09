@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -32,9 +33,9 @@ public class WebSecurityConfig {
             config.addAllowedOrigin(origin.trim());
         }
         
-        config.setAllowedMethods(Arrays.asList("*"));
-        config.setAllowedHeaders(Arrays.asList("*"));
-        config.setAllowCredentials(true); // CRITICAL: Allow cookies
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization"));
+        config.setAllowCredentials(true);
         
         UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
         src.registerCorsConfiguration("/**", config);
@@ -45,7 +46,8 @@ public class WebSecurityConfig {
     @SuppressWarnings("removal")
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
+        http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+            .and()
             .cors()
             .and()
             .authorizeHttpRequests((authz) -> authz
@@ -61,7 +63,7 @@ public class WebSecurityConfig {
             .and()
             .logout((logout) -> logout.logoutSuccessUrl("/user/logout"))
             .sessionManagement(session -> session
-                .sessionFixation().none()
+                .sessionFixation().migrateSession()
             );
 
         return http.build();

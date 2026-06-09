@@ -11,6 +11,7 @@ import com.Mike.Proj.dto.ResponseDto;
 import com.Mike.Proj.dto.user.SigninResponseDto;
 import com.Mike.Proj.dto.user.SignupDto;
 import com.Mike.Proj.service.UserService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/user")
@@ -23,7 +24,7 @@ public class UserController {
 
     //signup api
     @PostMapping("/signup")
-    public ResponseDto signup(@RequestBody SignupDto signupDto){
+    public ResponseDto signup(@Valid @RequestBody SignupDto signupDto){
         return userService.signUp(signupDto);
     }
 
