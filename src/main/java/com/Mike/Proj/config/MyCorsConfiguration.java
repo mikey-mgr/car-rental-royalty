@@ -15,10 +15,10 @@ public class MyCorsConfiguration {
             public void addCorsMappings(CorsRegistry registry) {
                 String allowedOrigins = System.getenv().getOrDefault("ALLOWED_ORIGINS", "http://localhost:8583");
                 registry.addMapping("/**")
-                        .allowedMethods("*")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedOrigins(allowedOrigins.split(","))
-                        .allowedHeaders("*")
-                        .allowCredentials(true); // allow cookies;
+                        .allowedHeaders("Content-Type", "Authorization")
+                        .allowCredentials(true);
             }
         };
     }

@@ -25,11 +25,7 @@ public class UserService implements UserDetailsService{
     @Autowired
     UserRepo userRepo;
 
-    @Autowired
-    TokenRepository tokenRepo;
-
-    @Autowired
-    AuthenticationService authenticationService;
+    
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -48,8 +44,9 @@ public class UserService implements UserDetailsService{
         User user = new User(signupDto.getFirstName(), signupDto.getLastName(), signupDto.getEmail(), encryptedPassword, "USER");
         userRepo.save(user);
 
-        final AuthenticationToken authenticationToken = new AuthenticationToken(user);
-        authenticationService.saveConfirmationToken(authenticationToken);
+        // Do not create long-lived bearer tokens. Authentication will rely on
+        // the Spring Security session/principal. If a token system is required
+        // use short-lived JWTs with rotation and revocation in a secure store.
 
         ResponseDto responseDto = new ResponseDto("Success", "New User has been created");
         return responseDto;
@@ -62,7 +59,6 @@ public class UserService implements UserDetailsService{
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         User user = userRepo.findByEmail(email);
-        AuthenticationToken token = tokenRepo.findByUser(user);
         String userRole = null;
         try{
             userRole = user.getRole();
@@ -70,7 +66,10 @@ public class UserService implements UserDetailsService{
             throw new CustomException("User does not exist");
         }
 
-        return new SigninResponseDto("Login Success", token.getToken(), userRole);
+        // Do not return a long-lived bearer token. Client-side authentication
+        // should continue to use browser cookies (Spring Session) and the
+        // authenticated principal. Token is intentionally null.
+        return new SigninResponseDto("Login Success", null, userRole);
     }
 
     @Override

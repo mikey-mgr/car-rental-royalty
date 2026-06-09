@@ -33,12 +33,9 @@ mvnw spring-boot:run
 
 The backend API will start on port **8081** at `http://localhost:8081`
 
-   **Default Admin Account:**
-   - Email: `admin@carrental.com`
-   - Password: `admin123`
-   - Created automatically on first startup
-   - **Important**: Sign in with this account to access admin features
-   - Change the password after first login for security
+   **Admin account:**
+   - No production admin account is created automatically. To provision an administrator, use a one-time bootstrap mechanism and supply a strong password via your deployment secret store.
+   - Do NOT embed default administrative credentials in source or documentation.
 
    **Admin Features:**
    After signing in as admin, you'll see an "ADMIN" dropdown in the navbar:
