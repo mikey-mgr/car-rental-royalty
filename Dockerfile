@@ -16,8 +16,8 @@ RUN mvn clean package -DskipTests=false
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Create non-root user for security
-RUN addgroup -g 1000 appuser && adduser -u 1000 -G appuser appuser
+# Create non-root user for security (non-interactive for Alpine)
+RUN addgroup -g 1000 appuser && adduser -D -u 1000 -G appuser appuser
 
 # Copy the built jar from the build stage
 COPY --from=build --chown=appuser:appuser /app/target/DeRoyalty-0.0.1-SNAPSHOT.jar app.jar
