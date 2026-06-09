@@ -326,9 +326,9 @@ export default {
 
     //methods to fetch cart for logged in user
     async usersInfo(){
-      //fetch cart items if token is present ie. logged in
-      let token = localStorage.getItem("token");
-      await axios.get(`${this.baseURL}/cart/?token=${token}`)
+      //SECURITY FIX: Removed token parameter from URL
+      //Using session cookies with withCredentials instead
+      await axios.get(`${this.baseURL}/cart/`, { withCredentials: true })
       .then((res) => {
         const result = res.data;
         if(this.$route.path == "/cart" && result == "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">\n    <meta name=\"description\" content=\"\">\n    <meta name=\"author\" content=\"\">\n    <title>Please sign in</title>\n    <link href=\"https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M\" crossorigin=\"anonymous\">\n    <link href=\"https://getbootstrap.com/docs/4.0/examples/signin/signin.css\" rel=\"stylesheet\" integrity=\"sha384-oOE/3m0LUMPub4kaC09mrdEhIc+e3exm4xOGxAmuFXhBNF4hcg/6MiAXAf5p0P56\" crossorigin=\"anonymous\"/>\n  </head>\n  <body>\n     <div class=\"container\">\n      <form class=\"form-signin\" method=\"post\" action=\"/login\">\n        <h2 class=\"form-signin-heading\">Please sign in</h2>\n        <p>\n          <label for=\"username\" class=\"sr-only\">Username</label>\n          <input type=\"text\" id=\"username\" name=\"email\" class=\"form-control\" placeholder=\"Username\" required autofocus>\n        </p>\n        <p>\n          <label for=\"password\" class=\"sr-only\">Password</label>\n          <input type=\"password\" id=\"password\" name=\"password\" class=\"form-control\" placeholder=\"Password\" required>\n        </p>\n        <button class=\"btn btn-lg btn-primary btn-block\" type=\"submit\">Sign in</button>\n      </form>\n</div>\n</body></html>"){
@@ -568,7 +568,9 @@ export default {
             text: "Login successful, redirecting",
             icon: "success"
           });
-          localStorage.setItem("token", loginInfo.token);
+          // SECURITY FIX: Removed localStorage storage of token
+          // Session cookie is now used automatically with withCredentials: true
+          // localStorage.setItem("token", loginInfo.token);
           localStorage.setItem("role", loginInfo.role);
 
           const modalEl = document.getElementById('authModal');
@@ -656,8 +658,17 @@ export default {
 
   mounted() {
     this.fetchData();
-    this.adminInfo();
-    this.token = localStorage.getItem("token");
+    
+    // SECURITY FIX: Only fetch admin info if user is authenticated as admin
+    // Check role first before fetching sensitive admin datasets
+    const role = localStorage.getItem('role');
+    if (role === 'ADMIN') {
+      this.adminInfo();
+    }
+    
+    // SECURITY FIX: Removed localStorage token retrieval
+    // Now using HTTP-only session cookies instead
+    // this.token = localStorage.getItem("token");
     
     // Add scroll listener for navbar hide/show on all pages
     window.addEventListener('scroll', this.handleNavbarScroll);

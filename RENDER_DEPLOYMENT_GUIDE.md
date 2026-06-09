@@ -882,7 +882,7 @@ Example:
 ```
 SPRING_DATASOURCE_URL=jdbc:postgresql://dpg-xxxxx-a:5432/your_db_qnd8
 SPRING_DATASOURCE_USERNAME=your_db_user
-SPRING_DATASOURCE_PASSWORD=N2jEhFAY8HvTfWFkRf57rmBndwkwoSKl
+SPRING_DATASOURCE_PASSWORD=[REDACTED - rotate secret immediately]
 ```
 
 #### 3.3 Deploy

@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Mike.Proj.common.APIResponse;
+import com.Mike.Proj.dto.contact.ContactMessageCreateRequest;
 import com.Mike.Proj.model.ContactMessages;
 import com.Mike.Proj.service.ContactMsgService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/contact")
@@ -23,11 +25,13 @@ public class ContactMsgController {
     @Autowired
     ContactMsgService contactMsgService;
 
-    //save a new contact message
+    /**
+     * Save a new contact message.
+     * Accepts a validated DTO that prevents ID-based mass assignment attacks.
+     */
     @PostMapping("/submit")
-    public ResponseEntity<APIResponse> saveMessage(@RequestBody ContactMessages msg){
-        contactMsgService.saveMessage(msg);
-
+    public ResponseEntity<APIResponse> saveMessage(@Valid @RequestBody ContactMessageCreateRequest request){
+        contactMsgService.saveMessage(request);
         return new ResponseEntity<APIResponse>(new APIResponse(true, "Message has been sent"), HttpStatus.CREATED);
     }
 
@@ -35,14 +39,13 @@ public class ContactMsgController {
     @GetMapping("/list")
     public ResponseEntity<List<ContactMessages>> getMessage(){
         List<ContactMessages> msgs = contactMsgService.getMessages();
-
         return new ResponseEntity<List<ContactMessages>>(msgs, HttpStatus.OK);
     }
 
     @GetMapping("/find-message")
     public ResponseEntity<List<ContactMessages>> findMessage(@RequestParam String name){
         List<ContactMessages> msgs = contactMsgService.findMessage(name);
-
         return new ResponseEntity<List<ContactMessages>>(msgs, HttpStatus.OK);
     }
 }
+

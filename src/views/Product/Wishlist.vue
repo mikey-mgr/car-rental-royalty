@@ -35,7 +35,6 @@ export default {
     component: {ProductBox},
     data() {
         return {
-            token: null,
             wishlists: null,
             userProducts: [],
         };
@@ -43,7 +42,7 @@ export default {
     methods: {
         //get all items in wishlist
         fetchWishlist() {
-            axios.get(`${this.baseURL}/wishlist/${this.token}`)
+            axios.get(`${this.baseURL}/wishlist/`, { withCredentials: true })
                 .then((result) => {
                 this.wishlists = result.data;
                 if(this.wishlists!=null){
@@ -61,7 +60,7 @@ export default {
         },
         //delete a wishlist item
         deleteItem(id){
-            axios.delete(`${this.baseURL}/wishlist/delete/${id}?token=${this.token}`)
+            axios.delete(`${this.baseURL}/wishlist/delete/${id}`, { withCredentials: true })
             .then((res) => {
                 if(res.status == 200){
                     this.$router.go(0);
@@ -75,7 +74,7 @@ export default {
         }
     },
     mounted() {
-        this.token = localStorage.getItem("token");
+        // Token-based auth removed; requests use browser cookies (withCredentials)
         this.fetchWishlist();
     },
     components: { ProductBox }

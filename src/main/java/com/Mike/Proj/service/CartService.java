@@ -84,8 +84,8 @@ public class CartService{
             throw new CustomException("Cart item is invalid: " + cartItemId);
         } 
         Cart cart = optionalCart.get();
-        //check if item id belongs to user
-        if(cart.getUser() != user){
+        //check if item id belongs to user - use equals() not != for entity comparison
+        if(!cart.getUser().getId().equals(user.getId())){
             throw new CustomException("Cart item does not belong to user: " + cartItemId);
         }
         cartRepo.delete(cart);  

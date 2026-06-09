@@ -16,15 +16,24 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
+# Create non-root user for security (non-interactive for Alpine)
+RUN addgroup -g 1000 appuser && adduser -D -u 1000 -G appuser appuser
+
 # Copy the built jar from the build stage
-COPY --from=build /app/target/DeRoyalty-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build --chown=appuser:appuser /app/target/DeRoyalty-0.0.1-SNAPSHOT.jar app.jar
 
 # Copy AppImages so DataInitializer can read assets at runtime
-# DataInitializer expects files at `src/assets/AppImages/...` relative to WORKDIR
-COPY --from=build /app/src/assets/AppImages ./src/assets/AppImages
+COPY --from=build --chown=appuser:appuser /app/src/assets/AppImages ./src/assets/AppImages
 
 # Expose port
 EXPOSE 8080
+
+# Switch to non-root user
+USER appuser
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost:8080/health || exit 1
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]

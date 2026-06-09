@@ -72,7 +72,7 @@ export default {
 
     data() {
         return {
-            token: null,
+            
         }
     },
 
@@ -87,7 +87,7 @@ export default {
 
         //delete a cart item
         deleteItem(id){
-            axios.delete(`${this.baseURL}/cart/delete/${id}?token=${this.token}`)
+            axios.delete(`${this.baseURL}/cart/delete/${id}`, { withCredentials: true })
             .then((res) => {
                 if(res.status == 200){
                     this.$router.go(0);
@@ -101,7 +101,7 @@ export default {
         }
     },
     mounted() {
-        this.token = localStorage.getItem("token");
+        // Token-based auth removed; server session used instead
         this.$emit("usersInfo")
     },
 }
