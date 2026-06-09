@@ -6,6 +6,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.Mike.Proj.dto.contact.ContactMessageCreateRequest;
 import com.Mike.Proj.exceptions.CustomException;
 import com.Mike.Proj.model.ContactMessages;
 import com.Mike.Proj.repository.ContactMsgRepo;
@@ -25,11 +26,26 @@ public class ContactMsgService {
         } else return msgs;
     }
 
-    //saves the contact us message
-    public void saveMessage(ContactMessages msg){
-        if(Objects.isNull(msg)){
+    /**
+     * Save a contact message from a validated DTO.
+     * Prevents mass-assignment attacks by reconstructing the entity server-side.
+     */
+    public void saveMessage(ContactMessageCreateRequest request){
+        if(Objects.isNull(request)){
             throw new CustomException("The submitted message contains no data");
-        } else contactMsgRepo.save(msg);
+        }
+        
+        // Create entity server-side with only DTO fields (no ID)
+        ContactMessages msg = new ContactMessages(
+            request.getName(),
+            request.getEmail(),
+            request.getCity(),
+            request.getCountry(),
+            request.getPhone(),
+            request.getMessage()
+        );
+        
+        contactMsgRepo.save(msg);
     }
 
     //find a contact message by name
@@ -41,3 +57,4 @@ public class ContactMsgService {
         } else return msgs;
     }
 }
+

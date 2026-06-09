@@ -64,11 +64,14 @@ self.addEventListener('fetch', (event) => {
   // IGNORE API calls - let them go directly to network
   if (request.url.includes('/api/') || 
       request.url.includes(':8081') ||
+      request.url.includes('/admin') ||
+      request.url.includes('/contact/submit') ||
       request.url.includes('/category/') ||
       request.url.includes('/product/') ||
       request.url.includes('/cart/') ||
       request.url.includes('/wishlist/') ||
-      request.url.includes('/user/')) {
+      request.url.includes('/user/') ||
+      request.url.includes('/order/')) {
     return;
   }
 

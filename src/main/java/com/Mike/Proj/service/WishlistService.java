@@ -45,8 +45,8 @@ public class WishlistService {
             throw new CustomException("Wishlist item is invalid: " + wishlistId);
         } 
         Wishlist wishlist = optionalWishlist.get();
-        //check if item id belongs to user
-        if(wishlist.getUser() != user){
+        //check if item id belongs to user - use equals() not != for entity comparison
+        if(!wishlist.getUser().getId().equals(user.getId())){
             throw new CustomException("Wishlist item does not belong to user: " + wishlistId);
         }
         wishlistRepo.delete(wishlist);

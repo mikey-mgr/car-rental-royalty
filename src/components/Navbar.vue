@@ -26,10 +26,10 @@
                   ADMIN
                 </a>
                 <ul class="dropdown-menu admin-dropdown" aria-labelledby="navbarAdmin">
-                  <router-link v-if="token" class="dropdown-item" :to="{name: 'AdminView'}" @click="closeNavbar">Dashboard</router-link>
-                  <router-link v-if="token" class="dropdown-item" :to="{name: 'AdminProduct'}" @click="closeNavbar">Vehicles</router-link>
-                  <router-link v-if="token" class="dropdown-item" :to="{name: 'AdminCategory'}" @click="closeNavbar">Categories</router-link>
-                  <router-link v-if="token" class="dropdown-item" :to="{name: 'UsersView'}" @click="closeNavbar">Users</router-link>
+                  <router-link v-if="role === 'ADMIN'" class="dropdown-item" :to="{name: 'AdminView'}" @click="closeNavbar">Dashboard</router-link>
+                  <router-link v-if="role === 'ADMIN'" class="dropdown-item" :to="{name: 'AdminProduct'}" @click="closeNavbar">Vehicles</router-link>
+                  <router-link v-if="role === 'ADMIN'" class="dropdown-item" :to="{name: 'AdminCategory'}" @click="closeNavbar">Categories</router-link>
+                  <router-link v-if="role === 'ADMIN'" class="dropdown-item" :to="{name: 'UsersView'}" @click="closeNavbar">Users</router-link>
                 </ul>
                 <!-- <router-link :class="{'active': $route.path==='/admin' || $route.path==='/admin/vehicle' || $route.path==='/admin/category'}" class="nav-link text-light" v-if="role == 'ADMIN'" :to="{name: 'AdminView'}">ADMIN</router-link> -->
               </li>
@@ -50,11 +50,11 @@
                         >ACCOUNT
                 </a>
                 <ul class="dropdown-menu account-dropdown" aria-labelledby="navbarAccount">
-                  <router-link v-if="token" class="dropdown-item" :to="{name: 'WishList'}" @click="closeNavbar">Wishlist</router-link>
-                  <a v-if="!token" class="dropdown-item" href="#" @click.prevent="openAuth('signup')">Signup</a>
+                  <router-link v-if="role" class="dropdown-item" :to="{name: 'WishList'}" @click="closeNavbar">Wishlist</router-link>
+                  <a v-if="!role" class="dropdown-item" href="#" @click.prevent="openAuth('signup')">Signup</a>
                   <li><hr class="dropdown-divider"></li>
-                  <a v-if="!token" class="dropdown-item" href="#" @click.prevent="openAuth('login')">Login</a>
-                  <a href="#" v-if="token" @click="logout" class="dropdown-item">Logout</a>
+                  <a v-if="!role" class="dropdown-item" href="#" @click.prevent="openAuth('login')">Login</a>
+                  <a href="#" v-if="role" @click="logout" class="dropdown-item">Logout</a>
                 </ul>
               </li>
               <li class="nav-item"><router-link :class="{'active': $route.path==='/contact'}" class="nav-link text-light" :to="{name: 'ContactUs'}" @click="closeNavbar">CONTACT</router-link></li>
@@ -92,7 +92,7 @@ import swal from 'sweetalert';
   export default {
     name: "NavbarView",
     props:["cartCount", "users", "baseURL"],
-    data() {
+      data() {
       return {
         role: null,
         isDarkMode: true,
@@ -174,9 +174,7 @@ import swal from 'sweetalert';
               text: "You have logged out",
               icon: "success"
             });
-            localStorage.removeItem("token");
-            localStorage.removeItem("role");
-            this.token = null;
+            this.role = null;
             this.$emit("clearUsers");
             this.$router.push({name: 'HomeView'});
             this.$emit("resetCartCount");
@@ -193,9 +191,8 @@ import swal from 'sweetalert';
       }
     },
     mounted(){
-        this.token = localStorage.getItem("token");
-        this.role = localStorage.getItem("role");
-        this.$emit("usersInfo");
+      // Role will be provided by parent via users info or fetched separately.
+      this.$emit("usersInfo");
         
         // Load theme preference
         const savedTheme = localStorage.getItem('theme') || 'dark';
