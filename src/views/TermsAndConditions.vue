@@ -193,7 +193,7 @@ export default {
 
 <style scoped>
 .terms-page {
-  background-color: var(--bg-primary);
+  background-color: var(--page-bg);
   color: var(--text-primary);
 }
 

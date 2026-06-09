@@ -135,7 +135,18 @@
             </div>
           </div>
           <div class="col-12 map-container text-center w-100 bg-light-gray py-4 px-3 py-lg-9">
-            <img src="../assets/AppImages/map/map-main.png" class="img-fluid max-h-100-vh" title="DeRoyalty Car Rental">
+            <div class="map-wrapper">
+              <img src="../assets/AppImages/map/map-main.png" class="img-fluid" title="DeRoyalty Car Rental" alt="map" />
+              <svg class="map-overlay" viewBox="0 0 1440 935" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                <g class="paths">
+                  <path v-for="city in cities" :key="city.name" :d="getPath(city)" class="city-path" />
+                </g>
+                <g class="dots">
+                  <circle v-for="city in cities" :key="city.name + '-dot'" :cx="city.x" :cy="city.y" r="18" class="city-dot" />
+                  <circle :cx="harare.x" :cy="harare.y" r="8" class="city-dot harare-dot" />
+                </g>
+              </svg>
+            </div>
           </div>
         </div>
 
@@ -157,6 +168,20 @@
 <script>
 export default {
   name: 'AboutUs',
+  data() {
+    return {
+      // Map city coordinates (image 1440x935)
+      harare: { x: 349, y: 613 },
+      cities: [
+        { name: 'Luanda', x: 71, y: 478 },
+        { name: 'Bulawayo', x: 312, y: 661 },
+        { name: 'Johannesburg', x: 300, y: 759 },
+        { name: 'Dubai', x: 914, y: 399 },
+        { name: 'London', x: 561, y: 244 },
+        { name: 'Melbourne', x: 1266, y: 794 },
+      ],
+    };
+  },
   methods: {
     openDirections() {
       // DeRoyalty Car Rental coordinates
@@ -269,6 +294,45 @@ export default {
         }
       });
     }
+
+    // Build a quadratic bezier path from a city to Harare (same math as HomeView)
+    ,getPath(city) {
+      const x1 = city.x;
+      const y1 = city.y;
+      const x2 = this.harare.x;
+      const y2 = this.harare.y;
+
+      const mx = (x1 + x2) / 2;
+      const my = (y1 + y2) / 2;
+
+      let nx = -(y2 - y1);
+      let ny = x2 - x1;
+      const len = Math.hypot(nx, ny) || 1;
+      nx /= len; ny /= len;
+
+      const dist = Math.hypot(x2 - x1, y2 - y1);
+      const offset = Math.min(400, Math.max(60, dist / 2));
+
+      const cx = mx + nx * offset;
+      const cy = my + ny * offset;
+
+      return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
+    },
+
+    setupMapAnimations() {
+      this.$nextTick(() => {
+        const paths = this.$el.querySelectorAll('.city-path');
+        paths.forEach((p, i) => {
+          try {
+            const len = p.getTotalLength();
+            p.style.strokeDasharray = len;
+            p.style.strokeDashoffset = len;
+            p.style.transition = 'stroke-dashoffset 1s ease ' + (0.2 * i) + 's';
+            setTimeout(() => { p.style.strokeDashoffset = '0'; }, 50 + i * 200);
+          } catch (e) { /* ignore */ }
+        });
+      });
+    }
   },
   mounted() {
     // Calculate and set navbar height
@@ -288,6 +352,8 @@ export default {
     // Add scroll listener for progress bars
     window.addEventListener('scroll', this.handleScroll);
     this.handleScroll(); // Initial call
+    // Start map overlay animations
+    this.setupMapAnimations();
   },
   beforeUnmount() {
     // Clean up scroll listener
@@ -303,7 +369,7 @@ export default {
   .about-us{
   margin-top: -180px;
   margin-bottom: 2rem;
-  background-color: var(--bg-card);
+  background-color: var(--bg-primary) !important;
 }
 #background-div {
   margin-top: -55px;
@@ -326,9 +392,7 @@ export default {
   
   /* Light mode page sections - keep gold text, change background to white */
   [data-theme="light"] .page-sections {
-    background: linear-gradient(135deg, rgb(255, 255, 255), rgb(248, 248, 248)) !important;
     color: var(--accent-color) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     border-bottom: 4px solid rgba(212, 175, 55, 0.3) !important;
   }
   
@@ -360,20 +424,14 @@ export default {
   
   /* Light mode hover - lighter background */
   [data-theme="light"] .page-sections:hover {
-    background: linear-gradient(135deg, rgb(245, 245, 245), rgb(235, 235, 235)) !important;
     color: var(--accent-color) !important;
   }
   
   .page-sections.active {
-    background: var(--royal-midnight-blue) !important;
+    background: var(--bg-primary) !important;
     border-bottom: 4px solid transparent !important;
   }
-  
-  /* Light mode active page sections - white background */
-  [data-theme="light"] .page-sections.active {
-    background: linear-gradient(135deg, rgb(255, 255, 255), rgb(248, 248, 248)) !important;
-  }
-  
+    
   .page-sections.active::after {
     animation: shimmer 2s infinite;
   }
@@ -409,6 +467,7 @@ export default {
   }
   
   .section-text{
+    background-color: var(--bg-secondary);
   color: var(--text-primary) !important;
   transition: color 0.3s ease;
 }
@@ -439,4 +498,59 @@ h3 {
   }
   @media (min-width: 0px) and (max-width: 500px) {
   }
+
+/* Map overlay styles (copied from HomeView) */
+.map-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 100%;
+}
+.map-wrapper img.img-fluid {
+  display: block;
+  width: 100%;
+  height: auto;
+  z-index: 1;
+}
+.map-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 2;
+}
+.city-path {
+  fill: none;
+  stroke: white;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 4px rgba(0,0,0,0.45));
+  stroke-opacity: 0.6;
+  vector-effect: non-scaling-stroke;
+}
+.city-dot {
+  fill: none;
+  stroke: white;
+  stroke-width: 2;
+  stroke-opacity: 0.65;
+  transform-origin: center;
+  transform-box: fill-box;
+  pointer-events: none;
+  animation: pulseRing 3s ease-out infinite;
+}
+.harare-dot {
+  fill: #ffd966;
+  stroke: rgba(0,0,0,0.45);
+  stroke-width: 1.2;
+}
+
+@keyframes pulseRing {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  50% { transform: scale(1.8); opacity: 0.35; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
 </style>
