@@ -33,7 +33,7 @@
 
 //         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
 //         conn.setRequestMethod("POST");
-//         conn.setRequestProperty("Authorization", "Bearer OGE4Mjk0MTc0YjdlY2IyODAxNGI5Njk5MjIwMDE1Y2N8c3k2S0pzVDg=");
+//         conn.setRequestProperty("Authorization", "Bearer [REDACTED]");
 //         conn.setDoInput(true);
 //         conn.setDoOutput(true);
 

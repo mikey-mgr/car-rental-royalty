@@ -19,13 +19,12 @@ export default {
         return{
             stripeAPIToken: '',
             stripe: '',
-            token: null,
             checkoutBodyArray: []
         }
     },
     methods: {
         getAllItems(){
-            axios.get(`${this.baseURL}/cart/?token=${this.token}`)
+            axios.get(`${this.baseURL}/cart/`, { withCredentials: true })
             .then((response) => {
                 if(response.status == 200){
                     let products = response.data;
@@ -52,7 +51,6 @@ export default {
         }
     },
     mounted(){
-        this.token = localStorage.getItem("token");
         this.stripe = window.Stripe(this.stripeAPIToken);
         // run code: npm i stripe
         this.getAllItems();

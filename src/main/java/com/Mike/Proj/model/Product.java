@@ -12,7 +12,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 @Entity
 @Table(name = "car")
@@ -25,6 +27,8 @@ public class Product {
     private @NotNull String name;
     @Column(length = 10000)
     private @NotNull String imageURL;
+    @Positive(message = "Price must be greater than 0")
+    @DecimalMin(value = "0.01", message = "Price must be at least 0.01")
     private @NotNull double price;
     @Column(length = 1000)
     private @NotNull String description;

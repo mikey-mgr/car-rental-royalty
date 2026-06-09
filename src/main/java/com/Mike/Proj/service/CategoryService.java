@@ -36,7 +36,7 @@ public class CategoryService {
 	public List<ProductDto> categoryProducts(Integer id) {
 		List<ProductDto> categoryProducts = new ArrayList<>();
 		for(ProductDto product: productService.getAllProducts()){
-			if(product.getCategoryId() == id){
+			if(product.getCategoryId().equals(id)){
 				categoryProducts.add(product);	
 			}
 		}
@@ -63,18 +63,18 @@ public class CategoryService {
     @SuppressWarnings("null")
 	public void deleteCategory(Integer categoryId) {
         Optional<Category> optionalCategory = categoryRepo.findById(categoryId);
-
-		Optional<List<Product>> optionalProducts = productRepo.findAllByCategoryId(optionalCategory.get().getId());
-
-		if(!optionalProducts.get().isEmpty()){
-			throw new CustomException("Cannot delete category, products exist in it");
-		}
-
-        // throw an exception if category doesnt exist
-        if(!optionalCategory.isPresent()){
+        
+        // throw an exception if category doesn't exist
+        if(optionalCategory.isEmpty()){
             throw new CustomException("Category isn't present");
         }
+        
 		Category category = optionalCategory.get();
+		Optional<List<Product>> optionalProducts = productRepo.findAllByCategoryId(category.getId());
+
+		if(!optionalProducts.isEmpty() && !optionalProducts.get().isEmpty()){
+			throw new CustomException("Cannot delete category, products exist in it");
+		}
 
 		categoryRepo.delete(category);
     }

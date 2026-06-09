@@ -93,7 +93,9 @@ export default {
                         text: "Login successful, redirecting",
                         icon: "success"
                     });
-                    localStorage.setItem("token", loginInfo.token);
+                    // SECURITY FIX: Removed localStorage token storage
+                    // Using session cookies instead
+                    // localStorage.setItem("token", loginInfo.token);
                     localStorage.setItem("role", loginInfo.role);
                     window.location.replace("/home");
                 } else {

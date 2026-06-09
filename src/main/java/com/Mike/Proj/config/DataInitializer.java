@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -30,6 +32,8 @@ import com.Mike.Proj.repository.UserRepo;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataInitializer.class);
 
     @Autowired
     private UserRepo userRepo;
@@ -48,35 +52,12 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Check if admin user already exists
-        User existingAdmin = userRepo.findByEmail("admin@carrental.com");
+        // SECURITY: Admin account initialization is now disabled.
+        // Use a secure one-time bootstrap process with environment variables
+        // to create the initial admin account with a strong, cryptographically
+        // generated password stored in your deployment secret manager.
+        // See documentation for bootstrap procedure.
         
-        if (existingAdmin == null) {
-            // Create default admin user
-            String encryptedPassword = passwordEncoder.encode("admin123");
-            User adminUser = new User(
-                "Admin",
-                "User",
-                "admin@carrental.com",
-                encryptedPassword,
-                "ADMIN"
-            );
-            
-            userRepo.save(adminUser);
-            
-            // Create authentication token for admin
-            AuthenticationToken authToken = new AuthenticationToken(adminUser);
-            tokenRepo.save(authToken);
-            
-            System.out.println("========================================");
-            System.out.println("Default Admin Account Created:");
-            System.out.println("Email: admin@carrental.com");
-            System.out.println("Password: admin123");
-            System.out.println("========================================");
-        } else {
-            System.out.println("Admin user already exists.");
-        }
-
         seedCategoriesAndProductsFromAssets();
     }
 
@@ -167,7 +148,7 @@ public class DataInitializer implements CommandLineRunner {
                 }
             }
         } catch (Exception ex) {
-            System.out.println("Asset-based category/product initialization skipped: " + ex.getMessage());
+            LOGGER.warn("Asset-based category/product initialization skipped.");
         }
     }
 
