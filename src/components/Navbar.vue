@@ -240,7 +240,6 @@ import swal from 'sweetalert';
   background-color: var(--navbar-bg);
   color: var(--accent-color);
   transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   transform: translateY(0);
 }
 
@@ -248,10 +247,6 @@ import swal from 'sweetalert';
   transform: translateY(-100%);
 }
 
-/* Light mode navbar adjustments */
-[data-theme="light"] .navbar {
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
 
 /* Navbar toggler icon visibility in light mode */
 [data-theme="light"] .navbar-toggler-icon {

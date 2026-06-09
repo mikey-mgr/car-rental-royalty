@@ -86,6 +86,20 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Universal page-area background: apply page background to all top-level
+   app content except the navbar and footer so pages without a specific
+   section wrapper still get the correct background color. */
+#app > *:not(.navbar):not(header):not(footer):not(.footer) {
+  background-color: var(--page-bg);
+}
+
+/* Ensure sections inherit page background by default unless they explicitly
+   opt into a different surface color (like cards). This prevents accidental
+   use of navbar/footer colors for content blocks. */
+main, section, .page, .page-root, .content, .container, .row, .section-description-text {
+  background-color: transparent !important;
+}
+
 // Card Styles
 .card {
   background-color: var(--bg-card) !important;
@@ -188,9 +202,10 @@ footer li.text-light.fw-bold.pb-2 {
   text-transform: uppercase !important;
 }
 
-/* Specific element that should match navbar/footer background */
+/* Section description should sit on the page background (not match navbar/footer)
+   to keep a visible demarcation between content and footer/navbar. */
 .section-description-text {
-  background-color: var(--navbar-bg) !important;
+  background-color: var(--page-bg) !important;
 }
 
 /* Keep general content in Roboto Light; exclude navbar/footer which have their own font rules */
@@ -209,8 +224,29 @@ main h1, main h2, main h3, .page-section h1, .page-section h2, .section-title {
 }
 
 /* Make section-description-text match navbar/footer background exactly */
-.section-description-text {
-  background-color: var(--navbar-bg) !important;
+/* Ensure #home (main page wrapper) uses the page background so content regions
+   don't visually blend into the footer/navbar. */
+#home {
+  background-color: var(--page-bg);
+}
+
+/* Footer separation: subtle border and lift so users see where the page ends */
+footer, .footer {
+  background-color: var(--footer-bg);
+  box-shadow: 0 -10px 36px rgba(0,0,0,0.14);
+  position: relative;
+}
+
+/* Subtle separator element above footer for stronger visual demarcation */
+footer::before, .footer::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  pointer-events: none;
 }
 
 // Button Styles

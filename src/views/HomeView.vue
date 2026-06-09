@@ -1,31 +1,17 @@
 <template>
   <div id="home">
     <div class="background-container" id="background-div">
-      <!-- Video element -->
-      <video 
-        ref="heroVideo"
-        class="hero-video"
-        muted 
-        playsinline
-        preload="auto"
-        loop
-        crossorigin="anonymous"
-        @error="onVideoError"
-        @loadeddata="onVideoLoaded"
-        @canplay="onVideoCanPlay"
-      >
-        <source :src="videoSrc" type="video/mp4">
-        Your browser does not support the video tag.
-      </video>
+      <!-- Static hero image (JS may upgrade to video when appropriate) -->
+      <div id="hero-container" class="hero-image" :style="{ backgroundImage: `url(${heroImage})` }"></div>
       
       <!-- Translucent black backdrop with copywriting -->
       <div class="hero-backdrop">
         <div class="hero-backdrop-content">
-          <h1 class="hero-backdrop-title">Experience Luxury on the Road</h1>
-          <p class="hero-backdrop-subtitle">Premium car rental services across Africa, Australia, and the Middle East</p>
-          <div class="hero-backdrop-cta">
+          <p class="hero-backdrop-subtitle">Royal Car Rental Group</p>
+          <h1 class="hero-backdrop-title">ROYAL BRAND, ROYAL SERVICES!</h1>
+          <!-- <div class="hero-backdrop-cta">
             <button class="btn btn-primary" @click="scrollToPickup">Book Your Ride</button>
-          </div>
+          </div> -->
         </div>
       </div>
       
@@ -131,53 +117,55 @@
                   @click="scrollToSection">
                   Our Fleets
           </div>
-            <div class="row" id="ourFleets">
-              <div class="col-12 text-center">
-                <h2 class="py-3 mt-5">What we're offering...</h2>
-              </div>
-            </div>
-          <div class="container fade-in-scroll mb-5">
-          <!--    display categories & Products-->
-            <div class="row justify-content-evenly">
-              <!-- Categories -->
-              <div v-for="(category, index) in displayedCategories" :key="'cat-' + index"
-                   class="col-md-6 col-xl-4 col-12 pt-3 my-2 justify-content-around card-stagger"
-                   :style="`animation-delay: ${index * 0.1}s`">
-                <CategoryBox :category="category" />
-              </div>
-              <!-- Products -->
-              <div v-for="(product, index) in displayedProducts" :key="'prod-' + index"
-                   class="col-md-6 col-xl-4 col-12 pt-3 my-2 justify-content-around card-stagger"
-                :style="`animation-delay: ${(index + displayedCategories.length) * 0.1}s`">
-                <ProductBox :product="product"/>
-              </div>
-            </div>
-            
-            <!-- Show More Button (mobile only) -->
-            <div v-if="isMobile && (hasMoreCategories || hasMoreProducts)" class="text-center mt-4">
-              <button @click="showAllItems = !showAllItems" class="btn btn-outline-primary show-more-btn">
-                <span v-if="!showAllItems">Show More Vehicles</span>
-                <span v-else>Show Less</span>
-                <i class="ms-2" :class="showAllItems ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
-              </button>
-            </div>
-          </div>
-            
-          <div class="row g-0">
-              <div class="col-lg-7 text-white section-text slide-in-left">
-                <div class="container-fluid section-description-text pe-xl-0 h-100">
-                  <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
-                    <h2 class="">Our Fleets</h2>
-                    <p>You've got the drive to travel in luxury, and we've got the tools, know-how and knowledge to help you take charge
-                        of your travel. Lets get you started on the path to your very own DeRoyalty Car Rental hire.
-                    </p>
-                  </div>
+          <div class="our-fleets">
+              <div class="row" id="ourFleets">
+                <div class="col-12 text-center">
+                  <h2 class="py-3 mt-5">What we're offering...</h2>
                 </div>
               </div>
-              <div class="col-lg-5 slide-in-right">
-                <img src="../assets/AppImages/products/cars-exec.jpg" class="img-fluid max-h-100-vh parallax-img" alt="cars">
+            <div class="container fade-in-scroll mb-5">
+            <!--    display categories & Products-->
+              <div class="row justify-content-evenly">
+                <!-- Categories -->
+                <div v-for="(category, index) in displayedCategories" :key="'cat-' + index"
+                    class="col-md-6 col-xl-4 col-12 pt-3 my-2 justify-content-around card-stagger"
+                    :style="`animation-delay: ${index * 0.1}s`">
+                  <CategoryBox :category="category" />
+                </div>
+                <!-- Products -->
+                <div v-for="(product, index) in displayedProducts" :key="'prod-' + index"
+                    class="col-md-6 col-xl-4 col-12 pt-3 my-2 justify-content-around card-stagger"
+                  :style="`animation-delay: ${(index + displayedCategories.length) * 0.1}s`">
+                  <ProductBox :product="product"/>
+                </div>
               </div>
-          </div>
+              
+              <!-- Show More Button (mobile only) -->
+              <div v-if="isMobile && (hasMoreCategories || hasMoreProducts)" class="text-center mt-4">
+                <button @click="showAllItems = !showAllItems" class="btn btn-outline-primary show-more-btn">
+                  <span v-if="!showAllItems">Show More Vehicles</span>
+                  <span v-else>Show Less</span>
+                  <i class="ms-2" :class="showAllItems ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
+                </button>
+              </div>
+            </div>
+              
+            <div class="row g-0">
+                <div class="col-lg-7 text-white section-text slide-in-left">
+                  <div class="container-fluid section-description-text pe-xl-0 h-100">
+                    <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
+                      <h2 class="">Our Fleets</h2>
+                      <p>You've got the drive to travel in luxury, and we've got the tools, know-how and knowledge to help you take charge
+                          of your travel. Lets get you started on the path to your very own DeRoyalty Car Rental hire.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-5 slide-in-right">
+                  <img src="../assets/AppImages/products/cars-exec.jpg" class="img-fluid max-h-100-vh parallax-img" alt="cars">
+                </div>
+            </div>
+            </div>
         </section>
           <!-- our values dropdown -->
         <section class="nav-item text-start">
@@ -244,9 +232,9 @@
                 </div>
               </div>
             </div>
-            <div class="col-md-6 slide-in-right">
-              <img src="../assets/AppImages/home_page/our-vision.jpg" class="img-fluid max-h-100-vh parallax-img" alt="our vision">
-            </div>
+                  <div class="col-md-6 slide-in-right">
+                    <img src="../assets/AppImages/home_page/our-vision.jpg" class="img-fluid max-h-100-vh parallax-img" alt="our vision">
+                  </div>
           </div>
         </div>
 
@@ -317,8 +305,22 @@
             </div>
           </div>
           <div class="col-12 map-container text-center w-100 bg-light-gray py-4 px-3 py-lg-9 fade-zoom">
-            <img src="../assets/AppImages/map/map-main.png" class="img-fluid max-h-100-vh" title="DeRoyalty Car Rental">
-            <div class="px-3 px-lg-0 map-stats d-flex flex-column flex-sm-row justify-content-evenly align-items-center mt-4">
+              <div class="map-wrapper">
+                <img src="../assets/AppImages/map/map-main.png" class="img-fluid" title="DeRoyalty Car Rental" alt="map" />
+                <svg class="map-overlay" viewBox="0 0 1440 935" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                  <!-- Paths from cities to Harare -->
+                  <g class="paths">
+                    <path v-for="city in cities" :key="city.name" :d="getPath(city)" class="city-path" />
+                  </g>
+                  <!-- City dots -->
+                  <g class="dots">
+                    <circle v-for="city in cities" :key="city.name + '-dot'" :cx="city.x" :cy="city.y" r="18" class="city-dot" />
+                    <!-- Harare center marker -->
+                    <circle :cx="harare.x" :cy="harare.y" r="7" class="city-dot harare-dot" />
+                  </g>
+                </svg>
+              </div>
+              <div class="px-3 px-lg-0 map-stats d-flex flex-column flex-sm-row justify-content-evenly align-items-center mt-4">
               <div class="d-flex flex-column justify-content-center align-items-center mb-4 fade-in-scroll">
                 <div class="count-wrapper">
                   <span class="lh-1 mb-2 display-4 text-warning count-up" data-count="1">
@@ -378,8 +380,7 @@
 <script>
 import CategoryBox from "../components/Category/CategoryBox.vue";
 import ProductBox from "@/components/ProductBox.vue";
-import heroVideo from '../assets/AppImages/home_page/home-vid.mp4';
-import heroVideoMobile from '../assets/AppImages/home_page/home-vid-mobile.mp4';
+import heroImage from '../assets/AppImages/home_page/royal-car-rental-group-hero.jpg';
 import scrollDownIcon from '../assets/AppImages/home_page/scroll-down.svg';
 
 export default {
@@ -391,10 +392,8 @@ export default {
       categorySize: 0,
       productSize: 0,
       showScrollIndicator: false,
-      videoSrc: this.getVideoSource(),
       scrollDownIcon,
       observedElements: [],
-      videoObserver: null,
       showAllItems: false,
       mobileBreakpoint: 768,
       isMobile: false,
@@ -423,6 +422,17 @@ export default {
         { src: require("../assets/AppImages/car-logos/volvo.svg"), alt: "Volvo" },
         { src: require("../assets/AppImages/car-logos/tesla.jpg"), alt: "Tesla" },
       ],
+      heroImage: heroImage,
+      // Map city coordinates (image 1440x935)
+      harare: { x: 349, y: 613 },
+      cities: [
+        { name: 'Luanda', x: 71, y: 478 },
+        { name: 'Bulawayo', x: 312, y: 661 },
+        { name: 'Johannesburg', x: 300, y: 759 },
+        { name: 'Dubai', x: 914, y: 399 },
+        { name: 'London', x: 561, y: 244 },
+        { name: 'Melbourne', x: 1266, y: 794 },
+      ],
     }
   },
   methods:{
@@ -430,46 +440,6 @@ export default {
       e.preventDefault();
       this.$router.push({ name: 'VehiclesView' });
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    },
-    getVideoSource() {
-      // Check if screen is mobile size (less than 768px)
-      const isMobile = window.innerWidth < 768;
-      return isMobile ? heroVideoMobile : heroVideo;
-    },
-    updateVideoSource() {
-      // Update video source when window is resized
-      const newVideoSrc = this.getVideoSource();
-      if (this.videoSrc !== newVideoSrc) {
-        this.videoSrc = newVideoSrc;
-        // Reload video if it's currently playing
-        if (this.$refs.heroVideo) {
-          this.$refs.heroVideo.load();
-        }
-      }
-    },
-    onVideoLoaded() {
-      // Video loaded
-    },
-    onVideoCanPlay() {
-      // Only play if video is in viewport
-      const video = this.$refs.heroVideo;
-      if (video) {
-        const rect = video.getBoundingClientRect();
-        const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
-        
-        if (isInViewport) {
-          const playPromise = video.play();
-          if (playPromise !== undefined) {
-            playPromise.catch(() => {
-              // Autoplay failed, video will loop silently when user interacts
-            });
-          }
-        }
-      }
-    },
-    onVideoError() {
-      // Video error - the loop will continue if video is not fully broken
-      console.warn('Video playback error, video will attempt to loop');
     },
     onDateFocus(field) {
       if (field === "pickup") {
@@ -514,29 +484,7 @@ export default {
         this.observedElements.push(el);
       });
       
-      // Observe video/background to play when in viewport
-      const backgroundDiv = document.getElementById('background-div');
-      if (backgroundDiv) {
-        const videoObserverOptions = {
-          threshold: 0.3
-        };
-        
-        this.videoObserver = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting && !this.videoPlayed) {
-              const video = this.$refs.heroVideo;
-              if (video && video.paused) {
-                video.play().catch(() => {
-                  this.showImage = true;
-                  this.videoPlayed = true;
-                });
-              }
-            }
-          });
-        }, videoObserverOptions);
-        
-        this.videoObserver.observe(backgroundDiv);
-      }
+      // Hero is a static background image; no video playback.
     },
     animateCountUp(element, target, duration = 2000) {
       const start = 0;
@@ -572,6 +520,53 @@ export default {
       // Observe all count-up elements
       const countElements = document.querySelectorAll('.count-up');
       countElements.forEach(el => observer.observe(el));
+    },
+    // Build a quadratic bezier path from a city to Harare
+    getPath(city) {
+      const x1 = city.x;
+      const y1 = city.y;
+      const x2 = this.harare.x;
+      const y2 = this.harare.y;
+
+      // Midpoint
+      const mx = (x1 + x2) / 2;
+      const my = (y1 + y2) / 2;
+
+      // Perpendicular direction for control point
+      let nx = -(y2 - y1);
+      let ny = x2 - x1;
+      const len = Math.hypot(nx, ny) || 1;
+      nx /= len; ny /= len;
+
+      // Curvature amount scales with distance; increase for more pronounced parabolic arcs
+      const dist = Math.hypot(x2 - x1, y2 - y1);
+      // Use a larger fraction of the distance to create stronger curvature; clamp to reasonable bounds
+      const offset = Math.min(400, Math.max(60, dist / 2));
+
+      const cx = mx + nx * offset;
+      const cy = my + ny * offset;
+
+      return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
+    },
+
+    setupMapAnimations() {
+      // Animate paths drawing and circle growth with a stagger
+      this.$nextTick(() => {
+        const paths = this.$el.querySelectorAll('.city-path');
+
+        paths.forEach((p, i) => {
+          try {
+            const len = p.getTotalLength();
+            p.style.strokeDasharray = len;
+            p.style.strokeDashoffset = len;
+            p.style.transition = 'stroke-dashoffset 1s ease ' + (0.2 * i) + 's';
+            // trigger
+            setTimeout(() => { p.style.strokeDashoffset = '0'; }, 50 + i * 200);
+          } catch (e) { /* ignore */ }
+        });
+
+        // Circles use CSS-driven continuous pulse; no JS scaling required.
+      });
     },
     handleParallax() {
       const scrolled = window.pageYOffset;
@@ -773,10 +768,11 @@ export default {
     // Add scroll listener for progress bars and parallax
     window.addEventListener('scroll', this.handleScroll);
     window.addEventListener('scroll', this.handleParallax);
-    
-    // Add resize listener to update video source and check mobile
-    window.addEventListener('resize', this.updateVideoSource);
     window.addEventListener('resize', this.checkMobile);
+
+    // Hero is a static background image.
+    // Start map overlay animations
+    this.setupMapAnimations();
     
     this.handleScroll(); // Initial call
   },
@@ -784,13 +780,9 @@ export default {
     // Clean up scroll listeners
     window.removeEventListener('scroll', this.handleScroll);
     window.removeEventListener('scroll', this.handleParallax);
-    window.removeEventListener('resize', this.updateVideoSource);
     window.removeEventListener('resize', this.checkMobile);
     
-    // Disconnect video observer
-    if (this.videoObserver) {
-      this.videoObserver.disconnect();
-    }
+    // No video observer to disconnect
   }
 };
 </script>
@@ -800,17 +792,12 @@ export default {
 /* Search / Pickup section */
 .pickup-location-area {
   position: relative;
-  background: linear-gradient(135deg, rgba(16, 32, 64, 0.95), rgba(10, 20, 40, 0.95));
   padding: 2.25rem 0;
   z-index: 5;
 }
 
-[data-theme="light"] .pickup-location-area {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 248, 248, 0.98));
-}
-
-.pickup-card {
-  background: var(--bg-card);
+  .pickup-card {
+  background: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 1.25rem 1.25rem 1.5rem;
@@ -828,10 +815,10 @@ export default {
   opacity: 0.85;
 }
 
-.pickup-input {
+  .pickup-input {
   border-radius: 10px;
   border: 1px solid var(--border-color);
-  background-color: var(--bg-primary);
+  background-color: var(--bg-card);
   color: var(--text-primary);
 }
 
@@ -923,7 +910,9 @@ export default {
   opacity: 0;
   transform: translateX(-50%) translateY(10px);
 }
-
+.our-fleets{
+  background-color: var(--bg-secondary);
+}
 .scroll-indicator img {
   width: 38px;
   height: 38px;
@@ -1188,10 +1177,6 @@ export default {
   }
 }
 
-/* Floating animation */
-.float-animation {
-  animation: float 3s ease-in-out infinite;
-}
 
 /* Map stats with ping effect */
 .map-stats > div {
@@ -1244,21 +1229,87 @@ z-index: 0;
   margin: 0 !important;
 }
 
-/* Video styling */
-.hero-video {
+/* Video styling removed (static image only) */
+
+/* Image styling - visible and covers hero area */
+.hero-image {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  z-index: 2;
-  opacity: 1;
+  background-size: cover;
+  background-position: center;
+  z-index: 1;
 }
 
-/* Image styling - hidden as fallback */
-.hero-image {
-  display: none;
+/* Map overlay styles */
+.map-container{
+  background-color: var(--bg-secondary) !important;
+}
+.map-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 100%;
+}
+.map-wrapper img.img-fluid {
+  display: block;
+  width: 100%;
+  height: auto;
+  z-index: 1;
+}
+.map-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 2;
+}
+.city-path {
+  fill: none;
+  stroke: white;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 4px rgba(0,0,0,0.45));
+  stroke-opacity: 0.6;
+  vector-effect: non-scaling-stroke;
+}
+.city-dot {
+  fill: none;
+  stroke: white;
+  stroke-width: 2;
+  stroke-opacity: 0.65;
+  transform-origin: center;
+  transform-box: fill-box;
+  pointer-events: none;
+  /* Continuous pulsing ring */
+  animation: pulseRing 3s ease-out infinite;
+}
+.harare-dot {
+  /* Keep Harare as a subtle filled marker */
+  fill: #ffd966;
+  stroke: rgba(0,0,0,0.45);
+  stroke-width: 1.2;
+}
+
+@keyframes pulseRing {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.8);
+    opacity: 0.35;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
 }
 
 /* Ensure content is above video/image */
@@ -1299,6 +1350,7 @@ z-index: 0;
     justify-content: center;
     padding: 20px 16px;
     color: var(--accent-color) !important;
+        background-color: var(--bg-primary) !important;
     border: none !important;
     text-transform: uppercase;
     position: relative;
@@ -1310,7 +1362,6 @@ z-index: 0;
   /* Light mode page sections - keep gold text, change background to white */
   [data-theme="light"] .page-sections {
     color: var(--accent-color) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
   
   /* Animated progress bar */
@@ -1347,7 +1398,7 @@ z-index: 0;
   }
   
   .page-sections.active {
-    background: var(--royal-midnight-blue) !important;
+    background: var(--bg-card) !important;
     border-bottom: 4px solid transparent !important;
   }
   
@@ -1362,7 +1413,7 @@ z-index: 0;
   
 /* Push sections down to account for fixed background */
 #sections {
-  background-color: var(--bg-primary);
+  background-color: var(--page-bg);
   position: relative;
   z-index: 1;
 }
@@ -1381,18 +1432,15 @@ z-index: 0;
 }
 
 .section-description-text {
-  background-color: var(--bg-card);
+  background-color: var(--bg-secondary) !important;
   z-index: 4;
 }
 
 /* Provide a solid base behind late-page sections like fleets + footer */
-.bottom-section {
-  background-color: var(--bg-primary);
-}
 
 /* Bottom section background */
 .bottom-section {
-  background-color: var(--bg-primary);
+  background-color: var(--bg-secondary);
   padding: 2rem 1rem;
   margin: 0;
   width: 100%;
@@ -1406,19 +1454,12 @@ z-index: 0;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.75) 0%,
-    rgba(0, 0, 0, 0.6) 50%,
-    rgba(0, 0, 0, 0.75) 100%
-  );
+  height: 150%;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 5;
   pointer-events: none;
-  backdrop-filter: blur(2px);
 }
 
 .hero-backdrop-content {
@@ -1436,7 +1477,7 @@ z-index: 0;
   margin-bottom: 1.25rem;
   text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
   letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #ffffff 0%, #f0c14b 100%);
+  background:  #f0c14b;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1445,7 +1486,7 @@ z-index: 0;
 
 .hero-backdrop-subtitle {
   color: rgba(255, 255, 255, 0.95);
-  font-size: 1.35rem;
+  font-size: 2.35rem;
   margin-bottom: 2rem;
   line-height: 1.6;
   font-weight: 400;
@@ -1634,12 +1675,6 @@ z-index: 0;
   transform: translateY(30px);
   transition: opacity 1.5s ease-out 0.5s, transform 1.5s ease-out 0.5s;
 }
-/* .section-text{
-  background-color: #102040;
-}
-.section-description-text{
-  background-color: rgba(255, 253, 208, 0.85);
-} */
 .section-text p{
   font-size: large;
 }
@@ -1678,7 +1713,7 @@ z-index: 0;
   .nav-item {
     position: relative;
     z-index: 1;
-    background-color: var(--bg-primary);
+    background-color: var(--page-bg);
   }
   
   .row.g-0 {
@@ -1692,12 +1727,6 @@ z-index: 0;
     /* Keep full screen dimensions on mobile */
     #background-div{
       height: 100vh;
-    }
-    
-    /* Optimize video for mobile */
-    .hero-video {
-      object-fit: cover;
-      object-position: center;
     }
     
     /* Optimize image for mobile */

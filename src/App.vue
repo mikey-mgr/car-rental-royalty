@@ -744,14 +744,12 @@ export default {
 html{
   overflow-y: scroll;
   transition: all 0.3s ease;
-  background-color: var(--bg-primary);
+  background-color: var(--page-bg);
 }
 body {
   overflow-x: clip;
 }
-div{
-  font-family: Akrobat-Regular, sans-serif
-}
+/* Removed broad Akrobat override to let theme variables control typography */
 
 .container{
   padding-top: 30px;
@@ -760,7 +758,7 @@ div{
 
 #app{
   margin-top: 85px;
-  background-color: var(--bg-primary);
+  background-color: var(--page-bg);
   color: var(--text-primary);
   min-height: 100vh;
 }

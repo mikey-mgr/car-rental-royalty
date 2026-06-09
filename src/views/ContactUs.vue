@@ -82,7 +82,7 @@
                     <div class="card-body">
                         <div class="container pb-4 px-0">
                         <h5 class="card-title">Contact Center</h5>
-                            <p class="card-text">Email:<br><a href="#">office@DeRoyaltycarrental.com</a></p>
+                            <p class="card-text">Email:<br><a href="#">office@deroyaltycarrental.com</a></p>
                             <p>Phone: <br><a href="tel:+263712768037">+263712768037</a></p>
                             <p>Address:<br>2870 Mainway Meadows<br>Waterfalls, Harare</p><br>
                             <p>(available 24/7, sometimes you may be required to wait)</p>
@@ -98,7 +98,7 @@
                     <div class="card-body">
                         <div class="container px-0">
                         <h5 class="card-title">Ceo Office</h5>
-                            <p class="card-text">Email: <br><a href="#">Braso@DeRoyaltycarrental.com</a></p>
+                            <p class="card-text">Email: <br><a href="#">brian@deroyaltycarrental.com</a></p>
                             <p>Phone: <br><a href="tel:+263712768037">+263712768037</a></p><br>
                             <p>(available 24/7, sometimes you may be required to wait)</p>
                         </div>
@@ -240,7 +240,7 @@ export default {
 .contact-us{
   margin-top: -180px;
   margin-bottom: 2rem;
-  background-color: var(--bg-card);
+  background-color: var(--bg-primary) !important;
   transition: all 0.3s ease;
 }
 .card-img-top{
@@ -250,8 +250,11 @@ export default {
     padding: 0.5rem;
     border-radius: 8px;
 }
+.card-body{
+    background-color: var(--bg-primary) !important;
+}
 .card {
-  background-color: var(--bg-card) !important;
+  background-color: var(--bg-primary) !important;
   color: var(--text-primary) !important;
 }
 .contact-btn{
