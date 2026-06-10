@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.Mike.Proj.common.APIResponse;
+import com.Mike.Proj.dto.AddToWishlistDto;
 import com.Mike.Proj.dto.WishlistDto;
 import com.Mike.Proj.model.Product;
 import com.Mike.Proj.model.User;
 import com.Mike.Proj.model.Wishlist;
+import com.Mike.Proj.repository.ProductRepo;
 import com.Mike.Proj.repository.UserRepo;
 import com.Mike.Proj.service.WishlistService;
 import jakarta.validation.Valid;
@@ -32,12 +34,20 @@ public class WishlistController {
     @Autowired
     UserRepo userRepo;
 
+    @Autowired
+    ProductRepo productRepo;
+
     //save products as wishlist item
     @PostMapping("/add")
-    public ResponseEntity<APIResponse> addToWishlist(@Valid @RequestBody Product product){
+    public ResponseEntity<APIResponse> addToWishlist(@Valid @RequestBody AddToWishlistDto addToWishlistDto){
         
         //get user from security context
         User user = getUserFromContext();
+
+        // Get the product by ID
+        Integer productId = addToWishlistDto.getProductId();
+        Product product = productRepo.findById(productId)
+            .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + productId));
 
         //save the item in wishlist
         Wishlist wishlist = new Wishlist(user, product);

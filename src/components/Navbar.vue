@@ -21,10 +21,10 @@
         </button>
         <div class="collapse navbar-collapse mr-4 justify-content-center" id="navbarSupportedContent">
           <ul class="navbar-nav justify-content-evenly w-100">
-              <li class="nav-item dropdown" v-if="role == 'ADMIN'">
-                <a href="" class="nav-link text-light dropdown-toggle"  :class="{'active': $route.path==='/admin' || $route.path==='/admin/vehicle' || $route.path==='/admin/category' || $route.path==='/admin/users'}" id="navbarAdmin" data-toggle="dropdown">
+              <li class="nav-item dropdown" v-if="role === 'ADMIN'">
+                <button type="button" class="nav-link text-light dropdown-toggle border-0 bg-transparent"  :class="{'active': $route.path==='/admin' || $route.path==='/admin/vehicle' || $route.path==='/admin/category' || $route.path==='/admin/users'}" id="navbarAdmin" data-toggle="dropdown">
                   ADMIN
-                </a>
+                </button>
                 <ul class="dropdown-menu admin-dropdown" aria-labelledby="navbarAdmin">
                   <router-link v-if="role === 'ADMIN'" class="dropdown-item" :to="{name: 'AdminView'}" @click="closeNavbar">Dashboard</router-link>
                   <router-link v-if="role === 'ADMIN'" class="dropdown-item" :to="{name: 'AdminProduct'}" @click="closeNavbar">Vehicles</router-link>
@@ -42,19 +42,19 @@
             <!-- Dropdown for account -->
             <!-- <ul class="navbar-nav nav-underline mr-auto"> -->
               <li class="nav-item dropdown">
-                <a href=""
+                <button type="button"
                     class="nav-link text-light dropdown-toggle" 
                     :class="{'active': $route.path==='/wishlist' || $route.path==='/user/signup' || $route.path==='/user/signin'}"
                       id="navbarAccount" 
                         data-toggle="dropdown"
                         >ACCOUNT
-                </a>
+                </button>
                 <ul class="dropdown-menu account-dropdown" aria-labelledby="navbarAccount">
                   <router-link v-if="role" class="dropdown-item" :to="{name: 'WishList'}" @click="closeNavbar">Wishlist</router-link>
                   <a v-if="!role" class="dropdown-item" href="#" @click.prevent="openAuth('signup')">Signup</a>
                   <li><hr class="dropdown-divider"></li>
                   <a v-if="!role" class="dropdown-item" href="#" @click.prevent="openAuth('login')">Login</a>
-                  <a href="#" v-if="role" @click="logout" class="dropdown-item">Logout</a>
+                  <a href="#" v-if="role" @click.prevent="logout" class="dropdown-item">Logout</a>
                 </ul>
               </li>
               <li class="nav-item"><router-link :class="{'active': $route.path==='/contact'}" class="nav-link text-light" :to="{name: 'ContactUs'}" @click="closeNavbar">CONTACT</router-link></li>
@@ -91,10 +91,10 @@ import swal from 'sweetalert';
 
   export default {
     name: "NavbarView",
-    props:["cartCount", "users", "baseURL"],
+    props:["cartCount", "users", "baseURL", "role"],
       data() {
       return {
-        role: null,
+        roleLocal: null,
         isDarkMode: true,
         navbarHeightReady: false,
       }
@@ -167,23 +167,36 @@ import swal from 'sweetalert';
         localStorage.setItem('theme', theme);
       },
       async logout(){
-        await axios.get(`${this.baseURL}/logout`)
-        .then((res) =>{
-          if(res.data == "Logout Success"){
+        try {
+          const response = await axios.get(`${this.baseURL}/user/logout`, {
+            withCredentials: true
+          });
+          
+          console.log('Logout response:', response.data);
+          
+          if(response.data.message && response.data.message.toLowerCase().includes('success')) {
             swal({
               text: "You have logged out",
               icon: "success"
             });
-            this.role = null;
+            // Clear role from localStorage (parent will reactively update prop)
+            localStorage.removeItem('role');
             this.$emit("clearUsers");
-            this.$router.push({name: 'HomeView'});
             this.$emit("resetCartCount");
-            window.location.replace("/home");
-          } else swal({
-            text: "Something went wrong, please try again",
-            icon: "warning"
-          })
-        }).catch((err) => console.log('err', err));
+            this.$router.replace({ name: 'HomeView' }).then(() => window.location.reload());
+          } else {
+            swal({
+              text: "Something went wrong, please try again",
+              icon: "warning"
+            });
+          }
+        } catch (err) {
+          console.error('Logout error:', err);
+          swal({
+            text: "Logout failed: " + (err.response?.data?.message || err.message),
+            icon: "error"
+          });
+        }
       },
       openAuth(tab) {
         this.closeNavbar();
@@ -191,8 +204,16 @@ import swal from 'sweetalert';
       }
     },
     mounted(){
-      // Role will be provided by parent via users info or fetched separately.
-      this.$emit("usersInfo");
+      // Role is now passed as a prop from parent App.vue
+      // This ensures it updates reactively when user logs in/out
+      
+      // Only fetch user info if user is logged in (has a role)
+      if (this.role) {
+        console.log('User is logged in, fetching user info...');
+        this.$emit("usersInfo");
+      } else {
+        console.log('User is not logged in, skipping usersInfo call');
+      }
         
         // Load theme preference
         const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -276,8 +297,6 @@ import swal from 'sweetalert';
   right: 0;
   left: auto;
   top: 2.8rem;
-  background-color: var(--bg-card);
-  border-color: var(--border-color);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   border-radius: 8px;
   overflow: hidden;

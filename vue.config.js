@@ -4,11 +4,42 @@ const path = require('path');
 const fs = require('fs');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
+function bypassSpaNavigation(req) {
+  if (!req || req.method !== 'GET') {
+    return undefined;
+  }
+
+  const accept = String(req.headers && req.headers.accept ? req.headers.accept : '');
+  return accept.includes('text/html') ? '/index.html' : undefined;
+}
+
 module.exports = {
 
   devServer: {
     hot: false,           // Disable HMR - causing refresh loop
     liveReload: false,    // Disable live reload
+    // Proxy API requests to the backend — making them same-origin from the browser's
+    // perspective, so SameSite=Lax cookies (the default) flow correctly and CSRF works.
+    // Admin API endpoints are listed explicitly to avoid proxying Vue Router SPA routes
+    // (like /admin/category/*) which need historyApiFallback instead.
+    proxy: {
+      '/category': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
+      '/product': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
+      '/cart': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
+      '/wishlist': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
+      '/order': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
+      '/user': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
+      '/contact': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
+      '/login': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
+      '/logout': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
+      '/health': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
+      '/healthz': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
+      // Admin API endpoints only — NOT a catch-all for /admin/*
+      '/admin/users/': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
+      '/admin/all-cart-items/': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
+      '/admin/all-wishlists/': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
+    },
+    historyApiFallback: true,
     setupMiddlewares: (middlewares, devServer) => {
       if (!devServer || !devServer.app) {
         return middlewares;

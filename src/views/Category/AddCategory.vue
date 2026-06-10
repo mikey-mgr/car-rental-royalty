@@ -60,7 +60,7 @@
               text: "Category added successfully",
               icon: "success",
             });
-            window.location.replace("/admin/category");
+            this.$router.push({ name: 'AdminCategory' });
           })
           .catch((err) => {
             console.log(err);
