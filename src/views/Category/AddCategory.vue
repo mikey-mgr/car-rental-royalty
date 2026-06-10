@@ -62,9 +62,7 @@
             });
             this.$router.push({ name: 'AdminCategory' });
           })
-          .catch((err) => {
-            console.log(err);
-          });
+          .catch(() => undefined);
       },
     },
   };

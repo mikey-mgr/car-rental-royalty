@@ -178,8 +178,7 @@
                         text: 'Something went wrong',
                         icon: 'warning'
                     });
-                }).catch(err => {
-                    console.log('err', err);
+                }).catch(() => {
                     swal({
                         text: 'Failed to update car. Please try again.',
                         icon: 'error'
@@ -209,8 +208,7 @@
                         icon: 'warning'
                     })
                 }
-            }).catch((err) => {
-                console.log('err', err);
+            }).catch(() => {
                 swal({
                     text: 'Failed to delete car. Please try again.',
                     icon: 'error'

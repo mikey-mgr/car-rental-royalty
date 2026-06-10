@@ -197,11 +197,9 @@ export default {
         navigator.geolocation.getCurrentPosition(
           () => {
             // Location obtained - could be used for analytics or future features
-            console.log('User location obtained for better directions');
           },
           () => {
             // Silently handle error - user already has directions open
-            console.log('Location not available, using default directions');
           },
           { timeout: 5000, maximumAge: 300000 } // 5 second timeout, cache for 5 minutes
         );

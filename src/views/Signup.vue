@@ -100,7 +100,6 @@ export default {
                     this.$router.push({name: 'SigninView'})
                 })
                 .catch((err) => {
-                    console.error('err', err);
                     if(err.response && err.response.data == "User with email is already present"){
                         swal({
                             text: "A user with this email already exists",

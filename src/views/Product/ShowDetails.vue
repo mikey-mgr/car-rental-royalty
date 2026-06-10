@@ -217,7 +217,7 @@ export default {
             .then((res) => {
                 const result = res.data;
                 this.cartItems = result.cartItems;
-            }).catch((err) => {console.log("err", err)});
+            }).catch(() => undefined);
             if(this.cartItems!=null){
                 for(let i = 0;i < this.cartItems.length;this.cartItems[i++]){
                     if(this.id == this.cartItems[i].product.id){
@@ -237,7 +237,7 @@ export default {
             await axios.get(`${this.baseURL}/wishlist/`, { withCredentials: true })
             .then((result) => {
                 this.wishlist = result.data;
-            }).catch((err) => {console.log('err', err)});
+            }).catch(() => undefined);
             if(this.wishlist!=null){
                 for(let i = 0; i < this.wishlist.length; this.wishlist[i++]){
                     if(this.id == this.wishlist[i].productId){
@@ -287,7 +287,7 @@ export default {
                     this.inCart = true,
                     this.$emit("usersInfo")
                 }
-            }).catch((err) => console.error('err', err));
+            }).catch(() => undefined);
         },
 
         //async call activated when add to wishlist button is clicked
@@ -322,8 +322,7 @@ export default {
                     icon: "success"
                 });
                 }
-            }).catch((err) => {console.log("err", err);
-            });
+            }).catch(() => undefined);
         },
 
         //remove item from wishlist
@@ -343,7 +342,7 @@ export default {
                         icon: "error"
                     })
                 }
-            }).catch((err) => console.log('err', err));
+            }).catch(() => undefined);
         },
 
         //open lightbox with selected image

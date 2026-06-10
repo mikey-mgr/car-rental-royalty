@@ -37,16 +37,14 @@ export default {
                         });
                     }
                 }
-            }).catch((err) => console.log('err', err));
+            }).catch(() => undefined);
         },
         goToCheckout(){
-            console.log('checkoutBodyArray', this.checkoutBodyArray);
             axios.post(`${this.baseURL}/create-checkout-session`, this.checkoutBodyArray)
             .then((response) => {
                 localStorage.setItem('sessionId', response.data.sessionId);
-                console.log('session', response.data);
                 // this.stripe.redirectToCheckout({sessionId: response.data.sessionId})
-            }).catch((err) => console.log('err',err));
+            }).catch(() => undefined);
 
         }
     },

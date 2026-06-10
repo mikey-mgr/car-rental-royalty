@@ -105,7 +105,6 @@ export default {
                     });
                 }
             } catch (err) {
-                console.log('err', err);
                 if(err.response && err.response.status === 401){
                     swal({
                         text: "Invalid email or password",

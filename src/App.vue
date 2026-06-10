@@ -260,19 +260,31 @@ export default {
   methods: {
     //method to check if backend is ready and retry
     async checkBackendHealth() {
-      console.log('Checking backend health...');
       try {
         // Try to fetch the public endpoints
         await axios.all([
           axios.get("/category/list", { timeout: 5000 }), 
           axios.get("/product/list", { timeout: 5000 })
         ]);
-        // If successful, backend is ready - reload the page
-        console.log('Backend is ready! Reloading page...');
         window.location.reload();
       } catch (err) {
-        // Backend not ready yet, will retry on next interval
-        console.log('Backend not ready, retrying...');
+        void err;
+      }
+    },
+
+    //fetch CSRF token from backend on app startup
+    async fetchCsrfToken() {
+      try {
+        // Call dedicated CSRF token endpoint to ensure token is generated
+        const response = await axios.get("/user/csrf-token", { 
+          withCredentials: true,
+          timeout: 5000 
+        });
+        if (response.data?.token) {
+          setCachedCsrfToken(response.data.token);
+        }
+      } catch (err) {
+        void err;
       }
     },
 
@@ -304,16 +316,16 @@ export default {
 
     //method to fetch all products and categories (runs during initial app boot)
     async fetchData() {
-      await axios.all([
-        axios.get("/category/list", { timeout: 8000 }), 
-        axios.get("/product/list", { timeout: 8000 })
-      ])
-      .then(axios.spread((res_cat, res_prod) => {
+      try {
+        const [res_cat, res_prod] = await axios.all([
+          axios.get("/category/list", { timeout: 8000 }), 
+          axios.get("/product/list", { timeout: 8000 })
+        ]);
+
         this.categories = res_cat.data;
         this.products = res_prod.data;
         this.pieChartConfig(res_cat.data, res_prod.data);
 
-        // Hide initial-boot loading overlay once data is fetched
         if (this.showOverlayTimer) {
           clearTimeout(this.showOverlayTimer);
           this.showOverlayTimer = null;
@@ -326,26 +338,21 @@ export default {
         }
         this.backendBootFailed = false;
 
-        // Clear retry interval
         if (this.retryInterval) {
           clearInterval(this.retryInterval);
         }
-      })).catch((err) => {
-        console.log('Backend not available, showing loading screen...', err);
-
-        // If we've already timed out into error state, don't auto-retry
+      } catch (err) {
+        void err;
         if (this.backendBootFailed) {
           return;
         }
 
-        // Keep showing loading if backend is not ready
-        // Start retry interval to check backend health
         if (!this.retryInterval) {
           this.retryInterval = setInterval(() => {
             this.checkBackendHealth();
-          }, 3000); // Check every 3 seconds
+          }, 3000);
         }
-      });
+      }
     },
 
     //methods to fetch cart for logged in user
@@ -355,15 +362,11 @@ export default {
       // decide if the session is valid.
       
       try {
-        console.log('usersInfo() called - fetching user cart...');
         const response = await axios.get(`${this.baseURL}/cart/`, { withCredentials: true });
         const result = response.data;
-        
-        console.log('Cart response received:', result);
-        
+
         // Check if session is invalid (backend returns HTML login page)
         if(typeof result === 'string' && result.includes('Please sign in')) {
-          console.log('Session invalid - got login page HTML');
           this.$router.push({name: 'SigninView'});
           swal({
             text: "Your session has expired. Please login again.",
@@ -376,20 +379,16 @@ export default {
         if(result.totalCost && result.cartItems){
           this.usrCartItems = result.cartItems;
           this.usrTotalCost = result.totalCost.toFixed(2);
-          console.log('Cart items:', this.usrCartItems.length);
         } else { 
           this.usrCartItems = false; 
           this.usrTotalCost = false;
-          console.log('No cart items found');
         }
         if(result.cartItems){
           this.cartCount = result.cartItems.length;
         }
       } catch (err) {
-        console.error("usersInfo() error:", err.response?.status, err.message);
         // If we get a 401, clear session
         if(err.response && err.response.status === 401) {
-          console.log('Got 401, clearing session');
           this.clearInvalidSession();
         }
       }
@@ -401,7 +400,6 @@ export default {
       // We still try to fetch even if userRole is not immediately set.
       
       try {
-        console.log('adminInfo() called - fetching admin data...');
         //fetch all carts, wishlists and users
         const responses = await axios.all([
           axios.get(`${this.baseURL}/admin/all-cart-items/`), 
@@ -413,13 +411,10 @@ export default {
         const resWishlists = responses[1];
         const resUsers = responses[2];
         
-        console.log('Admin data received');
-        
         // Check if any response indicates invalid session
         if((typeof resUsers.data === 'string' && resUsers.data.includes('Please sign in')) ||
            (typeof resCarts.data === 'string' && resCarts.data.includes('Please sign in')) ||
            (typeof resWishlists.data === 'string' && resWishlists.data.includes('Please sign in'))) {
-          console.log('Session invalid - got login page HTML');
           this.$router.push({name: 'SigninView'});
           swal({
             text: "Your admin session has expired. Please login again.",
@@ -433,12 +428,9 @@ export default {
         this.totalCost = resCarts.data.totalCost;
         this.wishlists = resWishlists.data;
         this.users = resUsers.data;
-        console.log('Admin data loaded - users:', this.users?.length);
       } catch (err) {
-        console.error('adminInfo() error:', err.response?.status, err.message);
         // If we get a 401 or 403, clear session
         if(err.response && (err.response.status === 401 || err.response.status === 403)) {
-          console.log('Got 401/403, clearing session');
           this.clearInvalidSession();
         }
       }
@@ -636,24 +628,15 @@ export default {
 
         const loginInfo = loginResponse.data;
         if (loginInfo.status === "Login Success") {
-          console.log('Login successful, user role:', loginInfo.role);
-          
           // Store role in both data and localStorage
           this.userRole = loginInfo.role;
           localStorage.setItem("role", loginInfo.role);
-          console.log('Role stored:', loginInfo.role);
-          
           // Refresh CSRF token after login
-          console.log('Refreshing CSRF token...');
           await this.fetchCsrfToken();
-          
           // Fetch user cart info
-          console.log('Fetching user info...');
           await this.usersInfo();
-          
           // If admin, fetch admin info
           if (loginInfo.role === 'ADMIN') {
-            console.log('User is admin, fetching admin info...');
             await this.adminInfo();
           }
           
@@ -666,7 +649,7 @@ export default {
           const bsModal = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
           if (bsModal) bsModal.hide();
 
-          this.$router.replace({ name: 'HomeView' }).then(() => window.location.reload());
+        this.$router.replace({ name: 'HomeView' }).then(() => window.location.reload());
         } else {
           console.log('Login returned unexpected status:', loginInfo.status);
           swal({
@@ -675,8 +658,6 @@ export default {
           });
         }
       } catch (err) {
-        console.log('Login error:', err.response?.data || err.message);
-        
         // Try to get error message from backend
         let errorMsg = "Login failed. Please try again.";
         if (err.response?.data?.message) {
@@ -717,15 +698,11 @@ export default {
           password: this.authSignupPassword,
         };
 
-        console.log('Attempting signup with:', { email: user.email, firstName: user.firstName, lastName: user.lastName });
-
-        const response = await axios.post(`${this.baseURL}/user/signup`, user, {
+        await axios.post(`${this.baseURL}/user/signup`, user, {
           headers: {
             "Content-Type": "application/json",
           }
         });
-
-        console.log('Signup response:', response.data);
 
         swal({
           text: "Signup successful, please login now",
@@ -742,9 +719,6 @@ export default {
         this.authSignupPassword = null;
         this.authSignupConfirmPassword = null;
       } catch (err) {
-        console.error('Signup error response:', err.response?.data);
-        console.error('Signup error:', err.message);
-        
         if (err.response?.data?.message) {
           swal({
             text: err.response.data.message,
@@ -785,7 +759,6 @@ export default {
     const savedRole = localStorage.getItem('role');
     if (savedRole) {
       this.userRole = savedRole;
-      console.log('App mounted with existing role:', savedRole);
       this.usersInfo();
     }
     
@@ -834,7 +807,7 @@ export default {
         }, 2500);
 
         if (this.backendBootTimer) clearTimeout(this.backendBootTimer);
-        this.backendBootTimer = setTimeout(() => {
+          this.backendBootTimer = setTimeout(() => {
           this.backendBootFailed = true;
           if (this.retryInterval) { clearInterval(this.retryInterval); this.retryInterval = null; }
         }, 10000);
@@ -853,17 +826,18 @@ export default {
           try {
             localStorage.setItem('hasVisited', '1');
           } catch (e) {
-            console.warn('Unable to persist first-visit flag to localStorage', e);
+            void e;
           }
           startOverlayCountdown();
         }, 3000);
       } else {
         startOverlayCountdown();
       }
-    } catch (e) {
-      // If localStorage isn't available for any reason fall back to normal behavior
-      startOverlayCountdown();
-    }
+      } catch (e) {
+        void e;
+        // If localStorage isn't available for any reason fall back to normal behavior
+        startOverlayCountdown();
+      }
   },
 
   beforeUnmount() {

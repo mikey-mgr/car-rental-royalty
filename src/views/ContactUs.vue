@@ -215,8 +215,7 @@ export default {
                     });
                     this.$router.push({ name: 'HomeView' });
                 }
-            }).catch((err) => {
-                console.log('err', err);
+            }).catch(() => {
                 swal({
                     text: "Message failed to send. Please try again.",
                     icon: "error"

@@ -172,8 +172,6 @@ import swal from 'sweetalert';
             withCredentials: true
           });
           
-          console.log('Logout response:', response.data);
-          
           if(response.data.message && response.data.message.toLowerCase().includes('success')) {
             swal({
               text: "You have logged out",
@@ -191,7 +189,6 @@ import swal from 'sweetalert';
             });
           }
         } catch (err) {
-          console.error('Logout error:', err);
           swal({
             text: "Logout failed: " + (err.response?.data?.message || err.message),
             icon: "error"
@@ -209,10 +206,7 @@ import swal from 'sweetalert';
       
       // Only fetch user info if user is logged in (has a role)
       if (this.role) {
-        console.log('User is logged in, fetching user info...');
         this.$emit("usersInfo");
-      } else {
-        console.log('User is not logged in, skipping usersInfo call');
       }
         
         // Load theme preference

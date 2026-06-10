@@ -48,7 +48,7 @@
                         text: "Category has been updated successfully",
                         icon: "success"
                     })
-                }).catch(err => console.log('err', err));
+                }).catch(() => undefined);
             }
         },
         mounted() {

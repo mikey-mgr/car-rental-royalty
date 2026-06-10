@@ -16,18 +16,16 @@ const STATIC_ASSETS = [
 
 // Install event - precache static assets
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Installing version 2...');
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then(cache => cache.addAll(STATIC_ASSETS))
       .then(() => self.skipWaiting()) // Activate immediately
-      .catch(err => console.error('[Service Worker] Install failed:', err))
+      .catch(() => undefined)
   );
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activating version 2...');
   event.waitUntil(
     caches.keys()
       .then(cacheNames => {
@@ -35,7 +33,6 @@ self.addEventListener('activate', (event) => {
           cacheNames
             .filter(name => ![STATIC_CACHE, VIDEO_CACHE, IMAGE_CACHE].includes(name))
             .map(name => {
-              console.log('[Service Worker] Deleting old cache:', name);
               return caches.delete(name);
             })
         );
@@ -121,12 +118,10 @@ async function handleVideoRequest(request) {
 
     // If fully cached, return it
     if (cachedResponse) {
-      console.log('[Service Worker] Serving cached video:', request.url);
       return cachedResponse;
     }
 
     // Not in cache - fetch from network and cache it
-    console.log('[Service Worker] Fetching video from network:', request.url);
     const networkResponse = await fetch(request);
 
     if (!networkResponse || networkResponse.status !== 200) {
@@ -136,11 +131,9 @@ async function handleVideoRequest(request) {
     // Cache the successful response
     const responseToCache = networkResponse.clone();
     cache.put(request, responseToCache);
-    console.log('[Service Worker] Video cached:', request.url);
 
     return networkResponse;
   } catch (error) {
-    console.error('[Service Worker] Video fetch failed:', error);
     // Try to return from cache on network failure
     const cache = await caches.open(VIDEO_CACHE);
     return cache.match(request) || new Response('Video unavailable', { status: 503 });
@@ -157,7 +150,6 @@ async function handleImageRequest(request) {
     // Try cache first
     let cachedResponse = await cache.match(request);
     if (cachedResponse) {
-      console.log('[Service Worker] Serving cached image:', request.url);
       return cachedResponse;
     }
 
@@ -174,7 +166,6 @@ async function handleImageRequest(request) {
     
     return networkResponse;
   } catch (error) {
-    console.error('[Service Worker] Image fetch failed:', error);
     // Fallback to cache or return placeholder
     const cache = await caches.open(IMAGE_CACHE);
     return cache.match(request) || new Response('', { status: 404 });
@@ -206,7 +197,6 @@ async function handleStaticRequest(request) {
     
     return networkResponse;
   } catch (error) {
-    console.error('[Service Worker] Static request failed:', error);
     // Return cached version if available
     return caches.match(request);
   }
@@ -215,7 +205,6 @@ async function handleStaticRequest(request) {
 // Message handler for cache management (optional - allows client-side cache clearing)
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'CLEAR_CACHE') {
-    console.log('[Service Worker] Clearing all caches...');
     caches.keys().then(cacheNames => {
       Promise.all(cacheNames.map(name => caches.delete(name)));
     });

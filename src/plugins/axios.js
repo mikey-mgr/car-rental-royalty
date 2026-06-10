@@ -26,9 +26,6 @@ axios.interceptors.request.use(config => {
   if (csrfToken && (config.method === 'post' || config.method === 'put' || config.method === 'delete')) {
     config.headers = config.headers || {};
     config.headers['X-XSRF-TOKEN'] = csrfToken;
-    console.debug('CSRF token added to request:', csrfToken.substring(0, 10) + '...');
-  } else if (!csrfToken && (config.method === 'post' || config.method === 'put' || config.method === 'delete')) {
-    console.warn('No CSRF token found for', config.method.toUpperCase(), 'request to', config.url);
   }
 
   return config;
@@ -46,11 +43,9 @@ axios.interceptors.response.use(
         return Promise.reject(error);
       }
       if (!originalRequest || originalRequest._retry) {
-        console.warn('CSRF token validation failed and retry already attempted.');
         return Promise.reject(error);
       }
 
-      console.warn('CSRF token validation failed. Attempting to refresh CSRF token.');
       originalRequest._retry = true;
 
       return axios.get('/user/csrf-token', { withCredentials: true })
@@ -64,22 +59,17 @@ axios.interceptors.response.use(
           }
           return Promise.reject(error);
         })
-        .catch((fetchErr) => {
-          console.error('Failed to refresh CSRF token:', fetchErr);
-          return Promise.reject(error);
-        });
+        .catch(() => Promise.reject(error));
     }
 
     // Handle unauthorized (401) - session invalid
     if (error.response && error.response.status === 401) {
-      console.warn('Session expired or invalid. Clearing session.');
       clearSessionCookies();
     }
 
     // Handle redirect to login (when backend returns HTML login page)
     if (error.response && error.response.data && typeof error.response.data === 'string' &&
         error.response.data.includes('Please sign in')) {
-      console.warn('Session invalid, clearing cookies and redirecting to login.');
       clearSessionCookies();
       if (!window.location.pathname.includes('/signin')) {
         window.location.href = '/';
@@ -107,7 +97,7 @@ function clearSessionCookies() {
       }
     }
   } catch (e) {
-    console.error('Error clearing session:', e);
+    void e;
   }
 }
 

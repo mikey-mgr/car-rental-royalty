@@ -184,8 +184,7 @@
                         icon: "error"
                     })
                     this.$router.push({ name: 'AdminProduct' });
-                }).catch((err)=> {
-                    console.log("err", err);
+                }).catch(() => {
                     swal({
                         text: "Failed to add vehicle. Please try again.",
                         icon: "error"
