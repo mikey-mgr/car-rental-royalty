@@ -28,7 +28,7 @@ public class AdminController {
     @GetMapping("/users/")
     public ResponseEntity<List<UserDto>> getUsers(){
 
-        //find the user
+        //find the user.
         // User user = authenticationService.getUser(token);
 
         //verify if user is an admin

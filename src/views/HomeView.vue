@@ -118,11 +118,6 @@
                   Our Fleets
           </div>
           <div class="our-fleets">
-              <div class="row" id="ourFleets">
-                <div class="col-12 text-center">
-                  <h2 class="py-3 mt-5">What we're offering...</h2>
-                </div>
-              </div>
             <div class="container fade-in-scroll mb-5">
             <!--    display categories & Products-->
               <div class="row justify-content-evenly">
@@ -798,7 +793,6 @@ export default {
 
   .pickup-card {
   background: var(--bg-primary);
-  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 1.25rem 1.25rem 1.5rem;
   box-shadow: 0 14px 50px rgba(0, 0, 0, 0.25);
@@ -909,9 +903,6 @@ export default {
 .scroll-indicator.hidden {
   opacity: 0;
   transform: translateX(-50%) translateY(10px);
-}
-.our-fleets{
-  background-color: var(--bg-secondary);
 }
 .scroll-indicator img {
   width: 38px;
@@ -1350,7 +1341,7 @@ z-index: 0;
     justify-content: center;
     padding: 20px 16px;
     color: var(--accent-color) !important;
-        background-color: var(--bg-primary) !important;
+    background-color: var(--bg-primary) !important;
     border: none !important;
     text-transform: uppercase;
     position: relative;
@@ -1420,7 +1411,7 @@ z-index: 0;
 
 /* Ensure sections have proper background */
 .section-text {
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-primary);
   color: var(--text-primary) !important;
   z-index: 4;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -1432,7 +1423,7 @@ z-index: 0;
 }
 
 .section-description-text {
-  background-color: var(--bg-secondary) !important;
+  background-color: var(--bg-primary) !important;
   z-index: 4;
 }
 

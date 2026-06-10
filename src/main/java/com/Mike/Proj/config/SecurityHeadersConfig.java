@@ -25,7 +25,7 @@ public class SecurityHeadersConfig {
                 
                 // Content Security Policy - strict by default
                 response.setHeader("Content-Security-Policy", 
-                    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;");
+                    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; frame-ancestors 'none';");
                 
                 // HTTP Strict Transport Security - enforce HTTPS
                 response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
@@ -35,9 +35,6 @@ public class SecurityHeadersConfig {
                 
                 // Clickjacking protection
                 response.setHeader("X-Frame-Options", "DENY");
-                
-                // XSS protection (older browsers)
-                response.setHeader("X-XSS-Protection", "1; mode=block");
                 
                 // Referrer policy - limit referrer information leakage
                 response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");

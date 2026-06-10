@@ -3,6 +3,7 @@ package com.Mike.Proj.controller;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -38,7 +39,7 @@ public class ProductController {
 
     //add new products
     @PostMapping("/add")
-    public ResponseEntity<APIResponse> createProduct(@RequestBody ProductDto productDto) {
+    public ResponseEntity<APIResponse> createProduct(@Valid @RequestBody ProductDto productDto) {
     	
     	// changed OptionalInt to Optional<Integer> to match the type of Category id
     	Optional<Integer> categoryId = Optional.ofNullable(productDto.getCategoryId());
@@ -63,7 +64,7 @@ public class ProductController {
     //Update a product's details
     @SuppressWarnings("null")
     @PostMapping("/update/{productId}")
-    public ResponseEntity<APIResponse> updateProduct(@PathVariable("productId") Integer productId, @RequestBody ProductDto productDto) throws Exception {
+    public ResponseEntity<APIResponse> updateProduct(@PathVariable("productId") Integer productId, @Valid @RequestBody ProductDto productDto) throws Exception {
     	
     	// changed OptionalInt to Optional<Integer> to match the type of Category id
     	Optional<Integer> categoryId = Optional.ofNullable(productDto.getCategoryId());

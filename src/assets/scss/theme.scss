@@ -104,7 +104,6 @@ main, section, .page, .page-root, .content, .container, .row, .section-descripti
 .card {
   background-color: var(--bg-card) !important;
   color: var(--text-primary) !important;
-  border-color: var(--border-color) !important;
   transition: all 0.3s ease;
 }
 
@@ -415,8 +414,7 @@ hr.luxury-divider {
 
 // Dropdown
 .dropdown-menu {
-  background-color: var(--bg-card) !important;
-  border-color: var(--border-color) !important;
+  background-color: var(--bg-primary) !important;
 
   .dropdown-item {
     color: var(--text-primary) !important;

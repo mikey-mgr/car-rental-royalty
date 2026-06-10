@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,7 +35,7 @@ public class CategoryController {
 	
 	//create a new category
 	@PostMapping("/create")
-	public ResponseEntity<APIResponse> createCategory(@RequestBody @NonNull Category category) {
+	public ResponseEntity<APIResponse> createCategory(@Valid @RequestBody Category category) {
 		categoryService.createCategory(category);
 		return new ResponseEntity<APIResponse>(new APIResponse(true, "New category has been created"), HttpStatus.CREATED);
 		
@@ -53,7 +54,7 @@ public class CategoryController {
 
 	//update a category's details
 	@PostMapping("/update/{categoryId}")
-	public ResponseEntity<APIResponse> editCategory(@PathVariable("categoryId")Integer categoryId, @RequestBody Category updatedCategory){
+	public ResponseEntity<APIResponse> editCategory(@PathVariable("categoryId")Integer categoryId, @Valid @RequestBody Category updatedCategory){
 		if(!categoryService.findById(categoryId)){
 			return new ResponseEntity<APIResponse>(new APIResponse(false, "Category not found"), HttpStatus.NOT_FOUND);
 		}

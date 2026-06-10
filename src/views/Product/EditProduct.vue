@@ -202,7 +202,7 @@
                         text: "Car has been deleted successfully",
                         icon: "success"
                     });
-                    window.location.replace("/admin/vehicles");
+                    this.$router.push({ name: 'AdminProduct' });
                 } else {
                     swal({
                         text: 'Something went wrong',

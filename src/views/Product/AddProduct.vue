@@ -183,7 +183,7 @@
                         text: "Something went wrong",
                         icon: "error"
                     })
-                    window.location.replace("/admin/vehicles")
+                    this.$router.push({ name: 'AdminProduct' });
                 }).catch((err)=> {
                     console.log("err", err);
                     swal({

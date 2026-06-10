@@ -47,7 +47,7 @@
                         <hr class="mb-4">
                         <label class="col-12 font-italic">Already have an Account?</label>
                         <router-link :to="{name: 'SigninView'}"> 
-                                <button class="btn btn-primary login">Login</button>
+                                <button type="button" class="btn btn-primary login">Login</button>
                         </router-link>
                     </form>
                 </div>

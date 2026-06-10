@@ -3,15 +3,18 @@ package com.Mike.Proj.config;
 import java.util.Arrays;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
+import jakarta.servlet.http.HttpServletResponse;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
@@ -25,16 +28,15 @@ public class WebSecurityConfig {
     CorsConfigurationSource corsConfigSrc(){
         CorsConfiguration config = new CorsConfiguration();
         
-        // Get allowed origins from environment variable
         String allowedOrigins = System.getenv()
-            .getOrDefault("ALLOWED_ORIGINS", "http://localhost:8583");
+            .getOrDefault("ALLOWED_ORIGINS", "http://localhost:8081,http://localhost:8583");
         
         for (String origin : allowedOrigins.split(",")) {
             config.addAllowedOrigin(origin.trim());
         }
         
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization"));
+        config.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization", "X-XSRF-TOKEN"));
         config.setAllowCredentials(true);
         
         UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
@@ -42,18 +44,56 @@ public class WebSecurityConfig {
 
         return src;
     }
+
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http, BCryptPasswordEncoder bCryptPasswordEncoder, UserDetailsService userDetailsService) 
+            throws Exception {
+        return http.getSharedObject(AuthenticationManagerBuilder.class)
+            .userDetailsService(userDetailsService)
+            .passwordEncoder(bCryptPasswordEncoder)
+            .and()
+            .build();
+    }
     
     @SuppressWarnings("removal")
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
-        http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+        // Plain cookie-based CSRF — SameSite=Lax (default) works because frontend
+        // uses the Vue dev server proxy, making all requests same-origin...
+        CookieCsrfTokenRepository csrfRepo = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        
+        http.csrf()
+            .csrfTokenRepository(csrfRepo)
+            // Disable CSRF for API login endpoint - uses password auth instead
+            .ignoringRequestMatchers("/user/api-login")
             .and()
             .cors()
             .and()
+            .headers(headers -> headers
+                // Security headers for production
+                .contentSecurityPolicy(csp -> csp
+                    .policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' https://cdnjs.cloudflare.com;")
+                )
+                .httpStrictTransportSecurity(hsts -> hsts
+                    .includeSubDomains(true)
+                    .preload(true)
+                    .maxAgeInSeconds(31536000)
+                )
+                .frameOptions(frame -> frame.sameOrigin())
+                .contentTypeOptions()
+            )
             .authorizeHttpRequests((authz) -> authz
-                .requestMatchers("/health", "/healthz", "/product/list", "/product/find/**", "/category/list", "/category/show/**", "/user/**", "/contact/submit").permitAll()
+                .requestMatchers("/health", "/healthz", "/product/list", "/product/find/**", "/category/list", "/category/show/**", "/user/signup", "/user/login-fail", "/user/api-login", "/user/csrf-token", "/contact/submit").permitAll()
+                .requestMatchers("/user/signin", "/user/logout").permitAll()
                 .requestMatchers("/cart/**", "/wishlist/**", "/order/create-checkout-session").authenticated()
                 .anyRequest().hasRole("ADMIN"))
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("{\"status\":\"Fail\",\"message\":\"Unauthorized\"}");
+                })
+            )
             .formLogin()
                 .defaultSuccessUrl("/user/signin", true)
                 .usernameParameter("email")
