@@ -1,6 +1,7 @@
 package com.Mike.Proj.config;
 
 import java.util.Arrays;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,11 +25,8 @@ public class WebSecurityConfig {
     }
     
     @Bean
-    CorsConfigurationSource corsConfigSrc(){
+    CorsConfigurationSource corsConfigSrc(@Value("${ALLOWED_ORIGINS:http://localhost:8081,http://localhost:8583}") String allowedOrigins){
         CorsConfiguration config = new CorsConfiguration();
-        
-        String allowedOrigins = System.getenv()
-            .getOrDefault("ALLOWED_ORIGINS", "http://localhost:8081,http://localhost:8583");
         
         for (String origin : allowedOrigins.split(",")) {
             config.addAllowedOrigin(origin.trim());

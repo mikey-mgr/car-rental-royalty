@@ -34,7 +34,10 @@
                     </div>
                     <div class="form-group col-md-8 col-lg-6">
                         <label>Image Url</label>
-                        <input type="text" rows="3" v-model="imageURL" class="form-control" required>
+                        <div class="input-group">
+                            <input type="text" v-model="imageURL" class="form-control" required>
+                            <button type="button" class="btn btn-outline-secondary" @click="triggerUpload('imageURL')">Upload</button>
+                        </div>
                     </div>
                     <div class="form-group col-lg-6">
                         <label>Description</label>
@@ -58,6 +61,7 @@
                     <div class="input-group mb-2">
                         <div v-for="(image, index) in this.carouselImg" :key="index" class="input-group col-md-6 col-lg-4 mb-3 p-0 border border-0">
                             <input v-model="carouselImg[index]" type="text" placeholder="Enter an image url" class="form-control" style="border-radius: 0;" required>
+                            <button type="button" class="btn btn-outline-secondary" @click="triggerUpload(index)" style="border-radius: 0;">Upload</button>
                             <a v-if="canRemoveImg" class="btn btn-outline-danger" @click="removeImg(index)" style="border-radius: 0;">Remove</a>
                         </div>
                     </div>
@@ -65,6 +69,7 @@
                         <a v-if="canAddImg" class="btn btn-primary" @click="addImg" style="border-radius: 2px;">Add Image</a>
                     </div>
                 </div>
+                <input type="file" ref="fileInput" accept="image/*" style="display:none" @change="handleUpload">
                 <div class="container">
                     <button
                       type="submit"
@@ -100,7 +105,8 @@
                 bookingStatus: "",
                 features: ["", "", ""],
                 carouselImg: ["", "", "", ""],
-                isSubmitting: false
+                isSubmitting: false,
+                uploadTarget: null
             }
         },
         computed: {
@@ -118,6 +124,39 @@
             },
         },
         methods: {
+            triggerUpload(target) {
+                this.uploadTarget = target;
+                this.$refs.fileInput.click();
+            },
+            async handleUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const formData = new FormData();
+                formData.append('file', file);
+                try {
+                    const res = await axios.post(this.baseURL + '/admin/upload', formData, {
+                        // DO NOT set Content-Type manually — Axios must auto-set
+                    // the boundary parameter for multipart/form-data to work
+                    });
+                    console.log('Upload response:', res.data);
+                    if (res.data.success && res.data.message) {
+                        const url = res.data.message;
+                        console.log('Setting imageURL to:', url);
+                        if (this.uploadTarget === 'imageURL') {
+                            this.imageURL = url;
+                        } else if (typeof this.uploadTarget === 'number') {
+                            this.$set(this.carouselImg, this.uploadTarget, url);
+                        }
+                        swal({ text: 'Image uploaded!', icon: 'success', timer: 1500 });
+                    } else {
+                        swal({ text: res.data.message || 'Upload failed', icon: 'error' });
+                    }
+                } catch (err) {
+                    const msg = err.response?.data?.message || err.message || 'Upload failed';
+                    swal({ text: msg, icon: 'error' });
+                }
+                e.target.value = '';
+            },
             addFeature(){
                 if(this.canAddFeature){
                     this.features.push("");

@@ -16,9 +16,13 @@
                     </div>
                     <div class="form-group">
                         <label>Image URL</label>
-                        <input type="text" class="form-control"
-                                v-model="category.imageUrl"  required/>
+                        <div class="input-group">
+                            <input type="text" class="form-control"
+                                    v-model="category.imageUrl"  required/>
+                            <button type="button" class="btn btn-outline-secondary" @click="triggerUpload">Upload</button>
+                        </div>
                     </div>
+                    <input type="file" ref="fileInput" accept="image/*" style="display:none" @change="handleUpload">
                     <button type="button" class="btn btn-primary mt-3" @click="editCategory" >Submit</button>
                 </form>
             </div>
@@ -37,6 +41,27 @@
             }
         },
         methods: {
+            triggerUpload() {
+                this.$refs.fileInput.click();
+            },
+            async handleUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const formData = new FormData();
+                formData.append('file', file);
+                try {
+                    const res = await axios.post(this.baseURL + '/admin/upload', formData);
+                    if (res.data.success && res.data.message) {
+                        this.category.imageUrl = res.data.message;
+                    } else {
+                        swal({ text: res.data.message || 'Upload failed', icon: 'error' });
+                    }
+                } catch (err) {
+                    const msg = err.response?.data?.message || err.message || 'Upload failed';
+                    swal({ text: msg, icon: 'error' });
+                }
+                e.target.value = '';
+            },
             async editCategory() {
                 delete this.category["products"]
                 // console.log('category', this.category)

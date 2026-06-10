@@ -24,7 +24,10 @@
                 </div>
                 <div class="form-group col-md-4">
                     <label>Image URL</label>
-                    <input type="text" class="form-control" v-model="product.imageURL" required/>
+                    <div class="input-group">
+                        <input type="text" class="form-control" v-model="product.imageURL" required/>
+                        <button type="button" class="btn btn-outline-secondary" @click="triggerUpload('imageURL')">Upload</button>
+                    </div>
                 </div>
                 <div class="form-group col-md-4">
                     <label>Price</label>
@@ -57,6 +60,7 @@
                     <div class="input-group mb-2">
                         <div v-for="(image, index) in this.carouselImg" :key="index" class="input-group col-md-6 col-lg-4 mb-3 p-0 border border-0">
                             <input v-model="carouselImg[index]" type="text" placeholder="Enter an image url" class="form-control" style="border-radius: 0;" required>
+                            <button type="button" class="btn btn-outline-secondary" @click="triggerUpload(index)" style="border-radius: 0;">Upload</button>
                             <a v-if="canRemoveImg" class="btn btn-outline-danger" @click="removeImg(index)" style="border-radius: 0;">Remove</a>
                         </div>
                     </div>
@@ -64,6 +68,7 @@
                         <a v-if="canAddImg" class="btn btn-primary" @click="addImg" style="border-radius: 2px;">Add Image</a>
                     </div>
                 </div>
+                <input type="file" ref="fileInput" accept="image/*" style="display:none" @change="handleUpload">
                 <div class="col-12 mt-3">
                     <button
                       type="submit"
@@ -101,7 +106,8 @@
             id: null,
             features: ["", "", ""],
             carouselImg: ["", "", "", ""],
-            isSubmitting: false
+            isSubmitting: false,
+            uploadTarget: null
         }
     },
 
@@ -132,6 +138,35 @@
             }
         },
         
+        triggerUpload(target) {
+            this.uploadTarget = target;
+            this.$refs.fileInput.click();
+        },
+        async handleUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+                const res = await axios.post(this.baseURL + '/admin/upload', formData, {
+                    // Don't set Content-Type — Axios must add boundary
+                });
+                if (res.data.success && res.data.message) {
+                    const url = res.data.message;
+                    if (this.uploadTarget === 'imageURL') {
+                        this.product.imageURL = url;
+                    } else if (typeof this.uploadTarget === 'number') {
+                        this.$set(this.carouselImg, this.uploadTarget, url);
+                    }
+                } else {
+                    swal({ text: res.data.message || 'Upload failed', icon: 'error' });
+                }
+                } catch (err) {
+                    const msg = err.response?.data?.message || err.message || 'Upload failed';
+                    swal({ text: msg, icon: 'error' });
+                }
+            e.target.value = '';
+        },
         ifFeaturesEmpty(){
             if(!this.product.features){
                 this.features = ["", "", ""]
