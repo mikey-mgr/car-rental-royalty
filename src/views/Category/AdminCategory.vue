@@ -3,9 +3,11 @@
       <div class="row">
         <div class="col-12 text-center">
           <h3 class="pt-4 pb-4">Admin Categories</h3>
-          <router-link :to="{ name: 'AddCategory' }">
-            <button class="btn btn-add-cat" style="float:right">Add Category</button>
-          </router-link>
+          <div class="d-flex justify-content-end gap-2 mb-2">
+            <router-link :to="{ name: 'AddCategory' }">
+              <button class="btn btn-add-cat">Add Category</button>
+            </router-link>
+          </div>
         </div>
       </div>
       <div class="row justify-content-evenly">
@@ -43,6 +45,15 @@
   color: white;
 }
 .btn-add-cat:hover{
+  color: black;
+  background-color: white;
+}
+.btn-seed-cat{
+  border-color: #6c757d;
+  background-color: #6c757d;
+  color: white;
+}
+.btn-seed-cat:hover{
   color: black;
   background-color: white;
 }

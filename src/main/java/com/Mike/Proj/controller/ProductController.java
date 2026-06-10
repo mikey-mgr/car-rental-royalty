@@ -78,7 +78,7 @@ public class ProductController {
             return new ResponseEntity<APIResponse>(new APIResponse(false, "Product does not exist"), HttpStatus.BAD_REQUEST);
          }
 
-         productService.updateProduct(productDto, productId);
+         productService.updateProduct(productDto, productId, optionalCategory.get());
          return new ResponseEntity<APIResponse>(new APIResponse(true, "Product has been updated"), HttpStatus.OK);
     }
 

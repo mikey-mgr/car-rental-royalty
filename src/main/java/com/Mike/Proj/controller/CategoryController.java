@@ -24,7 +24,7 @@ import com.Mike.Proj.service.ProductService;
 @RestController
 @RequestMapping("/category")
 //for configuring access to the backend controller from
-//a different server/origin ie. vue app
+//a different server/origin ie. vue app..
 public class CategoryController {
 
 	@Autowired

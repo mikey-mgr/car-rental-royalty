@@ -74,7 +74,7 @@ public class ProductService {
 
     
     @SuppressWarnings("null")
-    public void updateProduct(ProductDto productDto, Integer productId) throws Exception {
+    public void updateProduct(ProductDto productDto, Integer productId, Category category) throws Exception {
         Optional<Product> optionalProduct = productRepo.findById(productId);
 
         // throw an exception if product doesnt exist
@@ -86,6 +86,7 @@ public class ProductService {
         product.setImageURL(productDto.getImageURL());
         product.setName(productDto.getName());
         product.setPrice(productDto.getPrice());
+        product.setCategory(category);
         product.setBookingStatus(productDto.getBookingStatus());
         product.setFeatures(productDto.getFeatures());
         product.setCarousel_imgs(productDto.getCarousel_imgs());

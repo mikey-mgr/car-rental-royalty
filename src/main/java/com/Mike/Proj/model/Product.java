@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,6 +16,8 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+
+import com.Mike.Proj.config.StringListConverter;
 
 @Entity
 @Table(name = "car")
@@ -33,9 +36,11 @@ public class Product {
     @Column(length = 1000)
     private @NotNull String description;
     private @NotNull String bookingStatus;
-    @Column(length = 1000)
+    @Convert(converter = StringListConverter.class)
+    @Column(columnDefinition = "TEXT")
     private @NotNull ArrayList<String> features;
-    @Column(length = 10000)
+    @Convert(converter = StringListConverter.class)
+    @Column(columnDefinition = "TEXT")
     private @NotNull ArrayList<String> carousel_imgs;
 
     public Product(){
