@@ -1404,7 +1404,7 @@ z-index: 0;
   
 /* Push sections down to account for fixed background */
 #sections {
-  background-color: var(--bg-primary);
+  background-color: var(--page-bg);
   position: relative;
   z-index: 1;
 }
@@ -1704,7 +1704,7 @@ z-index: 0;
   .nav-item {
     position: relative;
     z-index: 1;
-    background-color: var(--bg-primary);
+    background-color: var(--page-bg);
   }
   
   .row.g-0 {

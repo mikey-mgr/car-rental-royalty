@@ -893,7 +893,7 @@ export default {
 html{
   overflow-y: scroll;
   transition: all 0.3s ease;
-  background-color: var(--bg-primary);
+  background-color: var(--page-bg);
 }
 body {
   overflow-x: clip;
@@ -907,7 +907,7 @@ body {
 
 #app{
   margin-top: 85px;
-  background-color: var(--bg-primary);
+  background-color: var(--page-bg);
   color: var(--text-primary);
   min-height: 100vh;
 }
