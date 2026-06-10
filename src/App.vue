@@ -258,15 +258,15 @@ export default {
     }
   },
   methods: {
-    //method to check if backend is ready and retry
+    //method to retry fetching data when backend isn't ready yet
     async checkBackendHealth() {
       try {
-        // Try to fetch the public endpoints
         await axios.all([
-          axios.get("/category/list", { timeout: 5000 }), 
-          axios.get("/product/list", { timeout: 5000 })
+          axios.get("/category/list", { timeout: 10000 }), 
+          axios.get("/product/list", { timeout: 10000 })
         ]);
-        window.location.reload();
+        // Backend is up — fetch data again naturally (no reload loop)
+        this.fetchData();
       } catch (err) {
         void err;
       }
@@ -292,8 +292,8 @@ export default {
     async fetchData() {
       try {
         const [res_cat, res_prod] = await axios.all([
-          axios.get("/category/list", { timeout: 8000 }), 
-          axios.get("/product/list", { timeout: 8000 })
+          axios.get("/category/list", { timeout: 15000 }), 
+          axios.get("/product/list", { timeout: 15000 })
         ]);
 
         this.categories = res_cat.data;
@@ -783,7 +783,7 @@ export default {
           this.backendBootTimer = setTimeout(() => {
           this.backendBootFailed = true;
           if (this.retryInterval) { clearInterval(this.retryInterval); this.retryInterval = null; }
-        }, 10000);
+        }, 20000);
       }
     };
 

@@ -44,6 +44,12 @@ self.addEventListener('activate', (event) => {
 // Fetch event - implement caching strategy with Range Request support
 self.addEventListener('fetch', (event) => {
   const { request } = event;
+
+  // IGNORE non-http(s) schemes (chrome-extension, moz-extension, etc.)
+  if (!request.url.startsWith('http://') && !request.url.startsWith('https://')) {
+    return;
+  }
+
   const url = new URL(request.url);
 
   // IGNORE localhost (dev mode)
