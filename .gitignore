@@ -10,3 +10,4 @@ target/
 .env
 UPGRADE_GUIDE.md
 SVG_CAR_LOADING_ANIMATION.md
+start_backend.bat

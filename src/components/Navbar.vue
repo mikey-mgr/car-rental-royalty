@@ -44,17 +44,17 @@
               <li class="nav-item dropdown">
                 <button type="button"
                     class="nav-link text-light dropdown-toggle" 
-                    :class="{'active': $route.path==='/wishlist' || $route.path==='/user/signup' || $route.path==='/user/signin'}"
+                    :class="{'active': $route.path==='/wishlist'}"
                       id="navbarAccount" 
                         data-toggle="dropdown"
                         >ACCOUNT
                 </button>
                 <ul class="dropdown-menu account-dropdown" aria-labelledby="navbarAccount">
                   <router-link v-if="role" class="dropdown-item" :to="{name: 'WishList'}" @click="closeNavbar">Wishlist</router-link>
-                  <a v-if="!role" class="dropdown-item" href="#" @click.prevent="openAuth('signup')">Signup</a>
+                  <a v-if="!role" class="dropdown-item ff-regular" href="#" @click.prevent="openAuth('signup')">Signup</a>
                   <li><hr class="dropdown-divider"></li>
-                  <a v-if="!role" class="dropdown-item" href="#" @click.prevent="openAuth('login')">Login</a>
-                  <a href="#" v-if="role" @click.prevent="logout" class="dropdown-item">Logout</a>
+                  <a v-if="!role" class="dropdown-item ff-regular" href="#" @click.prevent="openAuth('login')">Login</a>
+                  <a href="#" v-if="role" @click.prevent="logout" class="dropdown-item ff-regular">Logout</a>
                 </ul>
               </li>
               <li class="nav-item"><router-link :class="{'active': $route.path==='/contact'}" class="nav-link text-light" :to="{name: 'ContactUs'}" @click="closeNavbar">CONTACT</router-link></li>
@@ -135,8 +135,9 @@ import swal from 'sweetalert';
             // Wait for collapse transition to complete (Bootstrap default is 350ms)
             setTimeout(() => {
               // Now measure the collapsed height
-              const navbarHeight = navbar.offsetHeight;
-              document.documentElement.style.setProperty('--navbar-height', `${navbarHeight}px`);
+              const navbarHeight = navbar.getBoundingClientRect().height;
+              const isHidden = document.documentElement.getAttribute('data-navbar-hidden') === 'true';
+              document.documentElement.style.setProperty('--navbar-height', isHidden ? '0px' : `${navbarHeight}px`);
               
               // Show sticky sections with fade-in
               document.documentElement.classList.remove('measuring-navbar');
@@ -152,8 +153,9 @@ import swal from 'sweetalert';
           }
           
           // Navbar is already collapsed, measure directly
-          const navbarHeight = navbar.offsetHeight;
-          document.documentElement.style.setProperty('--navbar-height', `${navbarHeight}px`);
+          const navbarHeight = navbar.getBoundingClientRect().height;
+          const isHidden = document.documentElement.getAttribute('data-navbar-hidden') === 'true';
+          document.documentElement.style.setProperty('--navbar-height', isHidden ? '0px' : `${navbarHeight}px`);
           
           // Show sticky sections with fade-in
           document.documentElement.classList.remove('measuring-navbar');
@@ -447,7 +449,6 @@ a.nav-link:not(.dropdown-toggle).router-link-exact-active::after {
 .nav-link.dropdown-toggle {
   display: flex !important;
   align-items: center !important;
-  justify-content: center !important;
 }
 
 /* Active dropdown styling - also just highlighted text */
@@ -620,13 +621,29 @@ a.nav-link:not(.dropdown-toggle).router-link-exact-active::after {
   .nav-link.text-light.dropdown-toggle,
   .nav-link.text-light.dropdown-toggle:link,
   .nav-link.text-light.dropdown-toggle:visited {
-    font-family: var(--font-akrobat-regular) !important;
+    font-family: var(--font-akrobat-regular);
     font-weight: 400 !important;
     text-transform: uppercase !important;
+    padding-left: 0px !important;
   }
+
+  .ff-bold{
+    font-family: var(--font-akrobat-bold);
+  }
+  .ff-semibold{
+    font-family: var(--font-akrobat-semibold);
+  }
+  .ff-regular{
+    font-family: var(--font-akrobat-regular) !important;
+  }
+  .ff-light{
+    font-family: var(--font-akrobat-light);
+  }
+
   a.nav-link.text-light{
     padding-left: 0px !important;
   }
+
 
   .theme-toggle-wrapper {
     margin: 0.5rem 0;

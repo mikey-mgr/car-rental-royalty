@@ -1,3 +1,47 @@
+// Akrobat Font Faces
+@font-face {
+  font-family: 'Akrobat ExtraLight';
+  src: url('../akrobat/Akrobat-ExtraLight.otf') format('opentype');
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Akrobat Light';
+  src: url('../akrobat/Akrobat-Light.otf') format('opentype');
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Akrobat Regular';
+  src: url('../akrobat/Akrobat-Regular.otf') format('opentype');
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Akrobat SemiBold';
+  src: url('../akrobat/Akrobat-SemiBold.otf') format('opentype');
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Akrobat Bold';
+  src: url('../akrobat/Akrobat-Bold.otf') format('opentype');
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Akrobat ExtraBold';
+  src: url('../akrobat/akrobat-extrabold-webfont.ttf') format('truetype');
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Akrobat Black';
+  src: url('../akrobat/Akrobat-Black.otf') format('opentype');
+  font-style: normal;
+  font-display: swap;
+}
+
 // Luxury Color Palette
 :root {
   // Primary Colors
@@ -11,9 +55,11 @@
   --gold-gradient-end: rgb(255, 215, 0);
 
   // Fonts
-  --font-akrobat: 'Akrobat', sans-serif;
-  --font-akrobat-regular: 'Akrobat', sans-serif;
-  --font-akrobat-bold: 'Akrobat', sans-serif;
+  --font-akrobat: 'Akrobat Regular', sans-serif;
+  --font-akrobat-regular: 'Akrobat Regular', sans-serif;
+  --font-akrobat-bold: 'Akrobat Bold', sans-serif;
+  --font-akrobat-semibold: 'Akrobat SemiBold', sans-serif;
+  --font-akrobat-light: 'Akrobat Light', sans-serif;
   --font-roboto: 'Roboto', sans-serif;
 
   // Dark Mode (Default)
@@ -41,6 +87,9 @@ body, html, #app {
 .navbar, footer, .footer {
   font-family: var(--font-roboto);
   font-weight: 300;
+}
+.card-title{
+  font-family: var(--font-akrobat-bold);
 }
 
 /* Nav links, navbar titles, and footer headings use Akrobat regular */
@@ -132,8 +181,8 @@ main, section, .page, .page-root, .content, .container, .row, .section-descripti
 
 /* Enforce Roboto Light for general content with high specificity to override component-scoped styles */
 html, body, #app, main, section, .page, .content, .container, .row, p, li, a, span, input, button, textarea {
-  font-family: var(--font-roboto) !important;
-  font-weight: 300 !important;
+  font-family: var(--font-roboto);
+  font-weight: 300;
 }
 
 /* Navbar general text should use Roboto Light, but keep nav links in Akrobat */
@@ -210,7 +259,7 @@ footer li.text-light.fw-bold.pb-2 {
 /* Keep general content in Roboto Light; exclude navbar/footer which have their own font rules */
 main, .page-content, .container, .content, .card-body, .card, p, li, span {
   font-family: var(--font-roboto) !important;
-  font-weight: 300 !important;
+  font-weight: 300;
 }
 .navbar .nav-link, .nav-link, .nav a, .nav-link.dropdown-toggle, .navbar-brand {
   font-family: var(--font-akrobat-regular) !important;
@@ -430,7 +479,6 @@ hr.luxury-divider {
 .modal-content {
   background-color: var(--bg-secondary) !important;
   color: var(--text-primary) !important;
-  border-color: var(--border-color) !important;
 }
 
 .modal-header {

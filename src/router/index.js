@@ -9,8 +9,6 @@ import EditCategory from "../views/Category/EditCategory";
 import EditProduct from "../views/Product/EditProduct"
 import ShowDetails from "../views/Product/ShowDetails";
 import ListProducts from "../views/Category/ListProducts";
-import Signup from "../views/Signup";
-import Signin from "../views/Signin";
 import Wishlist from "../views/Product/Wishlist";
 import Cart from "../views/Cart";
 import Success from "../views/payment/Success";
@@ -96,18 +94,6 @@ const routes = [
     path: '/category/show/:id',
     name: 'ListProducts',
     component: ListProducts
-  },
-  //SignUp page
-  {
-    path:'/user/signup',
-    name: 'SignupView',
-    component: Signup
-  },
-  //SignIn page
-  {
-    path:'/user/signin',
-    name: 'SigninView',
-    component: Signin
   },
   //wishlist page
   {

@@ -131,6 +131,28 @@ Since GitHub Pages doesn't support backend applications, you can deploy this ful
 - **Memory:** 512MB RAM on free tier
 - **Backend URL:** `https://deroyalty-car-rental-backend.onrender.com`
 
+### Vue Router 404 on Page Refresh (SPA Routing)
+
+**Symptom**: Direct navigation to routes (e.g., `/home`, `/contact`) returns 404, but clicking links works.
+
+**Cause**: Render's static site hosting doesn't support `_redirects` files like Netlify. Requests for non-root paths go to the server, which has no matching file.
+
+**Fix — Add a Rewrite rule in Render Dashboard:**
+
+1. Go to your frontend static site on Render
+2. Click the **Redirects/Rewrites** tab
+3. Add a new rule:
+
+   | Field | Value |
+   |-------|-------|
+   | **Source** | `/*` |
+   | **Destination** | `/index.html` |
+   | **Type** | **Rewrite** |
+
+4. Save and redeploy
+
+This serves `index.html` for every unmatched route while keeping the URL intact, letting Vue Router handle navigation client-side.
+
 ### Troubleshooting
 
 - **Build fails:** Check Java version (17) and build logs

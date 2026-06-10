@@ -1,19 +1,25 @@
 <template>
 <div class="main-div">
-    <div class="container p-3" v-if="product">
-        <div class="row align-items-center">
-            <!-- display image, bootstrap carousel-->
-            
-            <div class="col-md-6 col-12">
-                <div id="autoplayCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
+    <div class="container-fluid my-5 px-5" v-if="product">
+        <div class="row g-3 top-section mb-3">
+            <div class="col-lg-6 col-12">
+                <div id="autoplayCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000" data-bs-wrap="true">
                     <div class="carousel-inner">
-                        <!-- dynamic images -->
                         <div class="carousel-item active">
-                            <img :src="resolvedMainImage" class="d-block w-100" alt="Vehicle image" @click="openLightbox(resolvedMainImage)" style="cursor: pointer;">
+                            <img :src="resolvedMainImage" class="carousel-img w-100" alt="Vehicle image" @click="openLightbox(resolvedMainImage)" style="cursor: pointer;">
                         </div>
                         <div v-for="(image, index) in filteredCarouselImages" :key="index" class="carousel-item">
-                            <img :src="image" class="d-block w-100" alt="vehicle image" @click="openLightbox(image)" style="cursor: pointer;">
+                            <img :src="image" class="carousel-img w-100" alt="vehicle image" @click="openLightbox(image)" style="cursor: pointer;">
                         </div>
+                    </div>
+                    <div v-if="slideCount > 1" class="carousel-indicators">
+                        <button v-for="i in slideCount" :key="i" type="button"
+                            data-bs-target="#autoplayCarousel"
+                            :data-bs-slide-to="i - 1"
+                            :class="{ active: i === 1 }"
+                            :aria-current="i === 1 ? 'true' : undefined"
+                            :aria-label="'Slide ' + i">
+                        </button>
                     </div>
                     <button class="carousel-control-prev" type="button" data-bs-target="#autoplayCarousel" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -25,150 +31,150 @@
                     </button>
                 </div>
             </div>
-            <!-- display product details -->
-            <div class="col-md-6 col-12">
-                <h4 class="border-bottom border-dark py-2">{{ product.name }}</h4>
-                <h6 class="category font-style-italic">{{ category.categoryName }}</h6>
-                <h6 class="fw-bold">${{ product.price }} per day</h6>
-                <p>{{ product.description }}</p>
-                <div class="mb-3">
-                  <BookingStatusBadge :status="product.bookingStatus" />
+            <div class="col-lg-6 col-12 d-flex flex-column">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                    <div>
+                        <h4 class="mb-0">{{ product.name }}</h4>
+                        <h6 class="category font-style-italic mb-1">{{ category.categoryName }}</h6>
+                    </div>
+                    <h5 class="fw-bold mb-0 price-lg">${{ product.price }} <span class="price-unit">/ day</span></h5>
                 </div>
-                <form @submit="addToCart">
-                    <div class="d-flex flex-row justify-content-between">
-                        <div class="input-group input-group-parent p-0">
-                            <div class="input-group col-md-6 col-lg-5 col-xl-5 col-sm-6 p-0 mb-2">
-                                <span class="input-group-text">Pickup date</span>
-                                <input type="date" :min="minDate" id="pickup-date-input" class="form-control" v-model="pickupDate" required/>
+                <p class="detail-desc mb-2">{{ product.description }}</p>
+                <div class="mb-2">
+                    <BookingStatusBadge :status="product.bookingStatus" />
+                </div>
+                <form @submit="addToCart" class="mb-2">
+                    <div class="row g-2">
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">Pickup</span>
+                                <input type="date" :min="minDate" id="pickup-date-input" class="form-control" v-model="pickupDate" required @change="onPickupDateChange"/>
                             </div>
-                            <div class="input-group col-md-6 col-lg-5 col-xl-6 col-sm-6 p-0 mb-2">
-                                <span class="input-group-text">Dropoff date</span>
-                                <input type="date" :min="minDate" id="dropoff-date-input" class="form-control" v-model="dropoffDate" required/>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">Dropoff</span>
+                                <input type="date" :min="dropoffMinDate" id="dropoff-date-input" class="form-control" v-model="dropoffDate" required @change="validateDropoffDate"/>
                             </div>
-                            <div class="input-group col-md-6 col-lg-5 col-xl-5 col-sm-6 p-0 mb-2">
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="input-group input-group-sm">
                                 <span class="input-group-text">Dropoff time</span>
-                                <input type="time" id="dropoff-time-input" class="form-control" v-model="dropoffTime" placeholder="HH:MM" required/>
+                                <input type="time" id="dropoff-time-input" class="form-control" v-model="dropoffTime" required/>
                             </div>
-                            <div class="col-12 p-0">
-                                <button type="submit" :disabled="inCart"
-                                    class="btn btn-primary add-to-cart-button">{{cartString}}
-                                </button>
-                            </div>
+                        </div>
+                        <div class="col-sm-6 d-grid">
+                            <button type="submit" :disabled="inCart" class="btn btn-primary add-to-cart-button w-100">{{cartString}}</button>
                         </div>
                     </div>
                 </form>
-                <div class="features pt-3 mb-3">
-                    <h5><strong>Features</strong></h5>
-                    <ul class="features-list">
+                <div class="features mb-2 mt-md-auto">
+                    <h6 class="fw-bold mb-1"><strong>Features</strong></h6>
+                    <ul class="features-list-inline">
                         <li v-for="(feature, index) in product.features" :key="index">{{ feature }}</li>
                     </ul>
                 </div>
-                <button v-show="!inWishlist" id="wishlist-button" class="btn mr-3" @click="addToWishlist" :disabled="addedToWishlist">
-                    {{wishlistString}}
-                </button>
-                <button class="btn btn-danger mr-3" style="border-radius: 0%;" v-show="inWishlist" @click="removeWishlist(wishlistId)" :disabled="deletedFromWishlist">
-                    {{wishlistString}}
-                </button>
-                <!-- edit button -->
-                <router-link :to="{name: 'EditProduct', params: {id: product.id}}"
-                    v-show="role == 'ADMIN'" >
-                    <button class="btn edit-prod mr-2">Edit</button>
-                </router-link>
-
-                            <!-- Modal to confirm booking -->
-                <div class="modal fade" id="bookingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content text-center">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="staticBackdropLabel">Confirm Booking</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body d-flex justify-content-center pb-2">
-                                <p class="m-0 py-3">Your car has been added to cart.<br>View your cart to confirm your booking</p>
-                            </div>
-                            <div class="modal-footer pt-0">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <router-link :to="{name: 'CartView'}"><button class="btn btn-info text-light" data-bs-dismiss="modal">View Cart</button></router-link>
-                            </div>
-                        </div>
-                    </div> 
-                </div>
-                <!-- Modal to direct user to signin page -->
-                <div class="modal fade " id="registerModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content text-center">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="staticBackdropLabel">Login or Register</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body d-flex justify-content-center">
-                                <p class="m-0 py-3">{{ modalText}}</p>
-                            </div>
-                            <div class="modal-footer">
-                                <button class="btn btn-primary" @click="openAuthModalLocal('signup')">Create account</button>
-                                <button class="btn btn-primary" @click="openAuthModalLocal('login')">Login</button>
-                            </div>
-                        </div>
-                    </div> 
-                </div>
-
-                <!-- Image Lightbox Modal -->
-                <div class="modal fade" id="imageLightbox" tabindex="-1" aria-labelledby="imageLightboxLabel" aria-hidden="true" @click="closeLightbox">
-                    <div class="modal-dialog modal-dialog-centered modal-xl">
-                        <div class="modal-content lightbox-content">
-                            <div class="modal-body p-0 position-relative">
-                                <button type="button" class="btn-close lightbox-close" @click="closeLightbox" aria-label="Close"></button>
-                                <div class="lightbox-image-container" @click.stop>
-                                    <img :src="lightboxImage" class="lightbox-image" :style="{ transform: `scale(${zoomLevel})` }" alt="Vehicle image">
-                                </div>
-                                <div class="zoom-controls">
-                                    <button class="btn btn-light zoom-btn" @click.stop="zoomIn" :disabled="zoomLevel >= 3">
-                                        <i class="bi bi-zoom-in"></i> +
-                                    </button>
-                                    <button class="btn btn-light zoom-btn" @click.stop="zoomOut" :disabled="zoomLevel <= 1">
-                                        <i class="bi bi-zoom-out"></i> -
-                                    </button>
-                                    <button class="btn btn-light zoom-btn" @click.stop="resetZoom">
-                                        Reset
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div> 
+                <div class="d-flex flex-wrap gap-2 pt-2 border-top border-secondary">
+                    <button v-show="!inWishlist" id="wishlist-button" class="btn" @click="addToWishlist" :disabled="addedToWishlist">
+                        {{wishlistString}}
+                    </button>
+                    <button class="btn btn-danger" style="border-radius: 0%;" v-show="inWishlist" @click="removeWishlist(wishlistId)" :disabled="deletedFromWishlist">
+                        {{wishlistString}}
+                    </button>
+                    <router-link :to="{name: 'EditProduct', params: {id: product.id}}" v-show="role == 'ADMIN'">
+                        <button class="btn edit-prod">Edit</button>
+                    </router-link>
                 </div>
             </div>
-            <section class="booking-requirements mb-4" aria-labelledby="booking-req-heading">
-                  <h5 id="booking-req-heading" class="requirements-heading">Before you book</h5>
-                  <p class="requirements-lead text-secondary small mb-3">
-                    Please have the following ready. Documents must be current and match the details on your booking.
-                  </p>
-                  <ul class="requirements-list row">
-                    <li class="col-12 col-md-6 col-lg-4">
-                      <span class="req-title">Driver's licence</span>
-                      <span class="req-detail">Must be valid and held for at least two years.</span>
-                    </li>
-                    <li class="col-12 col-md-6 col-lg-4">
-                      <span class="req-title">Minimum age</span>
-                      <span class="req-detail">Primary drivers must be 25 or older.</span>
-                    </li>
-                    <li class="col-12 col-md-6 col-lg-4">
-                      <span class="req-title">Photo ID</span>
-                      <span class="req-detail">National ID or passport on hand at pick-up.</span>
-                    </li>
-                    <li class="col-12 col-md-6 col-lg-4">
-                      <span class="req-title">Proof of residence</span>
-                      <span class="req-detail">A recent utility bill or official letter showing your current address.</span>
-                    </li>
-                    <li class="col-12 col-md-6 col-lg-4">
-                      <span class="req-title">Travel plans</span>
-                      <span class="req-detail">Flight itinerary required when you are arriving from another city or country.</span>
-                    </li>
-                    <li class="col-12 col-md-6 col-lg-4">
-                      <span class="req-title">Deposit &amp; rental charges</span>
-                      <span class="req-detail">Security deposit and rental fees must be settled in full before we confirm the vehicle.</span>
-                    </li>
-                  </ul>
-                </section>
+        </div>
+        <section class="booking-requirements mb-4 px-0" aria-labelledby="booking-req-heading">
+              <h5 id="booking-req-heading" class="requirements-heading">Before you book</h5>
+              <p class="requirements-lead text-secondary small mb-3">
+                Please have the following ready. Documents must be current and match the details on your booking.
+              </p>
+              <ul class="requirements-list row">
+                <li class="col-12 col-md-6 col-lg-4">
+                  <span class="req-title">Driver's licence</span>
+                  <span class="req-detail">Must be valid and held for at least two years.</span>
+                </li>
+                <li class="col-12 col-md-6 col-lg-4">
+                  <span class="req-title">Minimum age</span>
+                  <span class="req-detail">Primary drivers must be 25 or older.</span>
+                </li>
+                <li class="col-12 col-md-6 col-lg-4">
+                  <span class="req-title">Photo ID</span>
+                  <span class="req-detail">National ID or passport on hand at pick-up.</span>
+                </li>
+                <li class="col-12 col-md-6 col-lg-4">
+                  <span class="req-title">Proof of residence</span>
+                  <span class="req-detail">A recent utility bill or official letter showing your current address.</span>
+                </li>
+                <li class="col-12 col-md-6 col-lg-4">
+                  <span class="req-title">Travel plans</span>
+                  <span class="req-detail">Flight itinerary required when you are arriving from another city or country.</span>
+                </li>
+                <li class="col-12 col-md-6 col-lg-4">
+                  <span class="req-title">Deposit &amp; rental charges</span>
+                  <span class="req-detail">Security deposit and rental fees must be settled in full before we confirm the vehicle.</span>
+                </li>
+              </ul>
+            </section>
+        <div class="modal fade" id="bookingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content text-center">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Confirm Booking</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body d-flex justify-content-center pb-2">
+                        <p class="m-0 py-3">Your car has been added to cart.<br>View your cart to confirm your booking</p>
+                    </div>
+                    <div class="modal-footer pt-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <router-link :to="{name: 'CartView'}"><button class="btn btn-info text-light" data-bs-dismiss="modal">View Cart</button></router-link>
+                    </div>
+                </div>
+            </div> 
+        </div>
+        <div class="modal fade " id="registerModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content text-center">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Login or Register</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body d-flex justify-content-center">
+                        <p class="m-0 py-3">{{ modalText}}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" @click="openAuthModalLocal('signup')">Create account</button>
+                        <button class="btn btn-primary" @click="openAuthModalLocal('login')">Login</button>
+                    </div>
+                </div>
+            </div> 
+        </div>
+        <div class="modal fade" id="imageLightbox" tabindex="-1" aria-labelledby="imageLightboxLabel" aria-hidden="true" @click="closeLightbox">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content lightbox-content">
+                    <div class="modal-body p-0 position-relative">
+                        <button type="button" class="btn-close lightbox-close" @click="closeLightbox" aria-label="Close"></button>
+                        <div class="lightbox-image-container" @click.stop>
+                            <img :src="lightboxImage" class="lightbox-image" :style="{ transform: `scale(${zoomLevel})` }" alt="Vehicle image">
+                        </div>
+                        <div class="zoom-controls">
+                            <button class="btn btn-light zoom-btn" @click.stop="zoomIn" :disabled="zoomLevel >= 3">
+                                <i class="bi bi-zoom-in"></i> +
+                            </button>
+                            <button class="btn btn-light zoom-btn" @click.stop="zoomOut" :disabled="zoomLevel <= 1">
+                                <i class="bi bi-zoom-out"></i> -
+                            </button>
+                            <button class="btn btn-light zoom-btn" @click.stop="resetZoom">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div> 
         </div>
     </div>
 </div>
@@ -264,7 +270,7 @@ export default {
             await axios.post(`${this.baseURL}/cart/add`, 
             {
                 productId: this.id,
-                quantity: this.quantity,
+                quantity: this.numberOfDays,
                 bookedFor: this.dropoffDate,
                 bookedFrom: this.pickupDate,
                 dropoffTime: this.dropoffTime
@@ -411,6 +417,28 @@ export default {
         resetZoom() {
             this.zoomLevel = 1;
         },
+        validateDropoffDate() {
+            if (this.pickupDate && this.dropoffDate) {
+                const pickup = new Date(this.pickupDate);
+                const dropoff = new Date(this.dropoffDate);
+                const dayAfter = new Date(pickup);
+                dayAfter.setDate(dayAfter.getDate() + 1);
+                if (dropoff < dayAfter) {
+                    this.dropoffDate = null;
+                }
+            }
+        },
+        onPickupDateChange() {
+            if (this.pickupDate && this.dropoffDate) {
+                const pickup = new Date(this.pickupDate);
+                const dropoff = new Date(this.dropoffDate);
+                const dayAfter = new Date(pickup);
+                dayAfter.setDate(dayAfter.getDate() + 1);
+                if (dropoff < dayAfter) {
+                    this.dropoffDate = null;
+                }
+            }
+        },
     },
 
     computed: {
@@ -425,6 +453,23 @@ export default {
             if (mm < 10) mm = "0" + mm;
             if (dd < 10) dd = "0" + dd;
             return `${yyyy}-${mm}-${dd}`;
+        },
+        dropoffMinDate() {
+            if (this.pickupDate) {
+                const dayAfter = new Date(this.pickupDate);
+                dayAfter.setDate(dayAfter.getDate() + 1);
+                return dayAfter.toISOString().split('T')[0];
+            }
+            return this.minDate;
+        },
+
+        numberOfDays() {
+            if (!this.pickupDate || !this.dropoffDate) return 1;
+            const pickup = new Date(this.pickupDate);
+            const dropoff = new Date(this.dropoffDate);
+            const diffTime = Math.abs(dropoff - pickup);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return Math.max(1, diffDays);
         },
 
         //set the maxdate for the date element
@@ -457,6 +502,10 @@ export default {
         resolvedMainImage() {
             return resolveImageUrl(this.product?.imageURL);
         },
+
+        slideCount() {
+            return 1 + (this.filteredCarouselImages?.length || 0);
+        },
     },
 
     mounted() {
@@ -472,9 +521,58 @@ export default {
         this.$nextTick(() => {
             const carouselElement = document.getElementById('autoplayCarousel');
             if (carouselElement && bootstrap.Carousel) {
-                new bootstrap.Carousel(carouselElement, {
+                const carousel = new bootstrap.Carousel(carouselElement, {
                     interval: 5000,
                     ride: 'carousel'
+                });
+
+                // --- Dots auto-hide ---
+                const indicators = carouselElement.querySelector('.carousel-indicators');
+                let dotsTimer = null;
+                let isUserAction = false;
+
+                const showDots = () => {
+                    if (!indicators) return;
+                    indicators.classList.remove('dots-hidden');
+                    clearTimeout(dotsTimer);
+                    dotsTimer = setTimeout(() => {
+                        indicators.classList.add('dots-hidden');
+                    }, 2000);
+                };
+
+                if (indicators) showDots();
+
+                const onUserInteract = () => {
+                    isUserAction = true;
+                    showDots();
+                };
+
+                carouselElement.querySelector('.carousel-control-prev')?.addEventListener('click', onUserInteract);
+                carouselElement.querySelector('.carousel-control-next')?.addEventListener('click', onUserInteract);
+                indicators?.addEventListener('click', (e) => {
+                    if (e.target.matches('button')) onUserInteract();
+                });
+
+                // Swipe
+                let touchX = 0;
+                carouselElement.addEventListener('touchstart', (e) => {
+                    touchX = e.changedTouches[0].screenX;
+                }, { passive: true });
+                carouselElement.addEventListener('touchend', (e) => {
+                    const diff = touchX - e.changedTouches[0].screenX;
+                    if (Math.abs(diff) > 50) {
+                        if (diff > 0) carousel.next();
+                        else carousel.prev();
+                        onUserInteract();
+                    }
+                }, { passive: true });
+
+                // On slid — only show dots if user triggered it
+                carouselElement.addEventListener('slid.bs.carousel', () => {
+                    if (isUserAction) {
+                        showDots();
+                        isUserAction = false;
+                    }
                 });
             }
 
@@ -513,6 +611,9 @@ export default {
 .modal-content{
     height: 230px;
     z-index: 1056 !important;
+}.px-5{
+    padding-left: 2.2rem !important;
+    padding-right: 2.2rem !important;
 }
 
 /* Close button visibility in dark mode */
@@ -538,32 +639,153 @@ export default {
     filter: none;
 }
 
-/* Carousel improvements */
-.carousel-fade .carousel-item {
-    opacity: 0;
-    transition: opacity 0.6s ease-in-out;
-}
-.carousel-fade .carousel-item.active {
-    opacity: 1;
-}
+/* Carousel slide - custom elegant animation */
 .carousel-inner {
-    background-color: #000;
+    background-color: #1a1a1a;
+    border-radius: 6px;
 }
-.d-block.w-100{
-    height: clamp(260px, 45vh, 520px);
+.carousel-img {
     width: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
 }
 
-/* Features list alignment */
-.features-list {
-    list-style-type: disc;
-    padding-left: 20px;
-    margin: 0;
+.carousel-item {
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.7s ease;
 }
-.features-list li {
-    margin-bottom: 8px;
+
+.carousel-item-next:not(.carousel-item-start) {
+    transform: translateX(100%);
+}
+
+.carousel-item-prev:not(.carousel-item-end) {
+    transform: translateX(-100%);
+}
+
+.active.carousel-item-start {
+    transform: translateX(-100%);
+}
+
+.active.carousel-item-end {
+    transform: translateX(100%);
+}
+
+.carousel-item-next.carousel-item-start,
+.carousel-item-prev.carousel-item-end {
+    transform: translateX(0);
+}
+
+/* Fixed carousel height on all screens below lg */
+@media (max-width: 991.98px) {
+    #autoplayCarousel .carousel-inner,
+    #autoplayCarousel .carousel-item,
+    #autoplayCarousel .carousel-img {
+        height: clamp(250px, 38vh, 380px) !important;
+    }
+}
+
+/* On lg+ the carousel fills the column height */
+@media (min-width: 992px) {
+    .top-section {
+        min-height: 480px;
+    }
+    #autoplayCarousel {
+        height: 100%;
+    }
+    #autoplayCarousel .carousel-inner {
+        height: 100%;
+    }
+    #autoplayCarousel .carousel-item {
+        height: 100%;
+    }
+    #autoplayCarousel .carousel-img {
+        height: 100%;
+    }
+}
+
+/* Indicators (dots) positioned at bottom center of the image */
+.carousel-indicators {
+    position: absolute;
+    bottom: 12px;
+    left: 0;
+    right: 0;
+    margin: 0;
+    z-index: 15;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+}
+.carousel-indicators button {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.5);
+    border: 2px solid rgba(0,0,0,0.3);
+    cursor: pointer;
+    pointer-events: auto;
+    padding: 0;
+    transition: background-color 0.25s, transform 0.25s;
+}
+.carousel-indicators button.active {
+    background-color: #fff;
+    border-color: rgba(0,0,0,0.5);
+    transform: scale(1.25);
+}
+.carousel-indicators.dots-hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Features list inline badges */
+.features-list-inline {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+.features-list-inline li {
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    padding: 0.2rem 0.7rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--text-primary, #f8f9fa);
+}
+[data-theme="light"] .features-list-inline li {
+    background: rgba(212, 175, 55, 0.1);
+    color: #334155;
+}
+
+@media (min-width: 992px) {
+    .price-lg {
+        font-size: 1.35rem;
+    }
+}
+
+.price-unit {
+    font-weight: 400;
+    font-size: 0.85em;
+    color: var(--text-primary, #f8f9fa);
+    opacity: 0.65;
+}
+
+.detail-desc {
+    color: var(--text-primary, #f8f9fa);
+    opacity: 0.8;
+}
+
+[data-theme="light"] .price-unit {
+    color: #334155;
+    opacity: 1;
+}
+
+[data-theme="light"] .detail-desc {
+    color: #334155;
+    opacity: 1;
 }
 
 .booking-requirements {
@@ -678,7 +900,8 @@ export default {
     font-weight: 400;
 }
 .main-div{
-    padding-top: 10px;
+    margin-top: -85px;
+    padding-top: 95px;
 }
 #wishlist-button {
     border-radius: 0%;
@@ -708,11 +931,7 @@ export default {
     border-color: #f0c14b;
     color: black;
 }
-@media (min-width: 0px) and (max-width: 576px) {
-      .input-group-parent{
-        width: 15rem;
-      }
-}
+
 </style>
 
 <!-- Global (non-scoped) modal backdrop z-index for body-inserted backdrops -->

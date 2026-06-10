@@ -66,7 +66,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content auth-modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">{{ authTab === 'signup' ? 'Create Account' : 'Sign In' }}</h5>
+          <h5 class="modal-title ff-bold">{{ authTab === 'signup' ? 'Create Account' : 'Sign In' }}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -245,6 +245,7 @@ export default {
       routeProgress: 0,
       routeTimer: null,
       userRole: null,
+      authRedirectPath: null,
 
       authTab: 'login',
       authSubmitting: false,
@@ -341,13 +342,14 @@ export default {
 
         // Check if session is invalid (backend returns HTML login page)
         if(typeof result === 'string' && result.includes('Please sign in')) {
-          this.$router.push({name: 'SigninView'});
+          if (this.authRedirectPath) return;
+          this.authRedirectPath = this.$route.fullPath;
+          this.clearInvalidSession();
           swal({
             text: "Your session has expired. Please login again.",
             icon: "info"
           });
-          // Clear session data
-          this.clearInvalidSession();
+          this.$router.replace({ name: 'HomeView' }).then(() => this.openAuthModal('login'));
           return;
         }
         if(result.totalCost && result.cartItems){
@@ -361,9 +363,16 @@ export default {
           this.cartCount = result.cartItems.length;
         }
       } catch (err) {
-        // If we get a 401, clear session
+        // If we get a 401, clear session and redirect
         if(err.response && err.response.status === 401) {
+          if (this.authRedirectPath) return;
+          this.authRedirectPath = this.$route.fullPath;
           this.clearInvalidSession();
+          swal({
+            text: "Your session has expired. Please login again.",
+            icon: "info"
+          });
+          this.$router.replace({ name: 'HomeView' }).then(() => this.openAuthModal('login'));
         }
       }
     },
@@ -389,12 +398,14 @@ export default {
         if((typeof resUsers.data === 'string' && resUsers.data.includes('Please sign in')) ||
            (typeof resCarts.data === 'string' && resCarts.data.includes('Please sign in')) ||
            (typeof resWishlists.data === 'string' && resWishlists.data.includes('Please sign in'))) {
-          this.$router.push({name: 'SigninView'});
+          if (this.authRedirectPath) return;
+          this.authRedirectPath = this.$route.fullPath;
+          this.clearInvalidSession();
           swal({
             text: "Your admin session has expired. Please login again.",
             icon: "warning"
           });
-          this.clearInvalidSession();
+          this.$router.replace({ name: 'HomeView' }).then(() => this.openAuthModal('login'));
           return;
         }
         
@@ -403,9 +414,16 @@ export default {
         this.wishlists = resWishlists.data;
         this.users = resUsers.data;
       } catch (err) {
-        // If we get a 401 or 403, clear session
+        // If we get a 401 or 403, clear session and redirect
         if(err.response && (err.response.status === 401 || err.response.status === 403)) {
+          if (this.authRedirectPath) return;
+          this.authRedirectPath = this.$route.fullPath;
           this.clearInvalidSession();
+          swal({
+            text: "Your admin session has expired. Please login again.",
+            icon: "warning"
+          });
+          this.$router.replace({ name: 'HomeView' }).then(() => this.openAuthModal('login'));
         }
       }
     },
@@ -602,6 +620,10 @@ export default {
 
         const loginInfo = loginResponse.data;
         if (loginInfo.status === "Login Success") {
+          // Capture redirect target FIRST, before any operation that could overwrite it
+          let redirectPath = this.authRedirectPath;
+          this.authRedirectPath = null;
+
           // Store role in both data and localStorage
           this.userRole = loginInfo.role;
           localStorage.setItem("role", loginInfo.role);
@@ -623,7 +645,7 @@ export default {
           const bsModal = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
           if (bsModal) bsModal.hide();
 
-        this.$router.replace({ name: 'HomeView' }).then(() => window.location.reload());
+          window.location.href = redirectPath || '/home';
         } else {
           swal({
             text: "Login failed: " + (loginInfo.status || "Unknown error"),
@@ -757,6 +779,14 @@ export default {
     // Add scroll listener for navbar hide/show on all pages
     window.addEventListener('scroll', this.handleNavbarScroll);
 
+    // Clear redirect path when auth modal is dismissed without signing in
+    const modalEl = document.getElementById('authModal');
+    if (modalEl) {
+      modalEl.addEventListener('hidden.bs.modal', () => {
+        this.authRedirectPath = null;
+      });
+    }
+
     // Hook into router navigation for top progress bar
     if (this.$router) {
       this.$router.beforeEach((to, from, next) => {
@@ -848,7 +878,19 @@ html{
 body {
   overflow-x: clip;
 }
-/* Removed broad Akrobat override to let theme variables control typography */
+
+.ff-bold{
+  font-family: var(--font-akrobat-bold);
+}
+.ff-semibold{
+  font-family: var(--font-akrobat-semibold);
+}
+.ff-regular{
+  font-family: var(--font-akrobat-regular);
+}
+.ff-light{
+  font-family: var(--font-akrobat-light);
+}
 
 .container{
   padding-top: 30px;

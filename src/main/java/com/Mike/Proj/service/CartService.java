@@ -44,6 +44,8 @@ public class CartService{
         cart.setUser(user);
         cart.setDate(new Date());
         cart.setBookedFor(addToCartDto.getBookedFor());
+        cart.setBookedFrom(addToCartDto.getBookedFrom());
+        cart.setDropoffTime(addToCartDto.getDropoffTime());
 
         cartRepo.save(cart);
 
@@ -52,7 +54,7 @@ public class CartService{
 
         Double price = product.getPrice() * addToCartDto.getQuantity();
 
-        CartHistory cartHistory = new CartHistory(cart.getId(), new Date(), username, product.getName(), addToCartDto.getQuantity(), addToCartDto.getBookedFor(), price);
+        CartHistory cartHistory = new CartHistory(cart.getId(), new Date(), username, product.getName(), addToCartDto.getQuantity(), addToCartDto.getBookedFor(), addToCartDto.getBookedFrom(), addToCartDto.getDropoffTime(), price);
 
         cartHistoryRepo.save(cartHistory);
     }

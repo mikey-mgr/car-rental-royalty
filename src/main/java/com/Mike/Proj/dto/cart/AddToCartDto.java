@@ -9,6 +9,8 @@ public class AddToCartDto {
     private @NotNull Integer productId;
     private @NotNull Integer quantity;
     private @NotNull LocalDate bookedFor;
+    private LocalDate bookedFrom;
+    private String dropoffTime;
 
 
     public AddToCartDto(Integer productId, Integer quantity, LocalDate bookedFor) {
@@ -75,6 +77,22 @@ public class AddToCartDto {
      */
     public void setBookedFor(@NotNull LocalDate bookedFor) {
         this.bookedFor = bookedFor;
+    }
+
+    public LocalDate getBookedFrom() {
+        return bookedFrom;
+    }
+
+    public void setBookedFrom(LocalDate bookedFrom) {
+        this.bookedFrom = bookedFrom;
+    }
+
+    public String getDropoffTime() {
+        return dropoffTime;
+    }
+
+    public void setDropoffTime(String dropoffTime) {
+        this.dropoffTime = dropoffTime;
     }
 
 }

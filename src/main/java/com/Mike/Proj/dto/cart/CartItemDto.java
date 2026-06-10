@@ -11,6 +11,8 @@ public class CartItemDto {
     private Integer quantity;
     private Product product;
     private LocalDate bookedFor;
+    private LocalDate bookedFrom;
+    private String dropoffTime;
 
     public Integer getId() {
         return id;
@@ -41,6 +43,8 @@ public class CartItemDto {
         this.quantity = cart.getQuantity();
         this.setProduct(cart.getProduct());
         this.setBookedFor(cart.getBookedFor());
+        this.setBookedFrom(cart.getBookedFrom());
+        this.setDropoffTime(cart.getDropoffTime());
         this.setUserId(cart.getUser().getId());
     }
 
@@ -50,6 +54,22 @@ public class CartItemDto {
 
     public void setBookedFor(LocalDate bookedFor) {
         this.bookedFor = bookedFor;
+    }
+
+    public LocalDate getBookedFrom() {
+        return bookedFrom;
+    }
+
+    public void setBookedFrom(LocalDate bookedFrom) {
+        this.bookedFrom = bookedFrom;
+    }
+
+    public String getDropoffTime() {
+        return dropoffTime;
+    }
+
+    public void setDropoffTime(String dropoffTime) {
+        this.dropoffTime = dropoffTime;
     }
 
     /**

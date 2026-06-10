@@ -7,7 +7,7 @@
       <!-- Translucent black backdrop with copywriting -->
       <div class="hero-backdrop">
         <div class="hero-backdrop-content">
-          <p class="hero-backdrop-subtitle">Royal Car Rental Group</p>
+          <p class="hero-backdrop-subtitle">DeRoyalty Car Rentals</p>
           <h1 class="hero-backdrop-title">ROYAL BRAND, ROYAL SERVICES!</h1>
           <!-- <div class="hero-backdrop-cta">
             <button class="btn btn-primary" @click="scrollToPickup">Book Your Ride</button>
@@ -19,23 +19,16 @@
         <img :src="scrollDownIcon" alt="Scroll down indicator">
       </div>
     </div>
-        <section class="pickup-location-area">
+        <div class="pickup-location-area">
           <div class="container">
             <div class="pickup-card">
               <div class="pickup-card-header">
-                <h4 class="m-0">Find a Vehicle</h4>
+                <h4 class="m-0 ff-semibold">Find a Vehicle</h4>
                 <p class="m-0 pickup-subtitle">Choose location and dates, then browse available fleets.</p>
               </div>
               <form class="row g-3 align-items-end" @submit="goToVehicles">
+                
                 <div class="col-12 col-md-4">
-                  <label class="form-label field-label" for="pickupLocation">Pick-up Location</label>
-                  <select id="pickupLocation" v-model="pickupLocation" class="form-select pickup-input">
-                    <option disabled value="">Select location</option>
-                    <option>34 Frank Johnson</option>
-                    <option>Harare International Airport</option>
-                  </select>
-                </div>
-                <div class="col-12 col-md-3">
                   <label class="form-label field-label" for="pickupDate">Pickup Date</label>
                   <input
                     id="pickupDate"
@@ -46,44 +39,84 @@
                     placeholder="Select pickup date"
                     @focus="onDateFocus('pickup')"
                     @blur="onDateBlur('pickup')"
+                    @change="onPickupDateChange"
                   />
                 </div>
-                <div class="col-12 col-md-2">
+                <div class="col-12 col-md-4">
                   <label class="form-label field-label" for="dropoffDate">Dropoff Date</label>
                   <input
                     id="dropoffDate"
                     v-model="dropoffDate"
                     :type="dropoffDateInputType"
-                    :min="minDate"
+                    :min="dropoffMinDate"
                     class="form-control pickup-input"
                     placeholder="Select dropoff date"
                     @focus="onDateFocus('dropoff')"
                     @blur="onDateBlur('dropoff')"
+                    @change="validateDropoffDate"
                   />
                 </div>
-                <div class="col-12 col-md-1">
-                  <label class="form-label field-label" for="dropoffTime">Time</label>
+                <div class="col-12 col-md-4">
+                  <label class="form-label field-label" for="dropoffTime">Dropoff Time</label>
                   <input id="dropoffTime" v-model="dropoffTime" type="time" class="form-control pickup-input" placeholder="HH:MM" />
                 </div>
-                <div class="col-12 col-md-2">
+                
+                <div class="col-12 col-md-4">
+                  <label class="form-label field-label" for="pickupLocation">Pick-up Location</label>
+                  <div class="position-relative">
+                    <input
+                      id="pickupLocation"
+                      v-model="pickupLocation"
+                      type="text"
+                      class="form-control pickup-input"
+                      placeholder="Select location"
+                      readonly
+                      autocomplete="off"
+                      @focus="showLocationDropdown = true"
+                      @blur="hideLocationDropdown"
+                    />
+                    <ul v-if="showLocationDropdown" class="vehicle-dropdown">
+                      <li
+                        v-for="loc in locationOptions"
+                        :key="loc"
+                        @mousedown.prevent="selectLocation(loc)"
+                      >
+                        {{ loc }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label field-label" for="vehicleKeyword">Vehicle name</label>
+                  <div class="position-relative">
+                    <input
+                      id="vehicleKeyword"
+                      v-model="vehicleKeyword"
+                      type="text"
+                      inputmode="search"
+                      class="form-control pickup-input"
+                      placeholder="e.g. Fortuner, Mercedes, Note"
+                      autocomplete="off"
+                      @focus="showVehicleDropdown = true"
+                      @blur="hideVehicleDropdown"
+                    />
+                    <ul v-if="showVehicleDropdown && filteredVehicles.length" class="vehicle-dropdown">
+                      <li
+                        v-for="p in filteredVehicles"
+                        :key="p.id"
+                        @mousedown.prevent="selectVehicle(p.name)"
+                      >
+                        {{ p.name }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
                   <button class="btn btn-primary pickup-btn w-100" type="submit">
                     Find your Car
                   </button>
                 </div>
               </form>
-              <div class="row g-2 mt-1 align-items-end">
-                <div class="col-12">
-                  <label class="form-label field-label" for="vehicleKeyword">Vehicle name (optional)</label>
-                  <input
-                    id="vehicleKeyword"
-                    v-model="vehicleKeyword"
-                    type="search"
-                    class="form-control pickup-input"
-                    placeholder="e.g. Fortuner, Mercedes, Note"
-                    autocomplete="off"
-                  />
-                </div>
-              </div>
 
               <div class="brand-marquee mt-4">
                 <div class="brand-track" :style="{ '--brand-duration': brandTickerDuration + 's' }">
@@ -102,54 +135,20 @@
             </div>
           </div>
 
-        </section>
+        </div>
       
         <!-- sections -->
-
-
-      <div class="nav-pills nav-fill" id="sections">
-        <!-- Our Fleets dropdown -->
-        <section class="nav-item text-start">
-          <div class="nav-link page-sections sticky-top active"
-              data-toggle="collapse" aria-label="Toggle-navigation"
-                aria-expanded="false" data-target="ourFleets"
-                  aria-controls="ourFleets"
-                  @click="scrollToSection">
-                  Our Fleets
+      <div id="sections">
+          <div class="nav-link page-sections sticky-top" data-bs-target="#ourFleets" @click="scrollToSection">
+            01 Our Fleet
           </div>
-          <div class="our-fleets">
-            <div class="container fade-in-scroll mb-5">
-            <!--    display categories & Products-->
-              <div class="row justify-content-evenly">
-                <!-- Categories -->
-                <div v-for="(category, index) in displayedCategories" :key="'cat-' + index"
-                    class="col-md-6 col-xl-4 col-12 pt-3 my-2 justify-content-around card-stagger"
-                    :style="`animation-delay: ${index * 0.1}s`">
-                  <CategoryBox :category="category" />
-                </div>
-                <!-- Products -->
-                <div v-for="(product, index) in displayedProducts" :key="'prod-' + index"
-                    class="col-md-6 col-xl-4 col-12 pt-3 my-2 justify-content-around card-stagger"
-                  :style="`animation-delay: ${(index + displayedCategories.length) * 0.1}s`">
-                  <ProductBox :product="product"/>
-                </div>
-              </div>
-              
-              <!-- Show More Button (mobile only) -->
-              <div v-if="isMobile && (hasMoreCategories || hasMoreProducts)" class="text-center mt-4">
-                <button @click="showAllItems = !showAllItems" class="btn btn-outline-primary show-more-btn">
-                  <span v-if="!showAllItems">Show More Vehicles</span>
-                  <span v-else>Show Less</span>
-                  <i class="ms-2" :class="showAllItems ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
-                </button>
-              </div>
-            </div>
-              
+          <div class="our-fleets collapse show" id="ourFleets">
             <div class="row g-0">
                 <div class="col-lg-7 text-white section-text slide-in-left">
                   <div class="container-fluid section-description-text pe-xl-0 h-100">
                     <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
-                      <h2 class="">Our Fleets</h2>
+                      <h1 class="ff-bold display-1">01</h1>
+                      <h2 class="ff-bold">Our Fleet</h2>
                       <p>You've got the drive to travel in luxury, and we've got the tools, know-how and knowledge to help you take charge
                           of your travel. Lets get you started on the path to your very own DeRoyalty Car Rental hire.
                       </p>
@@ -160,21 +159,19 @@
                   <img src="../assets/AppImages/products/cars-exec.jpg" class="img-fluid max-h-100-vh parallax-img" alt="cars">
                 </div>
             </div>
-            </div>
-        </section>
-          <!-- our values dropdown -->
-        <section class="nav-item text-start">
-          <div class="nav-link page-sections active sticky-top"
-              data-toggle="collapse" aria-label="Toggle navigation"
-                  aria-expanded="true" data-target="ourValues"
-                  aria-controls="ourValues" id="ourValuesBtn"
-                  @click="scrollToSection">
-                  Our Values
+            <HorizontalCardStack :cards="fleetCards" />
+              
+            
           </div>
-          <div class="row g-0" id="ourValues" aria-labelledby="ourValuesBtn">
+          <div class="nav-link page-sections sticky-top" data-bs-target="#ourValues" id="ourValuesBtn" @click="scrollToSection">
+            02 Our Values
+          </div>
+          <div class="collapse show" id="ourValues">
+            <div class="row g-0 z-hide-arrow" aria-labelledby="ourValuesBtn">
             <div class="col-md-6 text-white section-text slide-in-left">
               <div class="container-fluid section-description-text pe-xl-0 h-100">
                 <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
+                    <h1 class="ff-bold display-1">02</h1>
                   <h2 class="">Our Values</h2>
                   <p>We always place the interests of our customers first. We always conduct business with implementation of high
                     standards, trust, honesty, professionalism and ethical behaviour.
@@ -186,8 +183,8 @@
               <img src="../assets/AppImages/home_page/values.jpg" class="img-fluid max-h-100-vh parallax-img" alt="our values">
             </div>
             <!-- <div class="row p-5 mx-0"></div> -->
-            <div class="row g-0 p-5 section-description-text fade-blur">
-              <div class="col-lg-5 d-flex">
+            <div class="row g-0 section-description-text fade-blur">
+              <div class="col-lg-5 ps-xl-4 p-4 pb-0 d-flex">
                 <img src="../assets/AppImages/home_page/ceo1.jpg" class="img-fluid max-h-100-vh parallax-img float-animation" alt="DeRoyalty Ceo">
               </div>
               <div class="col-lg-7">
@@ -204,22 +201,17 @@
                 </div>
               </div>
             </div>
+            </div>
           </div>
-        </section>
-
-          <!-- our vision dropdown -->
-        <div class="nav-item text-start">
-          <div class="nav-link page-sections sticky-top active"
-              data-toggle="collapse" aria-label="Toggle-navigation"
-                aria-expanded="true" data-target="ourVision"
-                  aria-controls="ourVision"
-                  @click="scrollToSection">
-                  Our Vision
-        </div>
-          <div class="row g-0" id="ourVision">
+          <div class="nav-link page-sections sticky-top" data-bs-target="#ourVision" @click="scrollToSection">
+            03 Our Vision
+          </div>
+          <div class="collapse show" id="ourVision">
+            <div class="row g-0">
             <div class="col-md-6 text-white section-text slide-in-left">
               <div class="container-fluid section-description-text pe-xl-0 h-100">
                 <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
+                    <h1 class="ff-bold display-1">03</h1>
                   <h2 class="">Our Vision</h2>
                   <p>Our Vision is to become one of the leading brands in the rental industry
                       of Africa and to build the wide network of branches in the World
@@ -231,24 +223,19 @@
                     <img src="../assets/AppImages/home_page/our-vision.jpg" class="img-fluid max-h-100-vh parallax-img" alt="our vision">
                   </div>
           </div>
-        </div>
-
-        <!-- Our know-how dropdown -->
-        <div class="nav-item text-start">
-          <div class="nav-link page-sections sticky-top active"
-              data-toggle="collapse" aria-label="Toggle-navigation"
-                aria-expanded="true" data-target="ourKnowHow"
-                  aria-controls="ourKnowHow"
-                  @click="scrollToSection">
-                  Our Know-How
-        </div>
-          <div class="row g-0" id="ourKnowHow">
+          </div>
+          <div class="nav-link page-sections sticky-top" data-bs-target="#ourKnowHow" @click="scrollToSection">
+            04 Our Know-How
+          </div>
+          <div class="collapse show" id="ourKnowHow">
+            <div class="row g-0">
             <div class="col-md-6 d-flex slide-in-left">
               <img src="../assets/AppImages/home_page/know-how.jpg" class="img-fluid max-h-100-vh parallax-img" alt="our know how">
             </div>
             <div class="col-md-6 text-white section-text slide-in-right">
               <div class="container-fluid section-description-text pe-xl-0 h-100">
                 <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
+                    <h1 class="ff-bold display-1">04</h1>
                   <h2 class="">Our Know-How</h2>
                   <p>DeRoyalty Car Rental brand was founded by Braso Communications, a renowned world-class telecommunications and
                       marketing company from Zimbabwe. During the last decade Braso Communications has worked well with many globally
@@ -273,21 +260,16 @@
               it takes to get real results online.
             </p>
           </div>
-        </div>
-
-        <!-- Our Locations dropdown -->
-        <div class="nav-item text-start">
-          <div class="nav-link page-sections sticky-top active"
-              data-toggle="collapse" aria-label="Toggle-navigation"
-                aria-expanded="true" data-target="ourLocation"
-                  aria-controls="ourLocation"
-                  @click="scrollToSection">
-                  Our Locations
-        </div>
-          <div class="row g-0" id="ourLocation">
+          </div>
+          <div class="nav-link page-sections sticky-top" data-bs-target="#ourLocation" @click="scrollToSection">
+            05 Our Locations
+          </div>
+          <div class="collapse show" id="ourLocation">
+            <div class="row g-0">
             <div class="col-md-6 text-white section-text slide-in-left">
               <div class="container-fluid section-description-text pe-xl-0 h-100">
                 <div class="d-flex flex-column justify-content-center align-items-start max-w-500 h-100 mx-auto ms-lg-0 me-lg-auto px-3 px-lg-3 py-5 py-xl-0">
+                    <h1 class="ff-bold display-1">05</h1>
                   <h2 class="">Our Locations</h2>
                   <p>We are a premium car rental group in Africa, Australia and the Middle East. It doesn't matter where you are located,
                       there will always be a convenient DeRoyalty Car Rental branch nearby to help you continue your journery.
@@ -303,15 +285,25 @@
               <div class="map-wrapper">
                 <img src="../assets/AppImages/map/map-main.png" class="img-fluid" title="DeRoyalty Car Rental" alt="map" />
                 <svg class="map-overlay" viewBox="0 0 1440 935" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                  <defs>
+                    <radialGradient id="cityGlow" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="white" stop-opacity="1" />
+                      <stop offset="100%" stop-color="white" stop-opacity="0" />
+                    </radialGradient>
+                  </defs>
                   <!-- Paths from cities to Harare -->
                   <g class="paths">
                     <path v-for="city in cities" :key="city.name" :d="getPath(city)" class="city-path" />
                   </g>
                   <!-- City dots -->
                   <g class="dots">
-                    <circle v-for="city in cities" :key="city.name + '-dot'" :cx="city.x" :cy="city.y" r="18" class="city-dot" />
+                    <circle v-for="city in cities" :key="city.name + '-dot'" :cx="city.x" :cy="city.y" r="25" class="city-dot" />
                     <!-- Harare center marker -->
                     <circle :cx="harare.x" :cy="harare.y" r="7" class="city-dot harare-dot" />
+                  </g>
+                  <g class="glows">
+                    <circle v-for="city in cities" :key="city.name + '-glow'" :cx="city.x" :cy="city.y" r="15" fill="url(#cityGlow)" class="city-glow" />
+                    <circle :cx="harare.x" :cy="harare.y" r="15" fill="url(#cityGlow)" class="city-glow" />
                   </g>
                 </svg>
               </div>
@@ -364,23 +356,21 @@
               </div>
             </div>
           </div>
-        </div>
-      <!-- <iframe src="https://maps.google.com/maps?q=35.856737, 10.606619&z=15&output=embed" width="360" height="270" frameborder="0" style="border:0"></iframe> -->
-      
-  
-    </div>
+          </div>
+      </div>
   </div>
 </template>
 
 <script>
-import CategoryBox from "../components/Category/CategoryBox.vue";
-import ProductBox from "@/components/ProductBox.vue";
+import HorizontalCardStack from "@/components/HorizontalCardStack.vue";
 import heroImage from '../assets/AppImages/home_page/royal-car-rental-group-hero.jpg';
 import scrollDownIcon from '../assets/AppImages/home_page/scroll-down.svg';
+import bootstrap from 'bootstrap/dist/js/bootstrap.bundle'
+import { resolveImageUrl } from '@/utils/resolveImageUrl';
 
 export default {
   name: "HomeView",
-  components: {CategoryBox, ProductBox},
+  components: {HorizontalCardStack},
   props: ["categories", "products"],
   data() {
     return {
@@ -392,6 +382,8 @@ export default {
       showAllItems: false,
       mobileBreakpoint: 768,
       isMobile: false,
+      categorySort: 'default',
+      productSort: 'default',
 
       pickupLocation: "",
       pickupDate: null,
@@ -399,23 +391,19 @@ export default {
       dropoffTime: null,
       pickupDateInputType: "text",
       dropoffDateInputType: "text",
+      vehicleKeyword: "",
+      showVehicleDropdown: false,
+      showLocationDropdown: false,
+      locationOptions: ["2870 Mainway Meadows Waterfalls", "Harare International Airport"],
       brandLogos: [
         { src: require("../assets/AppImages/car-logos/benz.png"), alt: "Benz" },
-        { src: require("../assets/AppImages/car-logos/mazda.png"), alt: "Mazda" },
         { src: require("../assets/AppImages/car-logos/nissan.png"), alt: "Nissan" },
         { src: require("../assets/AppImages/car-logos/toyota.png"), alt: "Toyota" },
         { src: require("../assets/AppImages/car-logos/honda.png"), alt: "Honda" },
-        { src: require("../assets/AppImages/car-logos/subaru.png"), alt: "Subaru" },
-        { src: require("../assets/AppImages/car-logos/lamborghini.svg"), alt: "Lamborghini" },
-        { src: require("../assets/AppImages/car-logos/porsche.png"), alt: "Porsche" },
-        { src: require("../assets/AppImages/car-logos/jeep.svg"), alt: "Jeep" },
-        { src: require("../assets/AppImages/car-logos/ferrari.png"), alt: "Ferrari" },
-        { src: require("../assets/AppImages/car-logos/lexus.png"), alt: "Lexus" },
         { src: require("../assets/AppImages/car-logos/ford.png"), alt: "Ford" },
-        { src: require("../assets/AppImages/car-logos/hyundai.svg"), alt: "Hyundai" },
-        { src: require("../assets/AppImages/car-logos/volkswagen.png"), alt: "Volkswagen" },
-        { src: require("../assets/AppImages/car-logos/volvo.svg"), alt: "Volvo" },
-        { src: require("../assets/AppImages/car-logos/tesla.jpg"), alt: "Tesla" },
+        { src: require("../assets/AppImages/car-logos/isuzu.png"), alt: "Isuzu" },
+        { src: require("../assets/AppImages/car-logos/LandRover.svg.png"), alt: "Land Rover" },
+        { src: require("../assets/AppImages/car-logos/rangeRover.png"), alt: "Range Rover" }
       ],
       heroImage: heroImage,
       // Map city coordinates (image 1440x935)
@@ -433,8 +421,53 @@ export default {
   methods:{
     goToVehicles(e) {
       e.preventDefault();
-      this.$router.push({ name: 'VehiclesView' });
+      this.showVehicleDropdown = false;
+      const query = {};
+      if (this.vehicleKeyword && this.vehicleKeyword.trim()) {
+        query.q = this.vehicleKeyword.trim();
+      }
+      if (this.pickupLocation) query.pickupLocation = this.pickupLocation;
+      if (this.pickupDate) query.pickupDate = this.pickupDate;
+      if (this.dropoffDate) query.dropoffDate = this.dropoffDate;
+      if (this.dropoffTime) query.dropoffTime = this.dropoffTime;
+      this.$router.push({ name: 'VehiclesView', query });
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    hideVehicleDropdown() {
+      setTimeout(() => { this.showVehicleDropdown = false; }, 200);
+    },
+    selectVehicle(name) {
+      this.vehicleKeyword = name;
+      this.showVehicleDropdown = false;
+    },
+    hideLocationDropdown() {
+      setTimeout(() => { this.showLocationDropdown = false; }, 200);
+    },
+    selectLocation(loc) {
+      this.pickupLocation = loc;
+      this.showLocationDropdown = false;
+    },
+    validateDropoffDate() {
+      if (this.pickupDate && this.dropoffDate) {
+        const pickup = new Date(this.pickupDate);
+        const dropoff = new Date(this.dropoffDate);
+        const dayAfter = new Date(pickup);
+        dayAfter.setDate(dayAfter.getDate() + 1);
+        if (dropoff < dayAfter) {
+          this.dropoffDate = null;
+        }
+      }
+    },
+    onPickupDateChange() {
+      if (this.pickupDate && this.dropoffDate) {
+        const pickup = new Date(this.pickupDate);
+        const dropoff = new Date(this.dropoffDate);
+        const dayAfter = new Date(pickup);
+        dayAfter.setDate(dayAfter.getDate() + 1);
+        if (dropoff < dayAfter) {
+          this.dropoffDate = null;
+        }
+      }
     },
     onDateFocus(field) {
       if (field === "pickup") {
@@ -468,6 +501,10 @@ export default {
         entries.forEach(entry => {
           if (entry.isIntersecting && !entry.target.classList.contains('animate-in')) {
             entry.target.classList.add('animate-in');
+            // Trigger path drawing when the map container enters view
+            if (entry.target.classList.contains('map-container')) {
+              this.setupMapAnimations();
+            }
           }
         });
       }, observerOptions);
@@ -541,28 +578,42 @@ export default {
       const cx = mx + nx * offset;
       const cy = my + ny * offset;
 
-      return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
+      return `M ${x2} ${y2} Q ${cx} ${cy} ${x1} ${y1}`;
+    },
+
+    // Pre-hide all paths on mount so they're ready to animate
+    prepMapPaths() {
+      this.$nextTick(() => {
+        const img = this.$el.querySelector('.map-wrapper img');
+        const svg = this.$el.querySelector('.map-overlay');
+        if (img && svg && img.naturalWidth && img.naturalHeight) {
+          svg.setAttribute('viewBox', `0 0 ${img.naturalWidth} ${img.naturalHeight}`);
+        }
+        this.$el.querySelectorAll('.city-path').forEach(p => {
+          const len = p.getTotalLength(); p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+        });
+      });
     },
 
     setupMapAnimations() {
-      // Animate paths drawing and circle growth with a stagger
-      this.$nextTick(() => {
-        const paths = this.$el.querySelectorAll('.city-path');
+      const pathElements = this.$el.querySelectorAll('.city-path');
+      if (!pathElements.length) return;
 
-        paths.forEach((p, i) => {
-          try {
-            const len = p.getTotalLength();
-            p.style.strokeDasharray = len;
-            p.style.strokeDashoffset = len;
-            p.style.transition = 'stroke-dashoffset 1s ease ' + (0.2 * i) + 's';
-            // trigger
-            setTimeout(() => { p.style.strokeDashoffset = '0'; }, 50 + i * 200);
-          } catch (e) { /* ignore */ }
-        });
-
-        // Circles use CSS-driven continuous pulse; no JS scaling required.
+      Array.from(pathElements).forEach(el => {
+        const len = el.style.strokeDasharray ? parseFloat(el.style.strokeDasharray) : 0;
+        if (len > 0) {
+          el.animate([
+            { strokeDashoffset: len },
+            { strokeDashoffset: 0 }
+          ], {
+            duration: 5000,
+            easing: 'ease-out',
+            fill: 'forwards'
+          });
+        }
       });
     },
+
     handleParallax() {
       const scrolled = window.pageYOffset;
       const parallaxElements = document.querySelectorAll('.parallax-bg');
@@ -573,12 +624,26 @@ export default {
       });
     },
     scrollToSection(event) {
-      // Prevent default collapse behavior
       event.preventDefault();
       
       const target = event.currentTarget;
-      const targetId = target.getAttribute('data-target');
-      const targetElement = document.getElementById(targetId);
+      const targetId = target.getAttribute('data-bs-target');
+      const targetElement = document.getElementById(targetId ? targetId.replace('#', '') : null);
+
+      // Update active class
+      document.querySelectorAll('.page-sections').forEach(s => s.classList.remove('active'));
+      target.classList.add('active');
+
+      // On mobile: toggle accordion via Bootstrap collapse API
+      if (window.innerWidth < 1200 && targetElement && targetElement.classList.contains('collapse')) {
+        let bsCollapse = bootstrap.Collapse.getInstance(targetElement);
+        if (!bsCollapse) {
+          bsCollapse = new bootstrap.Collapse(targetElement, { toggle: false });
+        }
+        bsCollapse.toggle();
+      }
+      
+      // Scroll to the section
       const navbar = document.querySelector('.navbar');
       const navbarHeight = navbar ? navbar.offsetHeight : 70;
       
@@ -626,7 +691,21 @@ export default {
       const sections = document.querySelectorAll('.page-sections');
       const navbar = document.querySelector('.navbar');
       const stickyTop = navbar ? navbar.offsetHeight : 70; // Dynamic navbar height
-      
+
+      // Determine active section based on scroll position
+      let activeSection = null;
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = sections[i];
+        const contentId = section.getAttribute('data-bs-target');
+        const contentEl = contentId ? document.getElementById(contentId.replace('#', '')) : null;
+        if (contentEl && contentEl.getBoundingClientRect().top <= stickyTop + 50) {
+          activeSection = section;
+          break;
+        }
+      }
+      sections.forEach(s => s.classList.remove('active'));
+      if (activeSection) activeSection.classList.add('active');
+
       sections.forEach((section, index) => {
         const targetId = section.getAttribute('data-target');
         const targetElement = document.getElementById(targetId);
@@ -647,7 +726,8 @@ export default {
               if (nextSectionRect.top > stickyTop + sectionHeight) {
                 // Calculate progress based on how close the next section is
                 const distanceToNextSection = nextSectionRect.top - (stickyTop + sectionHeight);
-                const parentElement = section.closest('.nav-item');
+                const targetId = section.getAttribute('data-bs-target');
+                const parentElement = targetId ? document.getElementById(targetId.replace('#', '')) : null;
                 const totalDistance = parentElement ? parentElement.offsetHeight - sectionHeight : 1000;
                 
                 progress = Math.min(100, Math.max(0, ((totalDistance - distanceToNextSection) / totalDistance) * 100));
@@ -657,7 +737,8 @@ export default {
               }
             } else {
               // Last section - fill based on how much content has been scrolled past
-              const parentElement = section.closest('.nav-item');
+              const targetId = section.getAttribute('data-bs-target');
+              const parentElement = targetId ? document.getElementById(targetId.replace('#', '')) : null;
               if (parentElement) {
                 const parentRect = parentElement.getBoundingClientRect();
                 const sectionHeight = section.offsetHeight;
@@ -687,9 +768,21 @@ export default {
           section.setAttribute('data-progress', progress.toFixed(0));
         }
       });
-    }
+    },
+    resolveCategoryImg(cat) {
+      return resolveImageUrl(cat?.imageUrl);
+    },
+    resolveProductImg(product) {
+      return resolveImageUrl(product?.imageURL);
+    },
   },
   computed: {
+    filteredVehicles() {
+      if (!this.products) return [];
+      const term = (this.vehicleKeyword || '').toLowerCase().trim();
+      if (!term) return this.products;
+      return this.products.filter(p => p.name.toLowerCase().includes(term));
+    },
     brandTickerDuration() {
       return Math.max(28, this.brandLogos.length * 3);
     },
@@ -704,38 +797,38 @@ export default {
       if (dd < 10) dd = "0" + dd;
       return `${yyyy}-${mm}-${dd}`;
     },
-    allCategories() {
-      return this.categories.slice(0, this.categorySize);
-    },
-    allProducts() {
-      return this.products.slice(0, this.productSize);
-    },
-    displayedCategories() {
-      if (!this.isMobile || this.showAllItems) {
-        return this.allCategories;
+    dropoffMinDate() {
+      if (this.pickupDate) {
+        const dayAfter = new Date(this.pickupDate);
+        dayAfter.setDate(dayAfter.getDate() + 1);
+        return dayAfter.toISOString().split('T')[0];
       }
-      return this.allCategories.slice(0, 2);
+      return this.minDate;
     },
-    displayedProducts() {
-      if (!this.isMobile || this.showAllItems) {
-        return this.allProducts;
-      }
-      const displayedCatCount = this.displayedCategories.length;
-      const maxItems = 3;
-      const remainingSlots = Math.max(0, maxItems - displayedCatCount);
-      return this.allProducts.slice(0, remainingSlots);
-    },
-    hasMoreCategories() {
-      return this.allCategories.length > this.displayedCategories.length;
-    },
-    hasMoreProducts() {
-      return this.allProducts.length > this.displayedProducts.length;
-    },
-    totalItems() {
-      return this.allCategories.length + this.allProducts.length;
-    },
-    displayedTotal() {
-      return this.displayedCategories.length + this.displayedProducts.length;
+    fleetCards() {
+      const cats = (this.categories || []).slice(0, this.categorySize).map(cat => ({
+        image: resolveImageUrl(cat?.imageUrl),
+        title: cat.categoryName,
+        description: cat.description,
+        features: [],
+        id: cat.id,
+        type: 'category',
+      }));
+      const prods = (this.products || []).slice(0, this.productSize).map(p => ({
+        image: resolveImageUrl(p?.imageURL),
+        title: p.name,
+        description: `$${p.price} / day`,
+        features: p.features || [],
+        id: p.id,
+        name: p.name,
+        type: 'vehicle',
+      }));
+      return [...cats, ...prods];
+    }
+  },
+  watch: {
+    vehicleKeyword() {
+      this.showVehicleDropdown = true;
     }
   },
   mounted() {
@@ -749,8 +842,9 @@ export default {
     this.$nextTick(() => {
       const navbar = document.querySelector('.navbar');
       if (navbar) {
-        const navbarHeight = navbar.offsetHeight;
-        document.documentElement.style.setProperty('--navbar-height', `${navbarHeight}px`);
+        const navbarHeight = navbar.getBoundingClientRect().height;
+        const isHidden = document.documentElement.getAttribute('data-navbar-hidden') === 'true';
+        document.documentElement.style.setProperty('--navbar-height', isHidden ? '0px' : `${navbarHeight}px`);
       }
       
       // Initialize animations after DOM is ready
@@ -759,15 +853,14 @@ export default {
         this.initCountUpAnimations();
       }, 100);
     });
-    
+
+    // Pre-hide map paths so they're ready to draw on scroll
+    this.prepMapPaths();
+
     // Add scroll listener for progress bars and parallax
     window.addEventListener('scroll', this.handleScroll);
     window.addEventListener('scroll', this.handleParallax);
     window.addEventListener('resize', this.checkMobile);
-
-    // Hero is a static background image.
-    // Start map overlay animations
-    this.setupMapAnimations();
     
     this.handleScroll(); // Initial call
   },
@@ -776,8 +869,6 @@ export default {
     window.removeEventListener('scroll', this.handleScroll);
     window.removeEventListener('scroll', this.handleParallax);
     window.removeEventListener('resize', this.checkMobile);
-    
-    // No video observer to disconnect
   }
 };
 </script>
@@ -789,6 +880,9 @@ export default {
   position: relative;
   padding: 2.25rem 0;
   z-index: 5;
+}
+.z-hide-arrow{
+  z-index: 2 !important;
 }
 
   .pickup-card {
@@ -835,6 +929,8 @@ export default {
   width: 100%;
   overflow: hidden;
   border-radius: 14px;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
 }
 
 .brand-track {
@@ -925,6 +1021,31 @@ export default {
 
 .pickup-input::placeholder {
   color: rgba(128, 128, 128, 0.85);
+}
+
+.vehicle-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  max-height: 200px;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+.vehicle-dropdown li {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  color: var(--text-primary, #333);
+}
+.vehicle-dropdown li:hover {
+  background: rgba(193, 142, 50, 0.12);
 }
 
 @media (max-width: 768px) {
@@ -1110,6 +1231,9 @@ export default {
 .count-up.counted {
   animation: pulse 0.5s ease-in-out;
 }
+.display-1{
+  font-size: 110px;
+}
 
 @keyframes pulse {
   0%, 100% {
@@ -1126,11 +1250,6 @@ export default {
   transition: transform 0.1s ease-out;
 }
 
-/* Enhanced hover effects for cards */
-.card-stagger:hover {
-  transform: translateY(-10px) scale(1.02);
-  transition: all 0.3s ease;
-}
 
 /* Image zoom on hover */
 .parallax-img {
@@ -1148,9 +1267,6 @@ export default {
   overflow: hidden;
 }
 
-.fade-in-scroll:hover .parallax-img {
-  transform: scale(1.05);
-}
 
 /* Banner animation - now fixed with background */
 .banner h3,
@@ -1209,30 +1325,6 @@ export default {
 .contact-us:hover{
   background-color: #0d6efd;
 }
-#background-div {
-  position: fixed;
-top: 0;
-  left: 0;
-width: 100%;
-  height: 100vh;
-    overflow: hidden;
-z-index: 0;
-  margin: 0 !important;
-}
-
-/* Video styling removed (static image only) */
-
-/* Image styling - visible and covers hero area */
-.hero-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  z-index: 1;
-}
 
 /* Map overlay styles */
 .map-container{
@@ -1270,6 +1362,12 @@ z-index: 0;
   stroke-opacity: 0.6;
   vector-effect: non-scaling-stroke;
 }
+@media (max-width: 768px) {
+  .city-path { stroke-width: 2; }
+  .display-1{
+    font-size: 60px;
+  }
+}
 .city-dot {
   fill: none;
   stroke: white;
@@ -1288,6 +1386,9 @@ z-index: 0;
   stroke-width: 1.2;
 }
 
+.city-glow {
+  pointer-events: none;
+}
 @keyframes pulseRing {
   0% {
     transform: scale(0.6);
@@ -1317,31 +1418,12 @@ z-index: 0;
   z-index: 1;
 }
 
-/* Section nav: compact, no pill chrome */
-#home #sections.nav-pills.nav-fill {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: fit-content;
-  max-width: 100%;
-}
-
-#home #sections .nav-item {
-  width: fit-content;
-  max-width: 100%;
-}
-
-#home > .nav-item.text-start {
-  width: fit-content;
-  max-width: 100%;
-}
-
 #home .page-sections{
     display: flex;
     justify-content: center;
     padding: 20px 16px;
     color: var(--accent-color) !important;
-    background-color: var(--bg-primary) !important;
+    background-color: var(--navbar-bg) !important;
     border: none !important;
     text-transform: uppercase;
     position: relative;
@@ -1350,10 +1432,31 @@ z-index: 0;
   }
 
 
-  /* Light mode page sections - keep gold text, change background to white */
-  [data-theme="light"] .page-sections {
-    color: var(--accent-color) !important;
-  }
+#background-div {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 0;
+  margin: 0 !important;
+}
+
+/* Video styling removed (static image only) */
+
+/* Image styling - visible and covers hero area */
+.hero-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  z-index: 1;
+}
+
   
   /* Animated progress bar */
   .page-sections::after {
@@ -1376,37 +1479,66 @@ z-index: 0;
   
   .page-sections:hover{
     cursor: pointer;
-    background: linear-gradient(135deg, var(--hover-bg), var(--deep-sapphire)) !important;
-    color: var(--ivory-white) !important;
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+  }
+
+  .our-fleets{
+    background-color: var(--bg-primary);
   }
   
-  /* Light mode hover - lighter background */
-  [data-theme="light"] .page-sections:hover {
-    background: linear-gradient(135deg, rgb(245, 245, 245), rgb(235, 235, 235)) !important;
-    color: var(--accent-color) !important;
-  }
-  
-  .page-sections.active {
-    background: var(--bg-card) !important;
-    border-bottom: 4px solid transparent !important;
-  }
-  
-  /* Light mode active page sections - white background */
-  [data-theme="light"] .page-sections.active {
-    background: linear-gradient(135deg, rgb(255, 255, 255), rgb(248, 248, 248)) !important;
-  }
   
   .page-sections.active::after {
     animation: shimmer 2s infinite;
   }
   
-/* Push sections down to account for fixed background */
+/* Sections layout */
 #sections {
   background-color: var(--page-bg);
   position: relative;
   z-index: 1;
+}
+#sections .collapse.show {
+  display: block;
+}
+.page-sections {
+  position: sticky;
+  top: var(--navbar-height, 70px);
+  z-index: 100;
+}
+@media (min-width: 1200px) {
+  #sections {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  #sections > .nav-link.page-sections {
+    width: 20%;
+    order: 0;
+    text-align: center;
+    position: sticky;
+    top: var(--navbar-height, 70px);
+    z-index: 100;
+  }
+  
+  #sections > .collapse {
+    width: 100%;
+    order: 1;
+    display: block !important;
+    visibility: visible !important;
+  }
+  #sections > .collapse .row.g-0 {
+    display: flex !important;
+  }
+  #sections > .nav-link.page-sections.active {
+    background-color: var(--accent-color) !important;
+    color: var(--charcoal-black) !important;
+  }
+  
+  [data-theme="light"] #sections > .nav-link.page-sections.active {
+    background-color: var(--accent-color) !important;
+    color: var(--charcoal-black) !important;
+  }
+}
+#ourValues{
+  background-color: var(--bg-primary) !important;
 }
 
 /* Ensure sections have proper background */
@@ -1415,6 +1547,23 @@ z-index: 0;
   color: var(--text-primary) !important;
   z-index: 4;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+.ff-bold{
+  font-family: var(--font-akrobat-bold);
+}
+.ff-semibold{
+  font-family: var(--font-akrobat-semibold);
+}
+.ff-regular{
+  font-family: var(--font-akrobat-regular);
+}
+.ff-light{
+  font-family: var(--font-akrobat-light);
+}
+
+.section-text h2{
+  font-family: var(--font-akrobat-bold);
+
 }
 
 .section-text h2,
@@ -1465,6 +1614,7 @@ z-index: 0;
   color: #ffffff;
   font-size: 3.5rem;
   font-weight: 800;
+  font-family: var(--font-akrobat-bold);
   margin-bottom: 1.25rem;
   text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
   letter-spacing: -0.02em;
@@ -1588,23 +1738,6 @@ z-index: 0;
   }
 }
 
-/* Optional: Add a subtle decorative line */
-.hero-backdrop-content::before {
-  content: '';
-  display: block;
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(90deg, #f0c14b, transparent);
-  margin: 0 auto 1.5rem auto;
-  border-radius: 2px;
-}
-
-@media (max-width: 768px) {
-  .hero-backdrop-content::before {
-    width: 40px;
-    margin-bottom: 1rem;
-  }
-}
 
 /* Keep banner styling consistent */
 .banner {
@@ -1685,7 +1818,6 @@ z-index: 0;
     position: sticky !important;
     top: var(--navbar-height, 70px);
     z-index: 100;
-    transition: top 0.3s ease;
     will-change: top;
   }
   
@@ -1697,80 +1829,107 @@ z-index: 0;
       box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
     }
   }
-  .nav-pills {
-    --bs-nav-pills-border-radius: 0px;
-  }
-  /* Ensure section content doesn't overlap */
-  .nav-item {
-    position: relative;
-    z-index: 1;
-    background-color: var(--page-bg);
-  }
+
   
   .row.g-0 {
     position: relative;
     z-index: 0;
   }
-  @media (min-width: 0px) and (max-width: 992px) {
-    
+@media (min-width: 0px) and (max-width: 992px) {
+  .scroll-indicator{
+    display: none;
   }
-  @media (min-width: 0px) and (max-width: 500px) {
-    /* Keep full screen dimensions on mobile */
-    #background-div{
-      height: 100vh;
-    }
-    
-    /* Optimize image for mobile */
-    .hero-image {
-      background-size: cover;
-      background-position: center;
-    }
-    
-    .banner{
-      padding-top: 50px;
-      padding-bottom: 40px;
-    }
+  #home{
+    padding-top: 0px;
+    margin-top: -85px;
   }
-
-/* Show More Button Styling */
-.show-more-btn {
-  background: linear-gradient(135deg, transparent, transparent);
-  border: 2px solid var(--accent-color, #f0c14b);
-  color: var(--accent-color, #f0c14b);
-  padding: 0.75rem 2rem;
-  font-weight: 600;
-  border-radius: 50px;
-  transition: all 0.3s ease;
-  letter-spacing: 0.5px;
+  #background-div{
+    height: 70vh;
+    position: relative;
+  }
+  .hero-image{
+    position: relative;
+  }
 }
 
-.show-more-btn:hover {
-  background: linear-gradient(135deg, var(--accent-color, #f0c14b), var(--gold-gradient-end, #c18e32));
-  color: #1a1a1a;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
-  border-color: transparent;
-}
-
-.show-more-btn:active {
-  transform: translateY(0);
-}
-
-/* Mobile adjustments */
-@media (max-width: 768px) {
-  .show-more-btn {
-    padding: 0.6rem 1.5rem;
-    font-size: 0.9rem;
-    width: auto;
-    min-width: 200px;
+@media (min-width: 0px) and (max-width: 650px) {
+  #background-div{
+    height: 50vh;
   }
+}
+
+@media (min-width: 0px) and (max-width: 450px) {
+  #background-div{
+    height: 40vh;
+  }
+  .hero-image{
+    background-size: contain;
+    background-position: center;
+  }
+}
+
+/* Sort controls styling */
+.sort-controls .form-select {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border-color, rgba(255,255,255,0.15));
+}
+.sort-controls .form-select:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+}
+.sort-label {
+  color: var(--text-primary);
+  opacity: 0.8;
+}
+@media (min-width: 576px) {
+  .sort-controls .w-sm-auto {
+    width: auto !important;
+  }
+}
+
+/* --- Stacked Card section titles --- */
+.stack-section-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-color, #d4af37);
+  margin-bottom: 0.75rem;
+  padding-left: 4px;
+}
+
+/* Slot content styles for HorizontalCardStack static card */
+.stack-card-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0;
+  color: var(--text-primary, #f8f9fa);
+  line-height: 1.3;
+}
+[data-theme="light"] .stack-card-title {
+  color: #102040;
+}
+
+.stack-card-desc {
+  font-size: 0.85rem;
+  color: var(--text-primary, #e9ecef);
+  opacity: 0.75;
+  margin: 0;
+  line-height: 1.4;
+  overflow-y: auto;
+}
+[data-theme="light"] .stack-card-desc {
+  color: #334155;
+  opacity: 1;
 }
 
 @media (max-width: 480px) {
-  .show-more-btn {
-    min-width: 180px;
-    padding: 0.5rem 1.2rem;
+  .stack-card-title {
     font-size: 0.85rem;
+  }
+  .stack-card-desc {
+    font-size: 0.75rem;
   }
 }
 </style>

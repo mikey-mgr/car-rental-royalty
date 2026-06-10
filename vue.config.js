@@ -16,6 +16,7 @@ function bypassSpaNavigation(req) {
 module.exports = {
 
   devServer: {
+    host: '0.0.0.0',
     hot: false,           // Disable HMR - causing refresh loop
     liveReload: false,    // Disable live reload
     // Proxy API requests to the backend — making them same-origin from the browser's

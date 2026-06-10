@@ -1,7 +1,7 @@
 <template>
     <footer>
-        <div class="container pt-5 px-3 w-100">
-            <div class="row justify-content-center">
+        <div class="container pt-5 px-5 w-100">
+            <div class="row justify-content-start">
                 <div class="col-md-4 col-9">
                     <ul class="list-unstyled">
                     <li class="mb-2">
@@ -14,7 +14,7 @@
                     <li class="text-light pb-2">Follow us on our Social platforms</li>
                     <li class="row justify-content-start">
                         <div class="row">
-                            <div class="footer-link col text-start"><a href="https://instagram.com/" class="footer-link media-icon bi bi-instagram"></a></div>
+                            <div class="footer-link col text-start"><a href="https://www.instagram.com/royaltycarsrental" class="footer-link media-icon bi bi-instagram"></a></div>
                             <div class="footer-link col text-start"><a href="https://linkedin.com/" class="footer-link media-icon bi bi-linkedin"></a></div>
                             <div class="footer-link col text-start"><a href="https://twitter.com/" class="footer-link media-icon bi bi-twitter"></a></div>
                             <div class="footer-link col text-start"><a href="https://facebook.com/" class="footer-link media-icon bi bi-facebook"></a></div>
@@ -89,7 +89,7 @@ footer{
     transition: color 0.2s ease;
 }
 .media-icon{
-    color: #334155; /* match footer text by default */
+    color: var(--accent-color);
     font-size: larger;
     transition: color 0.15s ease, transform 0.15s ease;
 }
@@ -97,20 +97,15 @@ footer{
     color: var(--accent-color) !important; transform: translateY(-2px);
 }
 
-/* Brand base colors for icons */
-.media-icon.bi-instagram { color: #E1306C; }
-.media-icon.bi-linkedin { color: #0A66C2; }
-.media-icon.bi-twitter { color: #1DA1F2; }
-.media-icon.bi-facebook { color: #1877F2; }
-.media-icon.bi-youtube { color: #FF0000; }
-
-/* On hover, highlight to accent color for emphasis */
-.media-icon:hover { color: var(--accent-color) !important; transform: translateY(-2px); }
 li{
     padding-bottom: 10px;
 }
 ul{
     padding: 0px;
+}
+.px-5{
+    padding-left: 2.2rem !important;
+    padding-right: 2.2rem !important;
 }
 
 /* Override Bootstrap text-light class in footer for theme support */

@@ -70,9 +70,6 @@ axios.interceptors.response.use(
     if (error.response && error.response.data && typeof error.response.data === 'string' &&
         error.response.data.includes('Please sign in')) {
       clearSessionCookies();
-      if (!window.location.pathname.includes('/signin')) {
-        window.location.href = '/';
-      }
     }
 
     return Promise.reject(error);

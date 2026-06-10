@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "bookings")
@@ -35,6 +36,12 @@ public class Cart {
 
     @Column(name = "booked_for")
     private LocalDate bookedFor;
+
+    @Column(name = "booked_from")
+    private LocalDate bookedFrom;
+
+    @Column(name = "dropoff_time")
+    private String dropoffTime;
 
     public Cart(Date createdDate, User user, int quantity, LocalDate bookedFor) {
         this.createdDate = createdDate;
@@ -140,8 +147,24 @@ public class Cart {
     /**
      * @param bookedFor the bookedFor to set
      */
-    public void setBookedFor(LocalDate bookedFor) {
+    public void setBookedFor(@NotNull LocalDate bookedFor) {
         this.bookedFor = bookedFor;
+    }
+
+    public LocalDate getBookedFrom() {
+        return bookedFrom;
+    }
+
+    public void setBookedFrom(LocalDate bookedFrom) {
+        this.bookedFrom = bookedFrom;
+    }
+
+    public String getDropoffTime() {
+        return dropoffTime;
+    }
+
+    public void setDropoffTime(String dropoffTime) {
+        this.dropoffTime = dropoffTime;
     }
 
 }

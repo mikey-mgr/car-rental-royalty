@@ -34,17 +34,25 @@ public class CartHistory {
 
     @Column(name = "booked_for")
     private LocalDate bookedFor;
+
+    @Column(name = "booked_from")
+    private LocalDate bookedFrom;
+
+    @Column(name = "dropoff_time")
+    private String dropoffTime;
     
     private Double price;
 
     public CartHistory(Integer cartId, Date createdDate, String user, String product, int quantity,
-            LocalDate bookedFor, Double price) {
+            LocalDate bookedFor, LocalDate bookedFrom, String dropoffTime, Double price) {
         this.cartId = cartId;
         this.createdDate = createdDate;
         this.user = user;
         this.product = product;
         this.quantity = quantity;
         this.bookedFor = bookedFor;
+        this.bookedFrom = bookedFrom;
+        this.dropoffTime = dropoffTime;
         this.price = price;
     }
 
@@ -94,6 +102,22 @@ public class CartHistory {
 
     public void setBookedFor(LocalDate bookedFor) {
         this.bookedFor = bookedFor;
+    }
+
+    public LocalDate getBookedFrom() {
+        return bookedFrom;
+    }
+
+    public void setBookedFrom(LocalDate bookedFrom) {
+        this.bookedFrom = bookedFrom;
+    }
+
+    public String getDropoffTime() {
+        return dropoffTime;
+    }
+
+    public void setDropoffTime(String dropoffTime) {
+        this.dropoffTime = dropoffTime;
     }
 
     /**

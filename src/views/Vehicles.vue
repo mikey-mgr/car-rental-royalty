@@ -13,7 +13,7 @@
     </div>
     <div v-else class="row">
       <div class="col-12 text-center">
-        <h2 class="pt-3 pb-3">All Vehicles</h2>
+        <h2 class="pt-3 pb-3 ff-bold">All Vehicles</h2>
       </div>
     </div>
 
@@ -34,12 +34,7 @@
               list="vehicleListOptions"
             />
             <datalist id="vehicleListOptions">
-              <option value="NISSAN VERSA NOTE (2014)"></option>
-              <option value="Ford Everest 2023"></option>
-              <option value="LAND ROVER DISCOVERY 4"></option>
-              <option value="TOYOTA CAMRY (2010)"></option>
-              <option value="MERCEDES BENZ GLE 2022"></option>
-              <option value="FIT NEW SHAPE HYBRID (2014)"></option>
+              <option v-for="p in products" :key="p.id" :value="p.name"></option>
             </datalist>
             <button
               v-if="text || searchText"
@@ -177,6 +172,9 @@ export default {
       if (q.dropoffDate) {
         parts.push(`To ${q.dropoffDate}`);
       }
+      if (q.dropoffTime) {
+        parts.push(`Time: ${q.dropoffTime}`);
+      }
       return parts.length ? parts.join(" · ") : "";
     },
     hasActiveFilters() {
@@ -276,6 +274,19 @@ export default {
 <style scoped>
 .bg-body-tertiary {
   background-color: var(--page-bg);
+}
+
+.ff-bold{
+  font-family: var(--font-akrobat-bold);
+}
+.ff-semibold{
+  font-family: var(--font-akrobat-semibold);
+}
+.ff-regular{
+  font-family: var(--font-akrobat-regular);
+}
+.ff-light{
+  font-family: var(--font-akrobat-light);
 }
 #search-button-navbar {
   background-color: #c18e32;

@@ -5,7 +5,7 @@
 
             <!-- Page Heading -->
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+                <h1 class="h3 mb-0 text-gray-800 ff-bold">Dashboard</h1>
             </div>
 
             <!-- Content Row -->
@@ -130,8 +130,9 @@
                                     <label for="filter-input" class="m-0 py-2 pl-3">Filter</label>
                                     <div class="col">
                                         <div class="input-group">
-                                            <input type="search" id="filter-input" class="form-control p-1" v-model="filter" placeholder="Type to Search"/>
-                                            <b-button :disabled="!filter" @click="filter = ''">Clear</b-button>
+                                            <input ref="filterInput" type="search" id="filter-input" class="form-control p-1" v-model="filter" placeholder="Type to Search"/>
+                                            <button class="btn btn-outline-secondary" @click="$refs.filterInput.focus()">Search</button>
+                                            <button class="btn btn-secondary" :disabled="!filter" @click="filter = ''">Clear</button>
                                         </div>
                                     </div>
                                 </div>
@@ -139,7 +140,7 @@
 
 
                                 <div class="col p-0">
-                                    <div role="group" tabindex="-1" class="mt-1 bv-no-focus-ring">
+                                    <div role="group" tabindex="-1" class="mt-1">
                                         <label for="" class="mr-2">Filter on:</label>
                                         <div class="custom-control custom-control-inline custom-checkbox">
                                             <input type="checkbox" v-model="vehicleFilterOn" class="custom-control-input" value="vehicleName" id="vName" name="vName">
@@ -160,42 +161,52 @@
                                 <div class="col-md-6 col-xs-12 form-row form-group my-1 px-1">
                                     <label for="per-page-select" class="m-0 py-2 pl-3">Per page</label>
                                     <div class="col">
-                                        <select class="form-select" id="per-page-select" v-model="perPage">
-                                            <option v-for="index in pageOptions.length" :key="index">{{ pageOptions[index-1] }}</option>
+                                        <select class="form-select" id="per-page-select" v-model.number="perPage">
+                                            <option v-for="n in pageOptions" :key="n" :value="n">{{ n }}</option>
                                         </select>
                                     </div>
                                 </div>
-                                <b-pagination
-                                    v-model="currentPage"
-                                    :total-rows="totalRows"
-                                    :per-page="perPage"
-                                    class="col-md-6 col-xs-12 my-1 px-1 d-flex"
-                                ></b-pagination>
+                                <nav v-if="vehicleTotalPages > 1" class="col-md-6 col-xs-12 my-1 px-1" aria-label="Vehicles pagination">
+                                    <ul class="pagination justify-content-center m-0 flex-wrap">
+                                        <li class="page-item" :class="{disabled: currentPage <= 1}">
+                                            <a class="page-link" href="#" @click.prevent="currentPage > 1 && currentPage--">&laquo;</a>
+                                        </li>
+                                        <li v-for="pg in vehicleTotalPages" :key="pg" class="page-item" :class="{active: pg === currentPage}">
+                                            <a class="page-link" href="#" @click.prevent="currentPage = pg">{{ pg }}</a>
+                                        </li>
+                                        <li class="page-item" :class="{disabled: currentPage >= vehicleTotalPages}">
+                                            <a class="page-link" href="#" @click.prevent="currentPage < vehicleTotalPages && currentPage++">&raquo;</a>
+                                        </li>
+                                    </ul>
+                                </nav>
                             </div>
 
-                            <!-- Bootstrap Table for vehicles-->
-                            <b-table responsive class="table" head-variant="dark"
-                                :items="vehicleItems"
-                                :fields="carTblFields"
-                                :per-page="perPage"
-                                striped hover
-                                :current-page="currentPage"
-                                sort-icon-left
-                                :filter="filter"
-                                @filtered="onFiltered"
-                                :filter-included-fields="vehicleFilterOn">
-                                    <template #cell(vehicleName)="row">
-                                        <router-link class="text-decoration-none text-secondary" :to="{name:'ProductDetails', params: {id: row.item.id, name: row.value}}">{{ row.value }}</router-link>
-                                    </template>
-                                    <template #cell(category)="row">
-                                        <router-link class="text-decoration-none text-secondary" :to="{name:'ListProducts', params: {id: row.item.categoryId}}">
-                                            {{ row.value }}
-                                        </router-link>
-                                    </template>
-                                    <template #cell(price)="row">
-                                        <p class="text-center fw-bold">${{ row.value.toFixed(2) }}</p>
-                                    </template>
-                            </b-table>
+                            <!-- Vehicles Table -->
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover mb-0">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th v-for="field in carTblFields" :key="field.key"
+                                                :class="{'sortable-th': field.sortable, 'sorted-th': vehicleSortKey === field.key}"
+                                                @click="field.sortable && toggleVehicleSort(field.key)" role="columnheader" :aria-sort="vehicleSortKey === field.key ? (vehicleSortAsc ? 'ascending' : 'descending') : null">
+                                                {{ field.label }}
+                                                <span v-if="vehicleSortKey === field.key" class="sort-arrow">{{ vehicleSortAsc ? '▲' : '▼' }}</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(row, idx) in vehicleDisplayItems" :key="row.id || idx">
+                                            <td><router-link class="text-decoration-none text-secondary" :to="{name:'ProductDetails', params: {id: row.id, name: row.vehicleName}}">{{ row.vehicleName }}</router-link></td>
+                                            <td>{{ row.bookingStatus }}</td>
+                                            <td class="text-center fw-bold">${{ Number(row.price).toFixed(2) }}</td>
+                                            <td><router-link class="text-decoration-none text-secondary" :to="{name:'ListProducts', params: {id: row.categoryId}}">{{ row.category }}</router-link></td>
+                                        </tr>
+                                        <tr v-if="vehicleDisplayItems.length === 0">
+                                            <td :colspan="carTblFields.length" class="text-center text-muted py-4">No vehicles found</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                             <!-- <div class="p-2">
                                 <tr class="">{{ allVehicles }} Vehicles</tr>
                             </div> -->
@@ -214,7 +225,7 @@
                         <!-- Card Body -->
                         <div class="card-body">
                             <div class="chart-pie py-4">
-                                <Doughnut :data="data" :options="options" />
+                                <Doughnut ref="chartRef" :data="data" :options="chartOptions" />
                             </div>
                                 <h5><router-link class="text-decoration-none mt-4" :to="{name: 'AdminProduct'}">View all Vehicles</router-link></h5>
                         </div>
@@ -233,40 +244,58 @@
                         </div>
                         <div class="card-body p-2">
                             <!-- Pagination for bookings table-->
-                            <div class="row d-flex m-0 p-0 mb-2">
-                                <div class="col-md-6 col-xs-12 form-row form-group my-1">
+                            <div class="row d-flex m-0 p-0 mb-2 align-items-center">
+                                <div class="col-md-4 col-xs-12 form-row form-group my-1">
                                     <label for="perPgSelect" class="m-0 p-2">Per page</label>
                                     <div class="col">
-                                        <select class="form-select" id="perPgSelect" v-model="perPg">
-                                            <option v-for="index in pgOptions.length" :key="index">{{ pgOptions[index-1] }}</option>
+                                        <select class="form-select" id="perPgSelect" v-model.number="perPg">
+                                            <option v-for="n in pgOptions" :key="n" :value="n">{{ n }}</option>
                                         </select>
                                     </div>
                                 </div>
-                                <b-pagination
-                                    v-model="currentPg"
-                                    :total-rows="ttlRows"
-                                    :per-page="perPg"
-                                    class="col-md-6 col-xs-12 my-1 px-3 d-flex"
-                                ></b-pagination>
+                                <nav v-if="bookingTotalPages > 1" class="col-md-8 col-xs-12 my-1" aria-label="Bookings pagination">
+                                    <ul class="pagination justify-content-center m-0 flex-wrap">
+                                        <li class="page-item" :class="{disabled: currentPg <= 1}">
+                                            <a class="page-link" href="#" @click.prevent="currentPg > 1 && currentPg--">&laquo;</a>
+                                        </li>
+                                        <li v-for="pg in bookingTotalPages" :key="pg" class="page-item" :class="{active: pg === currentPg}">
+                                            <a class="page-link" href="#" @click.prevent="currentPg = pg">{{ pg }}</a>
+                                        </li>
+                                        <li class="page-item" :class="{disabled: currentPg >= bookingTotalPages}">
+                                            <a class="page-link" href="#" @click.prevent="currentPg < bookingTotalPages && currentPg++">&raquo;</a>
+                                        </li>
+                                    </ul>
+                                </nav>
                             </div>
-                            <!-- Bootstrap Table for bookings-->
-                            <b-table responsive class="table" head-variant="dark"
-                                :items="bookingItems"
-                                :fields="bookingsTblFields"
-                                :per-page="perPg"
-                                striped hover
-                                :current-page="currentPg"
-                                v-model:sort-by="sortBy"
-                                v-model:sort-asc="sortAsc"
-                                sort-icon-left
-                                @filtered="onFiltr">
-                                    <template #cell(days)="row">
-                                        <p class="text-start">{{ row.value }}</p>
-                                    </template>
-                                    <template #cell(price)="row">
-                                        <p class="text-center fw-bold">${{ row.value.toFixed(2) }}</p>
-                                    </template>
-                            </b-table>
+                            <!-- Bookings Table -->
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover mb-0">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th v-for="field in bookingsTblFields" :key="field.key"
+                                                :class="{'sortable-th': field.sortable, 'sorted-th': bookingSortKey === field.key}"
+                                                @click="field.sortable && toggleBookingSort(field.key)" role="columnheader" :aria-sort="bookingSortKey === field.key ? (bookingSortAsc ? 'ascending' : 'descending') : null">
+                                                {{ field.label }}
+                                                <span v-if="bookingSortKey === field.key" class="sort-arrow">{{ bookingSortAsc ? '▲' : '▼' }}</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(row, idx) in bookingDisplayItems" :key="idx">
+                                            <td>{{ row.vehicle }}</td>
+                                            <td>{{ row.user }}</td>
+                                            <td>{{ row.bookedFrom }}</td>
+                                            <td>{{ row.bookedFor }}</td>
+                                            <td>{{ row.dropoffTime || '-' }}</td>
+                                            <td class="text-start">{{ row.days }}</td>
+                                            <td class="text-center fw-bold">${{ Number(row.price).toFixed(2) }}</td>
+                                        </tr>
+                                        <tr v-if="bookingDisplayItems.length === 0">
+                                            <td :colspan="bookingsTblFields.length" class="text-center text-muted py-4">No bookings found</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -323,15 +352,13 @@ export default {
                             label: "Category",
                         },
             ],
-            vehicleItems: this.vehicleTblConfig(this.categories, this.products),
             perPage: 5,
             pageOptions: [5,10,15,30,50,100,200],
-            totalRows: 1,
             currentPage: 1,
-            allVehicles: 0,
             filter: null,
             vehicleFilterOn: [],
-
+            vehicleSortKey: '',
+            vehicleSortAsc: true,
 
             //data for bookings table
             bookingsTblFields: [
@@ -344,31 +371,38 @@ export default {
                             key: "user",
                             label: "User",
                             sortable: true,
-                        },                        
+                        },
+                        {
+                            key: "bookedFrom",
+                            label: "Pickup Date",
+                            sortable: true,
+                        },
+                        {
+                            key: "bookedFor",
+                            label: "Dropoff Date",
+                            sortable: true,
+                        },
+                        {
+                            key: "dropoffTime",
+                            label: "Dropoff Time",
+                            sortable: false,
+                        },
                         {
                             key: "days",
                             label: "Days",
                             sortable: true,
                         },                        
                         {
-                            key: "bookedFor",
-                            label: "Booked for",
-                            sortable: true,
-                        },                        
-                        {
                             key: "price",
-                            label: "Price",
+                            label: "Total",
                             sortable: true,
                         },
             ],
-            bookingItems: this.bookingTblConfig(this.cartItems, this.users),
             perPg: 5,
             pgOptions: [5,10,15,30,50,100,200],
-            ttlRows: 1,
             currentPg: 1,
-            allBookings: 0,
-            sortBy: "bookedFor",
-            sortAsc: true,
+            bookingSortKey: 'bookedFor',
+            bookingSortAsc: true,
 
             //data for pie chart
             data: {
@@ -379,42 +413,153 @@ export default {
                 hoverBorderColor: "rgba(234, 236, 244, 1)",
                 }],
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                tooltips: {
-                    backgroundColor: "rgb(255,255,255)",
-                    bodyFontColor: "#858796",
-                    borderColor: '#dddfeb',
-                    borderWidth: 1,
-                    xPadding: 15,
-                    yPadding: 15,
-                    displayColors: false,
-                    caretPadding: 10,
-                },
-                legend: {
-                display: false
-                },
-            },
-
-            //general variables
             availableCount: 0,
         }
     },
     computed:{
+        chartOptions() {
+            let textColor = '#cccccc';
+            if (typeof document !== 'undefined') {
+                textColor = getComputedStyle(document.body).color || '#cccccc';
+            }
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                onClick: (event, elements, chart) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        const label = chart.data.labels[index];
+                        this.filter = label;
+                        this.vehicleFilterOn = ['category'];
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        backgroundColor: "rgb(255,255,255)",
+                        titleColor: "#333333",
+                        bodyColor: "#858796",
+                        borderColor: '#dddfeb',
+                        borderWidth: 1,
+                        padding: 15,
+                        displayColors: false,
+                        caretPadding: 10,
+                    },
+                    legend: {
+                        display: true,
+                        labels: {
+                            color: textColor,
+                            font: { weight: 'bold' },
+                            padding: 12,
+                        },
+                    },
+                },
+            };
+        },
         progressBarWidth(){
             return this.progressBarCalc(this.products);
         },
-        wishlistLength(){
+        wishlistsLength(){
             if(!this.wishlists){
                 return 0;
             } else return this.wishlists.length
         },
-
+        vehicleItems() {
+            return this.vehicleTblConfig(this.categories, this.products);
+        },
+        bookingItems() {
+            return this.bookingTblConfig(this.cartItems, this.users);
+        },
         cartItemsLength(){
             if(!this.cartItems){
                 return 0;
             } else return this.cartItems.length
+        },
+        allVehicles() {
+            return this.products ? this.products.length : 0;
+        },
+        allBookings() {
+            return this.cartItems ? this.cartItems.length : 0;
+        },
+
+        // Vehicles: filter
+        vehicleFilteredItems() {
+            let items = this.vehicleItems;
+            if (!this.filter) return items;
+            const q = this.filter.toString().toLowerCase();
+            const fields = this.vehicleFilterOn.length > 0 ? this.vehicleFilterOn : ['vehicleName', 'bookingStatus', 'price', 'category'];
+            return items.filter(row =>
+                fields.some(f => {
+                    const val = row[f];
+                    return val != null && val.toString().toLowerCase().includes(q);
+                })
+            );
+        },
+        // Vehicles: sort
+        vehicleSortedItems() {
+            const items = [...this.vehicleFilteredItems];
+            if (!this.vehicleSortKey) return items;
+            const key = this.vehicleSortKey;
+            items.sort((a, b) => {
+                const va = a[key] ?? '';
+                const vb = b[key] ?? '';
+                const cmp = typeof va === 'number' && typeof vb === 'number' ? va - vb : String(va).localeCompare(String(vb));
+                return this.vehicleSortAsc ? cmp : -cmp;
+            });
+            return items;
+        },
+        // Vehicles: total rows for pagination
+        vehicleTotalRows() {
+            return this.vehicleSortedItems.length;
+        },
+        // Vehicles: total pages
+        vehicleTotalPages() {
+            return Math.ceil(this.vehicleTotalRows / this.perPage) || 1;
+        },
+        // Vehicles: current page slice
+        vehicleDisplayItems() {
+            const start = (this.currentPage - 1) * this.perPage;
+            return this.vehicleSortedItems.slice(start, start + this.perPage);
+        },
+
+        // Bookings: sort
+        bookingSortedItems() {
+            const items = [...this.bookingItems];
+            if (!this.bookingSortKey) return items;
+            const key = this.bookingSortKey;
+            items.sort((a, b) => {
+                const va = a[key] ?? '';
+                const vb = b[key] ?? '';
+                const cmp = typeof va === 'number' && typeof vb === 'number' ? va - vb : String(va).localeCompare(String(vb));
+                return this.bookingSortAsc ? cmp : -cmp;
+            });
+            return items;
+        },
+        // Bookings: total rows
+        bookingTotalRows() {
+            return this.bookingSortedItems.length;
+        },
+        // Bookings: total pages
+        bookingTotalPages() {
+            return Math.ceil(this.bookingTotalRows / this.perPg) || 1;
+        },
+        // Bookings: current page slice
+        bookingDisplayItems() {
+            const start = (this.currentPg - 1) * this.perPg;
+            return this.bookingSortedItems.slice(start, start + this.perPg);
+        },
+    },
+    watch: {
+        filter() {
+            this.currentPage = 1;
+        },
+        vehicleFilterOn() {
+            this.currentPage = 1;
+        },
+        perPage() {
+            if (this.currentPage > this.vehicleTotalPages) this.currentPage = this.vehicleTotalPages;
+        },
+        perPg() {
+            if (this.currentPg > this.bookingTotalPages) this.currentPg = this.bookingTotalPages;
         },
     },
     methods: {
@@ -432,17 +577,23 @@ export default {
             let percentage = availableCount/totalLength * 100;
             return percentage.toFixed(0);
         },
-        //filter and pagination for vehicles table
-        onFiltered(filteredItems) {
-            // Trigger pagination to update the number of buttons/pages due to filtering
-            this.totalRows = filteredItems.length
-            this.currentPage = 1
+        toggleVehicleSort(key) {
+            if (this.vehicleSortKey === key) {
+                this.vehicleSortAsc = !this.vehicleSortAsc;
+            } else {
+                this.vehicleSortKey = key;
+                this.vehicleSortAsc = true;
+            }
+            this.currentPage = 1;
         },
-        //filter pagination for bookings table
-        onFiltr(filteredItems) {
-            // Trigger pagination to update the number of buttons/pages due to filtering
-            this.ttlRows = filteredItems.length
-            this.currentPg = 1
+        toggleBookingSort(key) {
+            if (this.bookingSortKey === key) {
+                this.bookingSortAsc = !this.bookingSortAsc;
+            } else {
+                this.bookingSortKey = key;
+                this.bookingSortAsc = true;
+            }
+            this.currentPg = 1;
         },
 
         //configure items for bookings table in admin panel
@@ -455,12 +606,16 @@ export default {
                             user: "",
                             days: "",
                             bookedFor: "",
+                            bookedFrom: "",
+                            dropoffTime: "",
                             price: ""
                     }
                     usrItem.vehicle = cartItems[i].product.name;
                     usrItem.user = this.getUserName(cartItems[i].userId, users);
                     usrItem.days = cartItems[i].quantity;
                     usrItem.bookedFor = cartItems[i].bookedFor;
+                    usrItem.bookedFrom = cartItems[i].bookedFrom;
+                    usrItem.dropoffTime = cartItems[i].dropoffTime;
                     usrItem.price = cartItems[i].product.price * cartItems[i].quantity;
                     items.push(usrItem);
                 }
@@ -517,20 +672,23 @@ export default {
 
     mounted() {
         this.$emit("adminInfo");
-        //setting the initial lengths for the vehicles table
-        if(this.products){
-            this.allVehicles = this.products.length;
-        } else this.allVehicles = 0;
-        // Set the initial number of items for b-table
-        this.totalRows = this.vehicleItems.length;
-
-        //setting the initial length for the bookings table
-        if(this.cartItems){
-            this.allBookings = this.cartItems.length;
-        } else this.allBookings = 0;
-        // Set the initial number of items for b-table
-        this.ttlRows = this.bookingItems.length;
-        
+        this._themeObserver = new MutationObserver(() => {
+            const chart = this.$refs.chartRef?.chart;
+            if (!chart) return;
+            const rootStyle = getComputedStyle(document.documentElement);
+            const color = rootStyle.getPropertyValue('--text-primary').trim() || '#cccccc';
+            if (chart.options.plugins?.legend?.labels) {
+                chart.options.plugins.legend.labels.color = color;
+                chart.update();
+            }
+        });
+        this._themeObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme']
+        });
+    },
+    beforeUnmount() {
+        if (this._themeObserver) this._themeObserver.disconnect();
     },
 }
 </script>
@@ -540,17 +698,38 @@ export default {
 .table td, .table th{
     border: 1px solid #dee2e6;
 }
-li.page-item{
-    display: flex;
-    flex: 1;
-    flex-grow: 1 !important;
-    flex-direction: column;
-}
-li.page-item.disabled{
-    display: flex;
-    flex: 1;
-    flex-grow: 1 !important;
-    flex-direction: column;
-}
 
+.ff-bold{
+  font-family: var(--font-akrobat-bold);
+}
+.ff-semibold{
+  font-family: var(--font-akrobat-semibold);
+}
+.ff-regular{
+  font-family: var(--font-akrobat-regular);
+}
+.ff-light{
+  font-family: var(--font-akrobat-light);
+}
+.sortable-th {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+.sortable-th:hover {
+    opacity: 0.85;
+}
+.sorted-th {
+    color: #fff !important;
+}
+.sort-arrow {
+    margin-left: 4px;
+    font-size: 0.7rem;
+}
+.pagination {
+    margin-bottom: 0;
+}
+.pagination .page-link {
+    cursor: pointer;
+}
 </style>
