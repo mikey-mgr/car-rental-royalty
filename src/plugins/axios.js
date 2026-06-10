@@ -7,12 +7,11 @@ import axios from 'axios';
  * - Refreshes CSRF tokens from the backend when needed
  */
 
-export const API_BASE_URL = process.env.VUE_APP_API_URL || 'http://localhost:8081';
+export const API_BASE_URL = process.env.VUE_APP_API_URL || '';
 let cachedCsrfToken = null;
 
 // Set default config
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = API_BASE_URL;
 
 // CSRF Token Interceptor - Add CSRF token to request headers
 axios.interceptors.request.use(config => {
