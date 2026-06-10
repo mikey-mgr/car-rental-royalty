@@ -35,9 +35,9 @@ module.exports = {
       '/health': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
       '/healthz': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
       // Admin API endpoints only — NOT a catch-all for /admin/*
-      '/admin/users/': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
-      '/admin/all-cart-items/': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
-      '/admin/all-wishlists/': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
+      // All /admin/ API calls are proxied; SPA routes (/admin, /admin/vehicles, etc.)
+      // are bypassed by bypassSpaNavigation (GET with text/html accept → serves index.html).
+      '/admin/': { target: 'http://localhost:8081', changeOrigin: true, bypass: bypassSpaNavigation },
     },
     historyApiFallback: true,
     setupMiddlewares: (middlewares, devServer) => {

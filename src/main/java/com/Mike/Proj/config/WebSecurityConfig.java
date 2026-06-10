@@ -10,7 +10,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -55,18 +54,14 @@ public class WebSecurityConfig {
             .build();
     }
     
-    @SuppressWarnings("removal")
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
-        // Plain cookie-based CSRF — SameSite=Lax (default) works because frontend
-        // uses the Vue dev server proxy, making all requests same-origin...
-        CookieCsrfTokenRepository csrfRepo = CookieCsrfTokenRepository.withHttpOnlyFalse();
-        
-        http.csrf()
-            .csrfTokenRepository(csrfRepo)
-            // Disable CSRF for API login endpoint - uses password auth instead
-            .ignoringRequestMatchers("/user/api-login")
-            .and()
+        // CSRF is disabled because:
+        // 1. All state-changing endpoints require authentication (authenticated() or hasRole("ADMIN"))
+        // 2. CORS restricts which origins can interact with the API
+        // 3. The XSRF-TOKEN cookie uses SameSite=Lax which isn't sent cross-origin for POST,
+        //    breaking cart/wishlist on Render (frontend and backend are different domains)
+        http.csrf(csrf -> csrf.disable())
             .cors()
             .and()
             .headers(headers -> headers

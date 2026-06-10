@@ -47,7 +47,7 @@ axios.interceptors.response.use(
 
       originalRequest._retry = true;
 
-      return axios.get('/user/csrf-token', { withCredentials: true })
+      return axios.get(`${API_BASE_URL}/user/csrf-token`, { withCredentials: true })
         .then((response) => {
           const newToken = response?.data?.token || getCsrfTokenFromCookie();
           if (newToken) {

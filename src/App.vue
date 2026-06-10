@@ -258,15 +258,15 @@ export default {
     }
   },
   methods: {
-    //method to check if backend is ready and retry
+    //method to retry fetching data when backend isn't ready yet
     async checkBackendHealth() {
       try {
-        // Try to fetch the public endpoints
         await axios.all([
-          axios.get("/category/list", { timeout: 5000 }), 
-          axios.get("/product/list", { timeout: 5000 })
+          axios.get(`${this.baseURL}/category/list`, { timeout: 10000 }), 
+          axios.get(`${this.baseURL}/product/list`, { timeout: 10000 })
         ]);
-        window.location.reload();
+        // Backend is up — fetch data again naturally (no reload loop)
+        this.fetchData();
       } catch (err) {
         void err;
       }
@@ -276,7 +276,7 @@ export default {
     async fetchCsrfToken() {
       try {
         // Call dedicated CSRF token endpoint to ensure token is generated
-        const response = await axios.get("/user/csrf-token", { 
+        const response = await axios.get(`${this.baseURL}/user/csrf-token`, { 
           withCredentials: true,
           timeout: 5000 
         });
@@ -292,8 +292,8 @@ export default {
     async fetchData() {
       try {
         const [res_cat, res_prod] = await axios.all([
-          axios.get("/category/list", { timeout: 8000 }), 
-          axios.get("/product/list", { timeout: 8000 })
+          axios.get(`${this.baseURL}/category/list`, { timeout: 15000 }), 
+          axios.get(`${this.baseURL}/product/list`, { timeout: 15000 })
         ]);
 
         this.categories = res_cat.data;
@@ -735,10 +735,13 @@ export default {
       this.usersInfo();
     }
     
-    // Fetch CSRF token first before anything else
-    this.fetchCsrfToken();
-    
-    this.fetchData();
+    // Fetch CSRF token first to establish a session, then fetch data
+    // (sequential to avoid two sessions being created by concurrent requests)
+    this.fetchCsrfToken().then(() => {
+      this.fetchData();
+    }).catch(() => {
+      this.fetchData();
+    });
     
     // SECURITY FIX: Only fetch admin info if user is authenticated as admin
     // Check role first before fetching sensitive admin datasets
@@ -783,7 +786,7 @@ export default {
           this.backendBootTimer = setTimeout(() => {
           this.backendBootFailed = true;
           if (this.retryInterval) { clearInterval(this.retryInterval); this.retryInterval = null; }
-        }, 10000);
+        }, 20000);
       }
     };
 
