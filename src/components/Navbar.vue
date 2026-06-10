@@ -272,7 +272,7 @@ import swal from 'sweetalert';
   filter: none !important;
 }
 
-/* Switch to white logo in light mode */
+/* Switch to white logo in light mode ...*/
 [data-theme="light"] #logo {
   content: url('../../public/royalty-logo-white.jpeg');
   /* remove drop-shadow for cleaner flat logo */

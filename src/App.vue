@@ -288,32 +288,6 @@ export default {
       }
     },
 
-    //fetch CSRF token from backend on app startup
-    async fetchCsrfToken() {
-      try {
-        // Call dedicated CSRF token endpoint to ensure token is generated
-        const response = await axios.get("/user/csrf-token", { 
-          withCredentials: true,
-          timeout: 5000 
-        });
-        console.log('CSRF token fetched successfully:', response.data);
-        
-        // Check if we have the token in cookies
-        const cookies = document.cookie.split('; ');
-        const csrfCookie = cookies.find(c => c.startsWith('XSRF-TOKEN='));
-        if (csrfCookie) {
-          console.log('CSRF token found in cookies:', csrfCookie.substring(0, 20) + '...');
-        } else {
-          console.warn('CSRF token NOT found in cookies after fetch');
-        }
-        if (response.data?.token) {
-          setCachedCsrfToken(response.data.token);
-        }
-      } catch (err) {
-        console.warn('Failed to fetch CSRF token:', err.message);
-      }
-    },
-
     //method to fetch all products and categories (runs during initial app boot)
     async fetchData() {
       try {
@@ -651,7 +625,6 @@ export default {
 
         this.$router.replace({ name: 'HomeView' }).then(() => window.location.reload());
         } else {
-          console.log('Login returned unexpected status:', loginInfo.status);
           swal({
             text: "Login failed: " + (loginInfo.status || "Unknown error"),
             icon: "warning"
@@ -867,7 +840,7 @@ export default {
 html{
   overflow-y: scroll;
   transition: all 0.3s ease;
-  background-color: var(--page-bg);
+  background-color: var(--bg-primary);
 }
 body {
   overflow-x: clip;
@@ -881,7 +854,7 @@ body {
 
 #app{
   margin-top: 85px;
-  background-color: var(--page-bg);
+  background-color: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
 }
