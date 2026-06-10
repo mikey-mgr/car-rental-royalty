@@ -183,9 +183,8 @@
                         text: "Something went wrong",
                         icon: "error"
                     })
-                    window.location.replace("/admin/vehicles")
-                }).catch((err)=> {
-                    console.log("err", err);
+                    this.$router.push({ name: 'AdminProduct' });
+                }).catch(() => {
                     swal({
                         text: "Failed to add vehicle. Please try again.",
                         icon: "error"

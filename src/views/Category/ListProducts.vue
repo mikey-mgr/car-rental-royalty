@@ -51,7 +51,7 @@ export default {
                  withCredentials: true 
             }).then(result => {
                 this.filteredProds = result.data
-            }).catch((err) => console.log('Error: ', err));
+            }).catch(() => undefined);
         }
     },
 

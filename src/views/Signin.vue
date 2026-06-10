@@ -29,7 +29,7 @@
                         <hr class="mb-5">
                         <label class="col-12 pl-0 font-italic">Don't have an Account?</label>
                         <router-link :to="{name: 'SignupView'}"> 
-                                <button class="btn btn-primary create-account">Create Account</button>
+                                <button type="button" class="btn btn-primary create-account">Create Account</button>
                         </router-link>    
                     </form>
                 </div>
@@ -97,7 +97,7 @@ export default {
                     // Using session cookies instead
                     // localStorage.setItem("token", loginInfo.token);
                     localStorage.setItem("role", loginInfo.role);
-                    window.location.replace("/home");
+                    this.$router.replace({ name: 'HomeView' }).then(() => window.location.reload());
                 } else {
                     swal({
                         text: "Invalid details",
@@ -105,7 +105,6 @@ export default {
                     });
                 }
             } catch (err) {
-                console.log('err', err);
                 if(err.response && err.response.status === 401){
                     swal({
                         text: "Invalid email or password",

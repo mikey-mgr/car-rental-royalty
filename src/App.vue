@@ -3,9 +3,6 @@
   <div v-if="isBackendLoading" class="backend-loading-overlay">
     <div class="loading-content">
       <template v-if="!backendBootFailed">
-        <div class="car-animation-container">
-          <img src="/car-only.svg" alt="Loading..." class="loading-car" />
-        </div>
         <div class="loading-dots" aria-hidden="true">
           <span class="dot"></span>
           <span class="dot"></span>
@@ -37,6 +34,7 @@
   @resetCartCount="resetCartCount" 
   :token="token" 
   :users="users"
+  :role="userRole"
   @clearUsers="clearUsers"
   @usersInfo="usersInfo"
   @openAuthModal="openAuthModal"
@@ -46,6 +44,7 @@
   <router-view v-if="categories && products" style="min-height: 60vh;"
   :baseURL="baseURL"
   :categories="categories"
+  :userRole="userRole"
   :products="products"
   @fetchData="fetchData"
   @adminInfo="adminInfo"
@@ -195,9 +194,7 @@ import axios from 'axios';
 import AppFooter from "./components/Footer.vue";
 import bootstrap from 'bootstrap/dist/js/bootstrap.bundle'
 import swal from "sweetalert";
-
-// Set the default value for withCredentials to true to allow cookies
-axios.defaults.withCredentials = true;
+import { API_BASE_URL, setCachedCsrfToken } from "./plugins/axios";
 
 
 //function to hide navbar when click happens outside it
@@ -222,7 +219,7 @@ export default {
   components: { Navbar, AppFooter },
   data() {
     return {
-      baseURL : process.env.VUE_APP_API_URL || "http://localhost:8081",
+      baseURL : API_BASE_URL,
       products: null,
       categories: null,
       cartCount: 0,
@@ -247,6 +244,7 @@ export default {
       isRouteLoading: false,
       routeProgress: 0,
       routeTimer: null,
+      userRole: null,
 
       authTab: 'login',
       authSubmitting: false,
@@ -262,34 +260,46 @@ export default {
   methods: {
     //method to check if backend is ready and retry
     async checkBackendHealth() {
-      console.log('Checking backend health...');
       try {
         // Try to fetch the public endpoints
         await axios.all([
-          axios.get(this.baseURL + "/category/list", { timeout: 5000 }), 
-          axios.get(this.baseURL + "/product/list", { timeout: 5000 })
+          axios.get("/category/list", { timeout: 5000 }), 
+          axios.get("/product/list", { timeout: 5000 })
         ]);
-        // If successful, backend is ready - reload the page
-        console.log('Backend is ready! Reloading page...');
         window.location.reload();
       } catch (err) {
-        // Backend not ready yet, will retry on next interval
-        console.log('Backend not ready, retrying...');
+        void err;
+      }
+    },
+
+    //fetch CSRF token from backend on app startup
+    async fetchCsrfToken() {
+      try {
+        // Call dedicated CSRF token endpoint to ensure token is generated
+        const response = await axios.get("/user/csrf-token", { 
+          withCredentials: true,
+          timeout: 5000 
+        });
+        if (response.data?.token) {
+          setCachedCsrfToken(response.data.token);
+        }
+      } catch (err) {
+        void err;
       }
     },
 
     //method to fetch all products and categories (runs during initial app boot)
     async fetchData() {
-      await axios.all([
-        axios.get(this.baseURL + "/category/list", { timeout: 8000 }), 
-        axios.get(this.baseURL + "/product/list", { timeout: 8000 })
-      ])
-      .then(axios.spread((res_cat, res_prod) => {
+      try {
+        const [res_cat, res_prod] = await axios.all([
+          axios.get("/category/list", { timeout: 8000 }), 
+          axios.get("/product/list", { timeout: 8000 })
+        ]);
+
         this.categories = res_cat.data;
         this.products = res_prod.data;
         this.pieChartConfig(res_cat.data, res_prod.data);
 
-        // Hide initial-boot loading overlay once data is fetched
         if (this.showOverlayTimer) {
           clearTimeout(this.showOverlayTimer);
           this.showOverlayTimer = null;
@@ -302,74 +312,111 @@ export default {
         }
         this.backendBootFailed = false;
 
-        // Clear retry interval
         if (this.retryInterval) {
           clearInterval(this.retryInterval);
         }
-      })).catch((err) => {
-        console.log('Backend not available, showing loading screen...', err);
-
-        // If we've already timed out into error state, don't auto-retry
+      } catch (err) {
+        void err;
         if (this.backendBootFailed) {
           return;
         }
 
-        // Keep showing loading if backend is not ready
-        // Start retry interval to check backend health
         if (!this.retryInterval) {
           this.retryInterval = setInterval(() => {
             this.checkBackendHealth();
-          }, 3000); // Check every 3 seconds
+          }, 3000);
         }
-      });
+      }
     },
 
     //methods to fetch cart for logged in user
     async usersInfo(){
-      //SECURITY FIX: Removed token parameter from URL
-      //Using session cookies with withCredentials instead
-      await axios.get(`${this.baseURL}/cart/`, { withCredentials: true })
-      .then((res) => {
-        const result = res.data;
-        if(this.$route.path == "/cart" && result == "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">\n    <meta name=\"description\" content=\"\">\n    <meta name=\"author\" content=\"\">\n    <title>Please sign in</title>\n    <link href=\"https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M\" crossorigin=\"anonymous\">\n    <link href=\"https://getbootstrap.com/docs/4.0/examples/signin/signin.css\" rel=\"stylesheet\" integrity=\"sha384-oOE/3m0LUMPub4kaC09mrdEhIc+e3exm4xOGxAmuFXhBNF4hcg/6MiAXAf5p0P56\" crossorigin=\"anonymous\"/>\n  </head>\n  <body>\n     <div class=\"container\">\n      <form class=\"form-signin\" method=\"post\" action=\"/login\">\n        <h2 class=\"form-signin-heading\">Please sign in</h2>\n        <p>\n          <label for=\"username\" class=\"sr-only\">Username</label>\n          <input type=\"text\" id=\"username\" name=\"email\" class=\"form-control\" placeholder=\"Username\" required autofocus>\n        </p>\n        <p>\n          <label for=\"password\" class=\"sr-only\">Password</label>\n          <input type=\"password\" id=\"password\" name=\"password\" class=\"form-control\" placeholder=\"Password\" required>\n        </p>\n        <button class=\"btn btn-lg btn-primary btn-block\" type=\"submit\">Sign in</button>\n      </form>\n</div>\n</body></html>"){
+      // Note: We still call this even if userRole is not set, 
+      // because it may just not be populated yet. Let the backend
+      // decide if the session is valid.
+      
+      try {
+        const response = await axios.get(`${this.baseURL}/cart/`, { withCredentials: true });
+        const result = response.data;
+
+        // Check if session is invalid (backend returns HTML login page)
+        if(typeof result === 'string' && result.includes('Please sign in')) {
           this.$router.push({name: 'SigninView'});
           swal({
-            text: "Please login or signup",
+            text: "Your session has expired. Please login again.",
             icon: "info"
           });
-          localStorage.removeItem("token");
-          localStorage.removeItem("role");
+          // Clear session data
+          this.clearInvalidSession();
           return;
         }
         if(result.totalCost && result.cartItems){
           this.usrCartItems = result.cartItems;
           this.usrTotalCost = result.totalCost.toFixed(2);
-        } else { this.usrCartItems = false; this.usrTotalCost = false; }
+        } else { 
+          this.usrCartItems = false; 
+          this.usrTotalCost = false;
+        }
         if(result.cartItems){
           this.cartCount = result.cartItems.length;
         }
-      }).catch((err) => {console.log("err", err)});
+      } catch (err) {
+        // If we get a 401, clear session
+        if(err.response && err.response.status === 401) {
+          this.clearInvalidSession();
+        }
+      }
     },
 
     //method to fetch all admin related info
     async adminInfo(){
-      //fetch all carts, wishlists and users
-      await axios.all([axios.get(`${this.baseURL}/admin/all-cart-items/`), axios.get(`${this.baseURL}/admin/all-wishlists/`),
-                        axios.get(`${this.baseURL}/admin/users/`)])
-      .then(axios.spread((resCarts, resWishlists, resUsers) => {
-        if(this.$route.path == "/admin" && resUsers.data == "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">\n    <meta name=\"description\" content=\"\">\n    <meta name=\"author\" content=\"\">\n    <title>Please sign in</title>\n    <link href=\"https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M\" crossorigin=\"anonymous\">\n    <link href=\"https://getbootstrap.com/docs/4.0/examples/signin/signin.css\" rel=\"stylesheet\" integrity=\"sha384-oOE/3m0LUMPub4kaC09mrdEhIc+e3exm4xOGxAmuFXhBNF4hcg/6MiAXAf5p0P56\" crossorigin=\"anonymous\"/>\n  </head>\n  <body>\n     <div class=\"container\">\n      <form class=\"form-signin\" method=\"post\" action=\"/login\">\n        <h2 class=\"form-signin-heading\">Please sign in</h2>\n        <p>\n          <label for=\"username\" class=\"sr-only\">Username</label>\n          <input type=\"text\" id=\"username\" name=\"email\" class=\"form-control\" placeholder=\"Username\" required autofocus>\n        </p>\n        <p>\n          <label for=\"password\" class=\"sr-only\">Password</label>\n          <input type=\"password\" id=\"password\" name=\"password\" class=\"form-control\" placeholder=\"Password\" required>\n        </p>\n        <button class=\"btn btn-lg btn-primary btn-block\" type=\"submit\">Sign in</button>\n      </form>\n</div>\n</body></html>"){
+      // Note: Let the backend decide if the session is valid.
+      // We still try to fetch even if userRole is not immediately set.
+      
+      try {
+        //fetch all carts, wishlists and users
+        const responses = await axios.all([
+          axios.get(`${this.baseURL}/admin/all-cart-items/`), 
+          axios.get(`${this.baseURL}/admin/all-wishlists/`),
+          axios.get(`${this.baseURL}/admin/users/`)
+        ]);
+        
+        const resCarts = responses[0];
+        const resWishlists = responses[1];
+        const resUsers = responses[2];
+        
+        // Check if any response indicates invalid session
+        if((typeof resUsers.data === 'string' && resUsers.data.includes('Please sign in')) ||
+           (typeof resCarts.data === 'string' && resCarts.data.includes('Please sign in')) ||
+           (typeof resWishlists.data === 'string' && resWishlists.data.includes('Please sign in'))) {
           this.$router.push({name: 'SigninView'});
           swal({
-            text: "Please login or signup",
-            icon: "info"
+            text: "Your admin session has expired. Please login again.",
+            icon: "warning"
           });
+          this.clearInvalidSession();
           return;
         }
+        
         this.cartItems = resCarts.data.cartItems;
-        this.totalCost =resCarts.data.totalCost;
+        this.totalCost = resCarts.data.totalCost;
         this.wishlists = resWishlists.data;
         this.users = resUsers.data;
-      })).catch((err) => console.log('err', err));
+      } catch (err) {
+        // If we get a 401 or 403, clear session
+        if(err.response && (err.response.status === 401 || err.response.status === 403)) {
+          this.clearInvalidSession();
+        }
+      }
+    },
+
+    // Helper method to clear invalid session data
+    clearInvalidSession(){
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      this.token = null;
+      this.users = null;
+      this.userRole = null;
     },
           
     //configs for doughnut pie chart
@@ -545,63 +592,59 @@ export default {
       };
 
       try {
-        await axios({
-          method: "post",
-          url: `${this.baseURL}/login`,
-          data: new URLSearchParams(body),
+        // Use REST API login endpoint
+        const loginResponse = await axios.post(`${this.baseURL}/user/api-login`, body, {
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type": "application/json",
           },
           withCredentials: true,
-          maxRedirects: 0,
-          validateStatus: (status) => status >= 200 && status < 400,
         });
 
-        const signinResponse = await axios.get(`${this.baseURL}/user/signin`, {
-          withCredentials: true
-        });
-
-        const loginInfo = signinResponse.data;
+        const loginInfo = loginResponse.data;
         if (loginInfo.status === "Login Success") {
-          this.usersInfo();
+          // Store role in both data and localStorage
+          this.userRole = loginInfo.role;
+          localStorage.setItem("role", loginInfo.role);
+          // Refresh CSRF token after login
+          await this.fetchCsrfToken();
+          // Fetch user cart info
+          await this.usersInfo();
+          // If admin, fetch admin info
+          if (loginInfo.role === 'ADMIN') {
+            await this.adminInfo();
+          }
+          
           swal({
             text: "Login successful, redirecting",
             icon: "success"
           });
-          // SECURITY FIX: Removed localStorage storage of token
-          // Session cookie is now used automatically with withCredentials: true
-          // localStorage.setItem("token", loginInfo.token);
-          localStorage.setItem("role", loginInfo.role);
 
           const modalEl = document.getElementById('authModal');
           const bsModal = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
           if (bsModal) bsModal.hide();
 
-          window.location.replace("/home");
+        this.$router.replace({ name: 'HomeView' }).then(() => window.location.reload());
         } else {
           swal({
-            text: "Invalid details",
+            text: "Login failed: " + (loginInfo.status || "Unknown error"),
             icon: "warning"
           });
         }
       } catch (err) {
-        console.log('err', err);
-        if (err.response && err.response.status === 401) {
-          swal({
-            text: "Invalid email or password",
-            icon: "error"
-          });
-        } else if (err.code === "ERR_NETWORK") {
-          swal({
-            text: "Network error, please check your connection",
-            icon: "error"
-          });
-        } else {
-          swal({
-            text: "Login failed. Please try again.",
-            icon: "error"
-          });
+        // Try to get error message from backend
+        let errorMsg = "Login failed. Please try again.";
+        if (err.response?.data?.message) {
+          errorMsg = err.response.data.message;
+        } else if (err.response?.data?.error) {
+          errorMsg = err.response.data.error;
+        } else if (err.response?.status === 400) {
+          errorMsg = "Invalid email or password";
         }
+        
+        swal({
+          text: errorMsg,
+          icon: "error"
+        });
       } finally {
         this.authSubmitting = false;
       }
@@ -628,7 +671,11 @@ export default {
           password: this.authSignupPassword,
         };
 
-        await axios.post(`${this.baseURL}/user/signup`, user);
+        await axios.post(`${this.baseURL}/user/signup`, user, {
+          headers: {
+            "Content-Type": "application/json",
+          }
+        });
 
         swal({
           text: "Signup successful, please login now",
@@ -637,12 +684,36 @@ export default {
 
         // Switch to login tab after signup
         this.authTab = 'login';
+        
+        // Clear form
+        this.authSignupEmail = null;
+        this.authFirstName = null;
+        this.authLastName = null;
+        this.authSignupPassword = null;
+        this.authSignupConfirmPassword = null;
       } catch (err) {
-        console.error('err', err);
-        if (err.response && err.response.data == "User with email is already present") {
+        if (err.response?.data?.message) {
+          swal({
+            text: err.response.data.message,
+            icon: "error"
+          });
+        } else if (err.response?.data == "User with email is already present") {
           swal({
             text: "A user with this email already exists",
             icon: "info"
+          });
+        } else if (err.response?.status === 400) {
+          // Validation error - show details
+          const errorData = err.response.data;
+          let errorMsg = "Validation failed: ";
+          if (typeof errorData === 'object') {
+            errorMsg += Object.values(errorData).join(", ");
+          } else {
+            errorMsg += errorData;
+          }
+          swal({
+            text: errorMsg,
+            icon: "error"
           });
         } else {
           swal({
@@ -657,6 +728,16 @@ export default {
   },
 
   mounted() {
+    // Read role from localStorage if already logged in
+    const savedRole = localStorage.getItem('role');
+    if (savedRole) {
+      this.userRole = savedRole;
+      this.usersInfo();
+    }
+    
+    // Fetch CSRF token first before anything else
+    this.fetchCsrfToken();
+    
     this.fetchData();
     
     // SECURITY FIX: Only fetch admin info if user is authenticated as admin
@@ -682,6 +763,9 @@ export default {
 
       this.$router.afterEach(() => {
         this.finishRouteProgress();
+        if (localStorage.getItem('role')) {
+          this.usersInfo();
+        }
       });
     }
 
@@ -696,7 +780,7 @@ export default {
         }, 2500);
 
         if (this.backendBootTimer) clearTimeout(this.backendBootTimer);
-        this.backendBootTimer = setTimeout(() => {
+          this.backendBootTimer = setTimeout(() => {
           this.backendBootFailed = true;
           if (this.retryInterval) { clearInterval(this.retryInterval); this.retryInterval = null; }
         }, 10000);
@@ -715,17 +799,18 @@ export default {
           try {
             localStorage.setItem('hasVisited', '1');
           } catch (e) {
-            console.warn('Unable to persist first-visit flag to localStorage', e);
+            void e;
           }
           startOverlayCountdown();
         }, 3000);
       } else {
         startOverlayCountdown();
       }
-    } catch (e) {
-      // If localStorage isn't available for any reason fall back to normal behavior
-      startOverlayCountdown();
-    }
+      } catch (e) {
+        void e;
+        // If localStorage isn't available for any reason fall back to normal behavior
+        startOverlayCountdown();
+      }
   },
 
   beforeUnmount() {
@@ -755,7 +840,7 @@ export default {
 html{
   overflow-y: scroll;
   transition: all 0.3s ease;
-  background-color: var(--page-bg);
+  background-color: var(--bg-primary);
 }
 body {
   overflow-x: clip;
@@ -769,7 +854,7 @@ body {
 
 #app{
   margin-top: 85px;
-  background-color: var(--page-bg);
+  background-color: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
 }
@@ -844,67 +929,6 @@ router-view{
 .loading-content {
   text-align: center;
   animation: slideUp 0.6s ease-out;
-}
-
-.car-animation-container {
-  position: relative;
-  width: 100vw;
-  height: 120px;
-  margin: 0 auto 2rem;
-  overflow: hidden;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.loading-car {
-  width: 180px;
-  height: auto;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  animation: carDrive 5s infinite;
-}
-
-@keyframes carDrive {
-  0% {
-    left: 50%;
-    transform: translate(-50%, -50%);
-    animation-timing-function: cubic-bezier(0.6, 0, 1, 0.4);
-  }
-  20% {
-    left: calc(100% + 90px);
-    transform: translate(-50%, -50%);
-    animation-timing-function: linear;
-  }
-  35% {
-    left: calc(100% + 90px);
-    transform: translate(-50%, -50%);
-    animation-timing-function: linear;
-  }
-  35.01% {
-    left: -90px;
-    transform: translate(-50%, -50%);
-    animation-timing-function: linear;
-  }
-  50% {
-    left: -90px;
-    transform: translate(-50%, -50%);
-    animation-timing-function: linear;
-  }
-  75% {
-    left: 45%;
-    transform: translate(-50%, -50%);
-    animation-timing-function: cubic-bezier(0.2, 0.8, 0.4, 1);
-  }
-  82% {
-    left: 50%;
-    transform: translate(-50%, -50%);
-    animation-timing-function: linear;
-  }
-  100% {
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
 }
 
 .loading-text {

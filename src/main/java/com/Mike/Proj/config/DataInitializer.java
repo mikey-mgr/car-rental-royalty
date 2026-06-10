@@ -18,9 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.Mike.Proj.model.AuthenticationToken;
 import com.Mike.Proj.model.Category;
 import com.Mike.Proj.model.Product;
@@ -52,13 +55,77 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // SECURITY: Admin account initialization is now disabled.
-        // Use a secure one-time bootstrap process with environment variables
-        // to create the initial admin account with a strong, cryptographically
-        // generated password stored in your deployment secret manager.
-        // See documentation for bootstrap procedure.
+        // Bootstrap admin account from environment variables if configured
+        bootstrapAdminUser();
         
+        // Seed categories and products from assets folder
         seedCategoriesAndProductsFromAssets();
+        
+        // Seed predefined vehicle catalog from JSON data
+        seedVehiclesFromData();
+    }
+
+    /**
+     * Securely bootstrap the initial admin user from environment variables.
+     * 
+     * To enable admin user creation, set these environment variables:
+     * - ADMIN_BOOTSTRAP_ENABLED=true
+     * - ADMIN_EMAIL=admin@yourcompany.com
+     * - ADMIN_PASSWORD=<strong-password>
+     * 
+     * This approach follows security best practices:
+     * 1. Admin creation is opt-in via ADMIN_BOOTSTRAP_ENABLED flag
+     * 2. Credentials are provided via environment variables (stored in secret manager in prod)
+     * 3. Admin user is only created if it doesn't already exist
+     * 4. Warnings are logged when bootstrap is disabled or admin already exists
+     * 
+     * For Docker/Render deployments:
+     * - Define environment variables in Render's Environment section
+     * - Use SecureString type for sensitive values
+     * - Environment variables are injected at container runtime
+     */
+    private void bootstrapAdminUser() {
+        String bootstrapEnabled = System.getenv("ADMIN_BOOTSTRAP_ENABLED");
+        
+        // Only proceed if explicitly enabled
+        if (bootstrapEnabled == null || !bootstrapEnabled.equalsIgnoreCase("true")) {
+            LOGGER.info("Admin bootstrap disabled. To enable, set ADMIN_BOOTSTRAP_ENABLED=true");
+            return;
+        }
+        
+        String adminEmail = System.getenv("ADMIN_EMAIL");
+        String adminPassword = System.getenv("ADMIN_PASSWORD");
+        
+        // Validate required environment variables
+        if (adminEmail == null || adminEmail.trim().isEmpty()) {
+            LOGGER.warn("ADMIN_BOOTSTRAP_ENABLED is true, but ADMIN_EMAIL is not set. Skipping admin creation.");
+            return;
+        }
+        if (adminPassword == null || adminPassword.trim().isEmpty()) {
+            LOGGER.warn("ADMIN_BOOTSTRAP_ENABLED is true, but ADMIN_PASSWORD is not set. Skipping admin creation.");
+            return;
+        }
+        
+        // Check if admin user already exists
+        if (userRepo.findByEmail(adminEmail) != null) {
+            LOGGER.info("Admin user with email {} already exists. Skipping creation.", adminEmail);
+            return;
+        }
+        
+        try {
+            // Create new admin user
+            User adminUser = new User();
+            adminUser.setEmail(adminEmail);
+            adminUser.setFirstName("System");
+            adminUser.setLastName("Admin");
+            adminUser.setPassword(passwordEncoder.encode(adminPassword));
+            adminUser.setRole("ADMIN");
+            
+            userRepo.save(adminUser);
+            LOGGER.info("Admin user successfully created with email: {}", adminEmail);
+        } catch (Exception e) {
+            LOGGER.error("Failed to create admin user: {}", e.getMessage(), e);
+        }
     }
 
     private void seedCategoriesAndProductsFromAssets() {
@@ -234,5 +301,157 @@ public class DataInitializer implements CommandLineRunner {
 
     private String productKey(Integer categoryId, String productName) {
         return categoryId + "::" + normalize(productName);
+    }
+
+    /**
+     * Seed predefined vehicle catalog from vehicles-seed-data.json
+     * Inserts rental vehicles with pricing and descriptions
+     */
+    private void seedVehiclesFromData() {
+        try {
+            // Load vehicles from classpath resource
+            ClassPathResource resource = new ClassPathResource("vehicles-seed-data.json");
+            if (!resource.exists()) {
+                LOGGER.info("vehicles-seed-data.json not found, skipping vehicle seeding.");
+                return;
+            }
+
+            String jsonContent = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            ObjectMapper mapper = new ObjectMapper();
+            List<VehicleData> vehicles = mapper.readValue(jsonContent, 
+                new TypeReference<List<VehicleData>>() {});
+
+            if (vehicles == null || vehicles.isEmpty()) {
+                LOGGER.warn("vehicles-seed-data.json is empty, skipping vehicle seeding.");
+                return;
+            }
+
+            LOGGER.info("Found {} vehicles in seed data", vehicles.size());
+
+            Map<String, Category> categories = new HashMap<>();
+            for (Category cat : categoryRepo.findAll()) {
+                String normalizedName = normalize(cat.getCategoryName());
+                categories.put(normalizedName, cat);
+                LOGGER.debug("Mapped category: {} -> {}", cat.getCategoryName(), normalizedName);
+            }
+
+            int vehiclesCreated = 0;
+            for (VehicleData vehicleData : vehicles) {
+                try {
+                    if (vehicleData.getName() == null || vehicleData.getName().trim().isEmpty()) {
+                        LOGGER.debug("Skipping vehicle with null/empty name");
+                        continue;
+                    }
+
+                    // Find or create category
+                    String categoryName = vehicleData.getCategoryName();
+                    if (categoryName == null || categoryName.trim().isEmpty()) {
+                        LOGGER.debug("Skipping vehicle {} with null/empty category", vehicleData.getName());
+                        continue;
+                    }
+
+                    String normalizedCategory = normalize(categoryName);
+                    Category category = categories.get(normalizedCategory);
+                    LOGGER.debug("Looking for category: '{}' (normalized: '{}') - found: {}", categoryName, normalizedCategory, category != null);
+                    
+                    if (category == null) {
+                        category = new Category();
+                        category.setCategoryName(categoryName);
+                        category.setDescription("Auto-generated from vehicle data: " + categoryName);
+                        category.setImageUrl("/AppImages/default-category.png");
+                        category = categoryRepo.save(category);
+                        categories.put(normalize(categoryName), category);
+                        LOGGER.info("Created new category: {}", categoryName);
+                    }
+
+                    // Build unique vehicle name with year
+                    String vehicleName = vehicleData.getName() + " " + vehicleData.getYear();
+
+                    // Check if vehicle already exists
+                    List<Product> existing = productRepo.findAll().stream()
+                        .filter(p -> p.getName().equalsIgnoreCase(vehicleName))
+                        .collect(Collectors.toList());
+                    
+                    if (!existing.isEmpty()) {
+                        LOGGER.debug("Vehicle already exists: {}", vehicleName);
+                        continue; // Skip if already exists
+                    }
+
+                    // Create product
+                    Product product = new Product();
+                    product.setCategory(category);
+                    product.setName(vehicleName);
+                    product.setPrice(vehicleData.getPrice());
+                    product.setDescription(vehicleData.getDescription());
+                    product.setBookingStatus("Available");
+                    product.setImageURL("/AppImages/default-vehicle.png");
+                    
+                    // Set features, handle null case
+                    List<String> features = vehicleData.getFeatures();
+                    ArrayList<String> featuresList = new ArrayList<>();
+                    if (features != null) {
+                        featuresList.addAll(features);
+                    }
+                    product.setFeatures(featuresList);
+                    
+                    // Set carousel images based on features count
+                    ArrayList<String> carouselImgs = new ArrayList<>();
+                    if (features != null) {
+                        for (int i = 0; i < features.size(); i++) {
+                            carouselImgs.add("/AppImages/default-vehicle.png");
+                        }
+                    } else {
+                        carouselImgs.add("/AppImages/default-vehicle.png");
+                    }
+                    product.setCarousel_imgs(carouselImgs);
+                    
+                    Product savedProduct = productRepo.save(product);
+                    vehiclesCreated++;
+                    LOGGER.info("Created vehicle: {} (ID: {}) @ ${}", vehicleName, savedProduct.getId(), vehicleData.getPrice());
+                    
+                } catch (Exception e) {
+                    LOGGER.error("Failed to seed vehicle {}: {}", vehicleData.getName(), e.getMessage());
+                }
+            }
+            
+            LOGGER.info("Vehicle catalog seeding completed. {} vehicles created from vehicles-seed-data.json", vehiclesCreated);
+        } catch (Exception ex) {
+            LOGGER.error("Vehicle seeding failed with error: {}", ex.getMessage(), ex);
+        }
+    }
+
+    /**
+     * Data transfer object for vehicle seed data
+     */
+    private static class VehicleData {
+        private String name;
+        private String year;
+        private String color;
+        private double price;
+        private String description;
+        private List<String> features;
+        private String categoryName;
+
+        // Getters and setters
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        
+        public String getYear() { return year; }
+        public void setYear(String year) { this.year = year; }
+        
+        public String getColor() { return color; }
+        public void setColor(String color) { this.color = color; }
+        
+        public double getPrice() { return price; }
+        public void setPrice(double price) { this.price = price; }
+        
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+        
+        public List<String> getFeatures() { return features; }
+        public void setFeatures(List<String> features) { this.features = features; }
+        
+        public String getCategoryName() { return categoryName; }
+        public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
     }
 }

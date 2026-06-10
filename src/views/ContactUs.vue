@@ -213,10 +213,9 @@ export default {
                         text: "Message has been sent! We will respond to you shortly",
                         icon: "success"
                     });
-                    window.location.replace("/home");
+                    this.$router.push({ name: 'HomeView' });
                 }
-            }).catch((err) => {
-                console.log('err', err);
+            }).catch(() => {
                 swal({
                     text: "Message failed to send. Please try again.",
                     icon: "error"

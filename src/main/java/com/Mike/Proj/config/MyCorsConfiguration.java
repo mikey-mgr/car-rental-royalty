@@ -17,7 +17,7 @@ public class MyCorsConfiguration {
                 registry.addMapping("/**")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedOrigins(allowedOrigins.split(","))
-                        .allowedHeaders("Content-Type", "Authorization")
+                        .allowedHeaders("Content-Type", "Authorization", "X-XSRF-TOKEN")
                         .allowCredentials(true);
             }
         };

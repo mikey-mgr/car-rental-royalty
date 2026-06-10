@@ -54,9 +54,7 @@ export default {
                     }
                 }
             }
-            }).catch((err) => {
-                console.log('err', err);
-            });
+            }).catch(() => undefined);
         },
         //delete a wishlist item
         deleteItem(id){
@@ -70,7 +68,7 @@ export default {
                         icon: "error"
                     })
                 }
-            }).catch((err) => console.log('err', err));
+            }).catch(() => undefined);
         }
     },
     mounted() {

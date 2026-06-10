@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.Mike.Proj.dto.ResponseDto;
 import com.Mike.Proj.dto.user.SigninResponseDto;
 import com.Mike.Proj.dto.user.SignupDto;
@@ -21,6 +23,8 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class UserService implements UserDetailsService{
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     UserRepo userRepo;
@@ -53,18 +57,24 @@ public class UserService implements UserDetailsService{
     }
 
     //api for login success to print user token and role
-    public SigninResponseDto signIn() {
+    public SigninResponseDto signIn(jakarta.servlet.http.HttpServletRequest request) {
 
-        //get current logged in user in the springsecurity
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
+        // Get the authenticated user from the HTTP request's principal
+        // This works after both form login and REST API login
+        java.security.Principal principal = request.getUserPrincipal();
+        
+        if (principal == null) {
+            throw new CustomException("User is not authenticated");
+        }
+        
+        String email = principal.getName();
         User user = userRepo.findByEmail(email);
-        String userRole = null;
-        try{
-            userRole = user.getRole();
-        } catch (Exception e) {
+        
+        if (user == null) {
             throw new CustomException("User does not exist");
         }
+        
+        String userRole = user.getRole();
 
         // Do not return a long-lived bearer token. Client-side authentication
         // should continue to use browser cookies (Spring Session) and the
@@ -85,6 +95,8 @@ public class UserService implements UserDetailsService{
         } catch (Exception e) {
             throw new CustomException(e.getMessage());
         }
+        
+        LOGGER.info("Loading user: {} with role: {}", username, user.getRole());
         
         return org.springframework.security.core.userdetails.User.withUsername(username)
             .password(encodedPassword)

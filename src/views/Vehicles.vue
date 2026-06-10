@@ -220,7 +220,6 @@ export default {
         this.notFound = this.apiResults.length === 0;
         this.text = name;
       } catch (err) {
-        console.log("err", err);
         this.apiResults = [];
         this.nameSearchActive = true;
         this.search = true;
